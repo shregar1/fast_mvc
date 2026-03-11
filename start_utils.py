@@ -42,6 +42,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.session import Session
 
 from configurations.cache import CacheConfiguration, CacheConfigurationDTO
+from configurations.channels import ChannelsConfiguration, ChannelsConfigurationDTO
 from configurations.db import DBConfiguration, DBConfigurationDTO
 from constants.default import Default
 
@@ -87,6 +88,7 @@ load_dotenv()
 logger.info("Loading Configurations")
 cache_configuration: CacheConfigurationDTO = CacheConfiguration().get_config()
 db_configuration: DBConfigurationDTO = DBConfiguration().get_config()
+channels_configuration: ChannelsConfigurationDTO = ChannelsConfiguration().get_config()
 logger.info("Loaded Configurations")
 
 # =============================================================================
@@ -216,6 +218,32 @@ if (
         logger.error("No Redis session available")
         raise RuntimeError("No Redis session available")
     logger.info("Initialized Redis database connection")
+
+# =============================================================================
+# CHANNELS BACKEND
+# =============================================================================
+
+channel_backend: Any = None
+"""
+Global pub-sub channels backend.
+
+Backed by Redis or Kafka depending on configuration.
+"""
+
+CHANNEL_BACKEND: str = os.getenv("CHANNEL_BACKEND", channels_configuration.backend)
+
+if CHANNEL_BACKEND == "redis" and redis_session:
+    try:
+        from core.channels.redis_backend import RedisChannelBackend
+
+        channel_backend = RedisChannelBackend(redis_session)
+        logger.info("Initialized Redis channels backend")
+    except Exception as exc:
+        logger.error(f"Failed to initialize Redis channels backend: {exc}")
+        channel_backend = None
+elif CHANNEL_BACKEND == "kafka":
+    # Placeholder for future Kafka backend initialization
+    logger.info("Kafka channels backend requested but not yet implemented.")
 
 # =============================================================================
 # ROUTE CONFIGURATION

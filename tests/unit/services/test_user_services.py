@@ -128,6 +128,32 @@ class TestUserLoginService:
             await service.run(request)
         assert exc_info.value.httpStatusCode == HTTPStatus.BAD_REQUEST
 
+    @pytest.mark.asyncio
+    async def test_run_missing_email_raises_bad_input(self, service, mock_user_repository):
+        """Test login fails when email is missing."""
+        mock_user_repository.retrieve_record_by_email.return_value = MagicMock()
+
+        request = MagicMock()
+        request.email = None
+        request.password = "SecureP@ss123"
+
+        with pytest.raises(BadInputError) as exc_info:
+            await service.run(request)
+        assert exc_info.value.responseKey == "error_email_required"
+
+    @pytest.mark.asyncio
+    async def test_run_missing_password_raises_bad_input(self, service, mock_user_repository):
+        """Test login fails when password is missing."""
+        mock_user_repository.retrieve_record_by_email.return_value = MagicMock()
+
+        request = MagicMock()
+        request.email = "test@example.com"
+        request.password = None
+
+        with pytest.raises(BadInputError) as exc_info:
+            await service.run(request)
+        assert exc_info.value.responseKey == "error_password_required"
+
 
 class TestUserLogoutService:
     """Tests for UserLogoutService."""
@@ -169,6 +195,22 @@ class TestUserLogoutService:
         assert service._urn == "test-urn"
         assert service._api_name == "LOGOUT"
         assert service._user_id == 1
+
+    @pytest.mark.asyncio
+    async def test_run_missing_user_id_raises_bad_input(self, mock_user_repository, mock_jwt_utility):
+        """Test logout fails when user_id is missing."""
+        service = UserLogoutService(
+            urn="test-urn",
+            user_urn="test-user-urn",
+            api_name="LOGOUT",
+            user_id=None,
+            user_repository=mock_user_repository,
+            jwt_utility=mock_jwt_utility,
+        )
+
+        with pytest.raises(BadInputError) as exc_info:
+            await service.run()
+        assert exc_info.value.responseKey == "error_user_id_required"
 
     @pytest.mark.asyncio
     async def test_run_success(self, service, mock_user_repository, mock_user):
@@ -254,4 +296,44 @@ class TestUserRegistrationService:
         with pytest.raises(BadInputError) as exc_info:
             await service.run(request)
         assert "already registered" in exc_info.value.responseMessage
+
+    @pytest.mark.asyncio
+    async def test_run_missing_email_raises_bad_input(self, service, mock_user_repository):
+        """Test registration fails when email is missing."""
+        mock_user_repository.retrieve_record_by_email.return_value = None
+
+        request = MagicMock()
+        request.email = None
+        request.password = "SecureP@ss123"
+
+        with pytest.raises(BadInputError) as exc_info:
+            await service.run(request)
+        assert exc_info.value.responseKey == "error_email_required"
+
+    @pytest.mark.asyncio
+    async def test_run_missing_password_raises_bad_input(self, service, mock_user_repository):
+        """Test registration fails when password is missing."""
+        mock_user_repository.retrieve_record_by_email.return_value = None
+
+        request = MagicMock()
+        request.email = "newuser@example.com"
+        request.password = None
+
+        with pytest.raises(BadInputError) as exc_info:
+            await service.run(request)
+        assert exc_info.value.responseKey == "error_password_required"
+
+    @pytest.mark.asyncio
+    @patch.dict('os.environ', {}, clear=True)
+    async def test_run_missing_bcrypt_salt_raises_runtime_error(self, service, mock_user_repository):
+        """Test registration fails when BCRYPT_SALT env var is missing."""
+        mock_user_repository.retrieve_record_by_email.return_value = None
+
+        request = MagicMock()
+        request.email = "newuser@example.com"
+        request.password = "SecureP@ss123"
+
+        with pytest.raises(RuntimeError) as exc_info:
+            await service.run(request)
+        assert "BCRYPT_SALT" in str(exc_info.value)
 

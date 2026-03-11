@@ -1,0 +1,18 @@
+{
+    "smtp": {
+        "enabled": false,
+        "host": "localhost",
+        "port": 587,
+        "username": null,
+        "password": null,
+        "use_tls": true,
+        "use_ssl": false,
+        "default_from": null
+    },
+    "sendgrid": {
+        "enabled": false,
+        "api_key": null,
+        "default_from": null
+    }
+}
+

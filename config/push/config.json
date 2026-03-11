@@ -1,0 +1,17 @@
+{
+  "apns": {
+    "enabled": false,
+    "key_id": "",
+    "team_id": "",
+    "bundle_id": "",
+    "private_key_path": "",
+    "use_sandbox": true
+  },
+  "fcm": {
+    "enabled": false,
+    "server_key": "",
+    "project_id": "",
+    "default_topics": []
+  }
+}
+

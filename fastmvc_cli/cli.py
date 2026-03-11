@@ -19,9 +19,14 @@ Example:
     $ fastmvc info
 """
 
+import os
+import base64
+import secrets
+import socket
 import subprocess
 import sys
 from pathlib import Path
+import shutil
 
 import click
 
@@ -84,22 +89,90 @@ def cli():
     default=False,
     help="Install dependencies after generation (default: False)"
 )
-def generate(project_name: str, output_dir: str, git: bool, venv: bool, install: bool):
+@click.option(
+    "--with-redis/--no-redis",
+    default=True,
+    help="Include Redis cache configuration (default: True)"
+)
+@click.option(
+    "--with-mongo/--no-mongo",
+    default=False,
+    help="Include MongoDB configuration and helpers (default: False)"
+)
+@click.option(
+    "--with-cassandra/--no-cassandra",
+    default=False,
+    help="Include Cassandra configuration and helpers (default: False)"
+)
+@click.option(
+    "--with-scylla/--no-scylla",
+    default=False,
+    help="Include ScyllaDB configuration and helpers (default: False)"
+)
+@click.option(
+    "--with-dynamo/--no-dynamo",
+    default=False,
+    help="Include DynamoDB configuration and helpers (default: False)"
+)
+@click.option(
+    "--with-cosmos/--no-cosmos",
+    default=False,
+    help="Include Azure Cosmos DB configuration and helpers (default: False)"
+)
+@click.option(
+    "--with-elasticsearch/--no-elasticsearch",
+    default=False,
+    help="Include Elasticsearch configuration and helpers (default: False)"
+)
+@click.option(
+    "--with-email/--no-email",
+    default=False,
+    help="Include email (SMTP/SendGrid) configuration and helpers (default: False)"
+)
+@click.option(
+    "--with-slack/--no-slack",
+    default=False,
+    help="Include Slack configuration and helpers (default: False)"
+)
+@click.option(
+    "--with-datadog/--no-datadog",
+    default=False,
+    help="Include Datadog configuration helpers (default: False)"
+)
+@click.option(
+    "--with-telemetry/--no-telemetry",
+    default=False,
+    help="Include OpenTelemetry configuration helpers (default: False)"
+)
+@click.option(
+    "--with-payments/--no-payments",
+    default=False,
+    help="Include payment gateway configuration and helpers (default: False)"
+)
+def generate(
+    project_name: str,
+    output_dir: str,
+    git: bool,
+    venv: bool,
+    install: bool,
+    with_redis: bool,
+    with_mongo: bool,
+    with_cassandra: bool,
+    with_scylla: bool,
+    with_dynamo: bool,
+    with_cosmos: bool,
+    with_elasticsearch: bool,
+    with_email: bool,
+    with_slack: bool,
+    with_datadog: bool,
+    with_telemetry: bool,
+    with_payments: bool,
+):
     """
-    Generate a new FastMVC project.
+    Generate a new project from the template.
 
-    Creates a new FastAPI project with the FastMVC architecture pattern,
-    including all necessary directories, configuration files, and boilerplate code.
-
-    \b
-    Arguments:
-        PROJECT_NAME: Name of the new project (will be used as directory name)
-
-    \b
-    Examples:
-        $ fastmvc generate my_api
-        $ fastmvc generate my_api --output-dir ~/projects
-        $ fastmvc generate my_api --git --venv --install
+    Non-interactive variant suitable for scripts and CI.
+    For an interactive multi-step wizard, use the ``init`` command.
     """
     click.echo()
     click.secho("╔══════════════════════════════════════════════════════════════╗", fg="cyan")
@@ -130,11 +203,295 @@ def generate(project_name: str, output_dir: str, git: bool, venv: bool, install:
         output_dir=output_dir,
         init_git=git,
         create_venv=venv,
-        install_deps=install
+        install_deps=install,
     )
 
+    # Configure optional backends for env and config pruning
+    generator.use_redis = with_redis
+    generator.use_mongo = with_mongo
+    generator.use_cassandra = with_cassandra
+    generator.use_scylla = with_scylla
+    generator.use_dynamo = with_dynamo
+    generator.use_cosmos = with_cosmos
+    generator.use_elasticsearch = with_elasticsearch
+    generator.use_email = with_email
+    generator.use_slack = with_slack
+    generator.use_datadog = with_datadog
+    generator.use_telemetry = with_telemetry
+    generator.use_payments = with_payments
+
+    # Simple helpers for repo files
+    def _write_license(path: Path, license_key: str, project: str) -> None:
+        year = str(Path().stat().st_mtime_ns)[:4]
+        if license_key == "mit":
+            text = f"""MIT License
+
+Copyright (c) {year} {project}
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
+        elif license_key == "apache-2.0":
+            text = f"""Apache License 2.0
+
+Copyright (c) {year} {project}
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
+        elif license_key == "gpl-3.0":
+            text = f"""GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
+
+Copyright (c) {year} {project}
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+"""
+        else:  # proprietary
+            text = f"""All Rights Reserved
+
+Copyright (c) {year} {project}
+
+This software is proprietary and confidential. Unauthorized copying of this
+file, via any medium is strictly prohibited.
+"""
+        path.write_text(text)
+
+    def _write_contributing(path: Path) -> None:
+        text = """# Contributing
+
+1. Fork the repository and create a feature branch.
+2. Install dependencies and pre-commit hooks.
+3. Run tests and linters before opening a pull request.
+
+```bash
+pip install -r requirements.txt
+pytest
+```
+"""
+        path.write_text(text)
+
+    def _write_codeowners(path: Path, owner: str) -> None:
+        if owner:
+            path.write_text(f"* {owner}\n")
+
+    def _write_pyproject(path: Path,
+                         use_ruff: bool,
+                         use_black: bool,
+                         use_isort: bool,
+                         use_mypy: bool) -> None:
+        """Create a minimal pyproject.toml with tool configs."""
+        lines: list[str] = []
+        if use_black:
+            lines.extend(
+                [
+                    "[tool.black]",
+                    'line-length = 88',
+                    'target-version = ["py310"]',
+                    "",
+                ]
+            )
+        if use_isort:
+            lines.extend(
+                [
+                    "[tool.isort]",
+                    'profile = "black"',
+                    "",
+                ]
+            )
+        if use_ruff:
+            lines.extend(
+                [
+                    "[tool.ruff]",
+                    "line-length = 88",
+                    'target-version = "py310"',
+                    "",
+                ]
+            )
+        if use_mypy:
+            lines.extend(
+                [
+                    "[tool.mypy]",
+                    "python_version = 3.10",
+                    "ignore_missing_imports = true",
+                    "",
+                ]
+            )
+        if lines:
+            path.write_text("\n".join(lines))
+
+    def _write_precommit(path: Path,
+                         use_ruff: bool,
+                         use_black: bool,
+                         use_isort: bool,
+                         use_mypy: bool) -> None:
+        """Create a basic .pre-commit-config.yaml."""
+        repos: list[str] = ["repos:"]
+        if use_black:
+            repos.extend(
+                [
+                    "- repo: https://github.com/psf/black",
+                    "  rev: 23.12.1",
+                    "  hooks:",
+                    "    - id: black",
+                    "",
+                ]
+            )
+        if use_ruff:
+            repos.extend(
+                [
+                    "- repo: https://github.com/astral-sh/ruff-pre-commit",
+                    "  rev: v0.5.0",
+                    "  hooks:",
+                    "    - id: ruff",
+                    "",
+                ]
+            )
+        if use_isort:
+            repos.extend(
+                [
+                    "- repo: https://github.com/pycqa/isort",
+                    "  rev: 5.13.2",
+                    "  hooks:",
+                    "    - id: isort",
+                    "",
+                ]
+            )
+        if use_mypy:
+            repos.extend(
+                [
+                    "- repo: https://github.com/pre-commit/mirrors-mypy",
+                    "  rev: v1.11.0",
+                    "  hooks:",
+                    "    - id: mypy",
+                    "",
+                ]
+            )
+        # Local pytest hook
+        repos.extend(
+            [
+                "- repo: local",
+                "  hooks:",
+                "    - id: pytest",
+                '      name: pytest',
+                '      entry: pytest',
+                "      language: system",
+                "      types: [python]",
+                "",
+            ]
+        )
+        path.write_text("\n".join(repos))
+
+    def _write_ci_workflow(path: Path,
+                           use_ruff: bool,
+                           use_black: bool,
+                           use_isort: bool,
+                           use_mypy: bool) -> None:
+        """Create a simple GitHub Actions CI workflow."""
+        steps_tools = []
+        if use_black:
+            steps_tools.append("black .")
+        if use_ruff:
+            steps_tools.append("ruff .")
+        if use_isort:
+            steps_tools.append("isort .")
+        if use_mypy:
+            steps_tools.append("mypy .")
+
+        tools_block = ""
+        if steps_tools:
+            joined = " && ".join(steps_tools)
+            tools_block = f"""
+      - name: Run linters/formatters
+        run: {joined}
+"""
+
+        workflow = f"""name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install pytest pytest-cov ruff black isort mypy
+{tools_block}
+      - name: Run tests
+        run: pytest --cov=. --cov-report=term-missing
+"""
+        path.write_text(workflow)
+
+    # Collect license / ownership details
+    license_key = click.prompt(
+        "  License",
+        type=click.Choice(["mit", "apache-2.0", "gpl-3.0", "proprietary"], case_sensitive=False),
+        default="mit",
+    ).lower()
+    code_owner = click.prompt(
+        "  CODEOWNERS handle/email (optional)",
+        default="",
+        show_default=False,
+    ).strip()
+
     try:
+        # If target directory already exists, ask whether to overwrite
+        if generator.project_path.exists():
+            click.secho(
+                f"Directory '{generator.project_path}' already exists.",
+                fg="yellow",
+            )
+            if not click.confirm(
+                "Do you want to overwrite it? This will DELETE existing contents.",
+                default=False,
+            ):
+                click.secho("Aborting project generation.", fg="red")
+                sys.exit(1)
+            shutil.rmtree(generator.project_path)
+
         generator.generate()
+
+        # Create concrete .env from generated .env.example using wizard values
+        env_example = generator.project_path / ".env.example"
+        env_file = generator.project_path / ".env"
+        if env_example.exists():
+            shutil.copy2(env_example, env_file)
         click.echo()
         click.secho("✓ Project generated successfully!", fg="green", bold=True)
         click.echo()
@@ -143,12 +500,316 @@ def generate(project_name: str, output_dir: str, git: bool, venv: bool, install:
         click.echo(f"  1. cd {project_name}")
         click.echo("  2. pip install -r requirements.txt")
         click.echo("  3. cp .env.example .env  # Configure your environment")
-        click.echo("  4. docker-compose up -d  # Start PostgreSQL and Redis")
-        click.echo("  5. fastmvc migrate upgrade  # Run database migrations")
-        click.echo("  6. python -m uvicorn app:app --reload")
+        click.echo("  4. docker-compose up -d  # Start PostgreSQL and Redis (optional)")
+        click.echo("  5. python -m uvicorn app:app --reload")
         click.echo()
         click.secho("  → Your API will be available at http://localhost:8000", fg="cyan")
         click.secho("  → API docs at http://localhost:8000/docs", fg="cyan")
+        click.echo()
+    except Exception as e:
+        click.secho(f"✗ Error generating project: {e}", fg="red")
+        sys.exit(1)
+
+
+@cli.command()
+def init():
+    """
+    Interactive, multi-step project initializer with a TUI-style wizard.
+
+    Guides you through project name, output directory, git, virtualenv,
+    and dependency installation options, then generates the project.
+    """
+    # Clear screen for a simple CLI "GUI"
+    click.clear()
+    click.secho("┌─────────────────────────────────────────────┐", fg="cyan")
+    click.secho("│        Project Setup Wizard (CLI UI)       │", fg="cyan")
+    click.secho("└─────────────────────────────────────────────┘", fg="cyan")
+    click.echo()
+
+    # Step 1: basic info
+    click.secho("[1/4] Project details", fg="yellow", bold=True)
+    project_name = click.prompt("  Project name", type=str)
+    output_dir = click.prompt("  Output directory", default=".", type=str)
+    click.echo()
+
+    # Step 2: stack & presets
+    click.secho("[2/4] Stack, presets & features", fg="yellow", bold=True)
+    api_preset = click.prompt(
+        "  API preset",
+        type=click.Choice(["auth_only", "crud", "admin"], case_sensitive=False),
+        default="crud",
+    )
+    db_backend = click.prompt(
+        "  Database backend",
+        type=click.Choice(["postgres", "mysql", "sqlite"], case_sensitive=False),
+        default="postgres",
+    )
+    use_redis = click.confirm("  Use Redis?", default=True)
+    use_mongo = click.confirm("  Use MongoDB?", default=False)
+    use_cassandra = click.confirm("  Use Cassandra?", default=False)
+    use_dynamo = click.confirm("  Use AWS DynamoDB?", default=False)
+    use_cosmos = click.confirm("  Use Azure Cosmos DB?", default=False)
+    use_scylla = click.confirm("  Use ScyllaDB?", default=False)
+    use_elasticsearch = click.confirm("  Use Elasticsearch?", default=False)
+    use_email = click.confirm("  Use Email (SMTP/SendGrid)?", default=False)
+    use_slack = click.confirm("  Use Slack?", default=False)
+    use_datadog = click.confirm("  Use Datadog APM?", default=False)
+    use_telemetry = click.confirm("  Use OpenTelemetry (OTel)?", default=False)
+    use_payments = click.confirm("  Use Payments (Stripe/Razorpay/PayPal/PayU/Link)?", default=False)
+    click.echo()
+
+    # Feature toggles and layout
+    enable_auth = click.confirm("  Include auth module?", default=True)
+    enable_user_mgmt = click.confirm("  Include user management?", default=True)
+    enable_product_crud = click.confirm("  Include example Product CRUD?", default=True)
+    layout = click.prompt(
+        "  Project layout",
+        type=click.Choice(["monolith", "backend-only", "backend+worker"], case_sensitive=False),
+        default="monolith",
+    )
+    enable_alembic = click.confirm("  Include Alembic migrations?", default=True)
+    click.echo()
+
+    # Step 3: tooling options
+    click.secho("[3/4] Tooling options", fg="yellow", bold=True)
+    init_git = click.confirm("  Initialize git repository?", default=True)
+    create_venv = click.confirm("  Create a virtual environment (venv)?", default=False)
+    install_deps = click.confirm(
+        "  Install dependencies after generation?", default=False
+    )
+    remote_url = click.prompt(
+        "  Git remote URL (leave blank to skip)",
+        default="",
+        show_default=False,
+    ).strip()
+    push_initial = False
+    if remote_url and init_git:
+        push_initial = click.confirm(
+            "  Push initial commit to this remote after generation?", default=False
+        )
+
+    # Quality & tooling toggles
+    enable_ruff = click.confirm("  Enable ruff (linter)?", default=True)
+    enable_black = click.confirm("  Enable black (formatter)?", default=True)
+    enable_isort = click.confirm("  Enable isort (imports)?", default=True)
+    enable_mypy = click.confirm("  Enable mypy (type checking)?", default=False)
+    enable_precommit = click.confirm("  Add pre-commit hooks?", default=True)
+    enable_ci = click.confirm("  Add GitHub Actions CI workflow?", default=True)
+    click.echo()
+
+    # Step 4: ports, secrets & summary
+    click.secho("[4/4] Ports, secrets & review", fg="yellow", bold=True)
+
+    # App port with conflict check
+    default_app_port = 8000
+    app_port = click.prompt("  Application port", default=default_app_port, type=int)
+
+    def _port_in_use(port: int, host: str = "127.0.0.1") -> bool:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(0.2)
+            return s.connect_ex((host, port)) == 0
+
+    if _port_in_use(app_port):
+        candidate = app_port + 1
+        while _port_in_use(candidate) and candidate < app_port + 10:
+            candidate += 1
+        if not _port_in_use(candidate):
+            if click.confirm(
+                f"  Port {app_port} is in use. Use {candidate} instead?", default=True
+            ):
+                app_port = candidate
+
+    # DB connection details (only relevant for non-sqlite)
+    db_name = project_name
+    db_host = "localhost"
+    db_port = 5432 if db_backend == "postgres" else 3306
+    if db_backend != "sqlite":
+        db_name = click.prompt("  Database name", default=project_name, type=str)
+        db_host = click.prompt("  Database host", default="localhost", type=str)
+        db_port = click.prompt(
+            "  Database port",
+            default=5432 if db_backend == "postgres" else 3306,
+            type=int,
+        )
+
+    # Secrets and CORS
+    auto_secrets = click.confirm(
+        "  Auto-generate JWT secret & bcrypt salt?", default=True
+    )
+    jwt_secret = None
+    bcrypt_salt = None
+
+    if auto_secrets:
+        jwt_secret = secrets.token_urlsafe(32)
+        try:
+            import bcrypt  # type: ignore
+
+            bcrypt_salt = bcrypt.gensalt().decode("utf-8")
+        except Exception:
+            raw = base64.b64encode(os.urandom(16)).decode("utf-8")
+            bcrypt_salt = f"$2b$12${raw[:22]}"
+
+    cors_origins = click.prompt(
+        "  CORS origins (comma-separated)",
+        default="http://localhost:3000,http://localhost:8000",
+        type=str,
+    )
+
+    click.echo()
+    # Summary + confirmation
+    click.secho("Review configuration", fg="yellow", bold=True)
+    click.echo(f"  Project name : {project_name}")
+    click.echo(f"  Output dir   : {Path(output_dir).resolve()}")
+    click.echo(f"  Git init     : {'yes' if init_git else 'no'}")
+    click.echo(f"  Virtualenv   : {'yes' if create_venv else 'no'}")
+    click.echo(f"  Install deps : {'yes' if install_deps else 'no'}")
+    click.echo(f"  API preset   : {api_preset}")
+    click.echo(f"  DB backend   : {db_backend}")
+    click.echo(f"  Use Redis    : {'yes' if use_redis else 'no'}")
+    click.echo(f"  Features     : auth={enable_auth}, users={enable_user_mgmt}, product_crud={enable_product_crud}")
+    click.echo(f"  Layout       : {layout}")
+    click.echo(f"  Alembic      : {'yes' if enable_alembic else 'no'}")
+    click.echo(f"  App port     : {app_port}")
+    if db_backend != "sqlite":
+        click.echo(f"  DB host      : {db_host}")
+        click.echo(f"  DB port      : {db_port}")
+        click.echo(f"  DB name      : {db_name}")
+    click.echo()
+
+    if not click.confirm("Proceed with project creation?", default=True):
+        click.secho("Aborting project generation.", fg="red")
+        sys.exit(1)
+
+    # Reuse the same generator used by the non-interactive command
+    generator = ProjectGenerator(
+        project_name=project_name,
+        output_dir=output_dir,
+        init_git=init_git,
+        create_venv=create_venv,
+        install_deps=install_deps,
+    )
+
+    # Attach preset / env options so _create_env_example can use them
+    generator.api_preset = api_preset
+    generator.db_backend = db_backend
+    generator.use_redis = use_redis
+    generator.use_mongo = use_mongo
+    generator.use_cassandra = use_cassandra
+    generator.use_dynamo = use_dynamo
+    generator.use_cosmos = use_cosmos
+    generator.use_scylla = use_scylla
+    generator.use_elasticsearch = use_elasticsearch
+    generator.use_email = use_email
+    generator.use_slack = use_slack
+    generator.use_datadog = use_datadog
+    generator.use_telemetry = use_telemetry
+    generator.use_payments = use_payments
+    generator.app_port = app_port
+    generator.db_name = db_name
+    generator.db_host = db_host
+    generator.db_port = str(db_port)
+    generator.jwt_secret = jwt_secret
+    generator.bcrypt_salt = bcrypt_salt
+    generator.cors_origins = cors_origins
+    generator.enable_auth = enable_auth
+    generator.enable_user_mgmt = enable_user_mgmt
+    generator.enable_product_crud = enable_product_crud
+    generator.layout = layout
+    generator.enable_alembic = enable_alembic
+    generator.enable_ruff = enable_ruff
+    generator.enable_black = enable_black
+    generator.enable_isort = enable_isort
+    generator.enable_mypy = enable_mypy
+    generator.enable_precommit = enable_precommit
+    generator.enable_ci = enable_ci
+    # runtime helpers enabled by default; could be toggled later
+    generator.enable_runtime_helpers = True
+
+    try:
+        # If target directory already exists, ask whether to overwrite
+        if generator.project_path.exists():
+            click.secho(
+                f"Directory '{generator.project_path}' already exists.",
+                fg="yellow",
+            )
+            if not click.confirm(
+                "Do you want to overwrite it? This will DELETE existing contents.",
+                default=False,
+            ):
+                click.secho("Aborting project generation.", fg="red")
+                sys.exit(1)
+            shutil.rmtree(generator.project_path)
+
+        generator.generate()
+
+        # Create concrete .env from example using wizard values
+        env_example = generator.project_path / ".env.example"
+        env_file = generator.project_path / ".env"
+        if env_example.exists():
+            shutil.copy2(env_example, env_file)
+
+        # Write / override LICENSE, CONTRIBUTING.md, CODEOWNERS
+        _write_license(generator.project_path / "LICENSE", license_key, project_name)
+        _write_contributing(generator.project_path / "CONTRIBUTING.md")
+        if code_owner:
+            _write_codeowners(generator.project_path / "CODEOWNERS", code_owner)
+
+        # Write quality/tooling configs
+        if generator.enable_ruff or generator.enable_black or generator.enable_isort or generator.enable_mypy:
+            _write_pyproject(
+                generator.project_path / "pyproject.toml",
+                generator.enable_ruff,
+                generator.enable_black,
+                generator.enable_isort,
+                generator.enable_mypy,
+            )
+        if generator.enable_precommit:
+            _write_precommit(
+                generator.project_path / ".pre-commit-config.yaml",
+                generator.enable_ruff,
+                generator.enable_black,
+                generator.enable_isort,
+                generator.enable_mypy,
+            )
+        if generator.enable_ci:
+            ci_dir = generator.project_path / ".github" / "workflows"
+            ci_dir.mkdir(parents=True, exist_ok=True)
+            _write_ci_workflow(
+                ci_dir / "ci.yml",
+                generator.enable_ruff,
+                generator.enable_black,
+                generator.enable_isort,
+                generator.enable_mypy,
+            )
+
+        # Configure git remote and optional first push
+        if init_git and remote_url:
+            try:
+                subprocess.run(
+                    ["git", "remote", "add", "origin", remote_url],
+                    cwd=generator.project_path,
+                    check=False,
+                    capture_output=True,
+                )
+                if push_initial:
+                    subprocess.run(
+                        ["git", "push", "-u", "origin", "HEAD"],
+                        cwd=generator.project_path,
+                        check=False,
+                    )
+            except Exception:
+                # Best-effort; failures are non-fatal for project generation
+                pass
+
+        click.echo()
+        click.secho("✓ Project generated successfully!", fg="green", bold=True)
+        click.echo()
+        click.secho("Summary:", fg="yellow", bold=True)
+        click.echo(f"  Project name: {project_name}")
+        click.echo(f"  Location:     {generator.project_path}")
+        click.echo(f"  Git init:     {'yes' if init_git else 'no'}")
+        click.echo(f"  Virtualenv:   {'yes' if create_venv else 'no'}")
+        click.echo(f"  Install deps: {'yes' if install_deps else 'no'}")
         click.echo()
     except Exception as e:
         click.secho(f"✗ Error generating project: {e}", fg="red")
@@ -257,6 +918,117 @@ def add_entity(entity_name: str, tests: bool):
     except Exception as e:
         click.secho(f"✗ Error generating entity: {e}", fg="red")
         sys.exit(1)
+
+
+@add.command("service")
+@click.argument(
+    "service_name",
+    type=click.Choice(
+        [
+            "mongo",
+            "cassandra",
+            "scylla",
+            "dynamo",
+            "cosmos",
+            "elasticsearch",
+            "email",
+            "slack",
+            "datadog",
+            "telemetry",
+            "payments",
+        ],
+        case_sensitive=False,
+    ),
+)
+def add_service(service_name: str):
+    """
+    Add an infrastructure service integration to an existing FastMVC project.
+
+    This command copies the relevant config/ and DTO/configuration modules
+    from the FastMVC template into the current project without overwriting
+    existing files, so the server keeps working after the addition.
+
+    \b
+    Examples:
+        $ fastmvc add service email
+        $ fastmvc add service mongo
+        $ fastmvc add service elasticsearch
+    """
+    click.echo()
+    click.secho(f"→ Adding service integration: {service_name}", fg="blue", bold=True)
+    click.echo()
+
+    project_path = Path.cwd()
+    if not (project_path / "app.py").exists():
+        click.secho(
+            "✗ Not in a FastMVC project directory. "
+            "Run this command from your project root.",
+            fg="red",
+        )
+        sys.exit(1)
+
+    # Resolve template root using ProjectGenerator helper
+    try:
+        template_root = ProjectGenerator("tmp")._get_template_path()
+    except Exception as e:  # pragma: no cover - defensive
+        click.secho(f"✗ Could not locate FastMVC template: {e}", fg="red")
+        sys.exit(1)
+
+    def _copy_dir(rel: str) -> None:
+        src = template_root / rel
+        dst = project_path / rel
+        if not src.exists():
+            return
+        if dst.exists():
+            click.secho(f"  • Skipping existing directory: {rel}", fg="yellow")
+            return
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copytree(src, dst)
+        click.secho(f"  ✓ Added directory: {rel}", fg="green")
+
+    def _copy_file(rel: str) -> None:
+        src = template_root / rel
+        dst = project_path / rel
+        if not src.exists():
+            return
+        if dst.exists():
+            click.secho(f"  • Skipping existing file: {rel}", fg="yellow")
+            return
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dst)
+        click.secho(f"  ✓ Added file: {rel}", fg="green")
+
+    service_name = service_name.lower()
+
+    if service_name in {
+        "mongo",
+        "cassandra",
+        "scylla",
+        "dynamo",
+        "cosmos",
+        "elasticsearch",
+        "slack",
+        "datadog",
+        "telemetry",
+        "payments",
+    }:
+        _copy_dir(f"config/{service_name}")
+        _copy_file(f"configurations/{service_name}.py")
+        _copy_file(f"dtos/configurations/{service_name}.py")
+    elif service_name == "email":
+        _copy_dir("config/email")
+        _copy_file("configurations/email.py")
+        _copy_file("dtos/configurations/email.py")
+        _copy_dir("services/communications")
+    else:  # pragma: no cover - guarded by click.Choice
+        click.secho(f"✗ Unsupported service: {service_name}", fg="red")
+        sys.exit(1)
+
+    click.echo()
+    click.secho("✓ Service integration files added.", fg="green", bold=True)
+    click.echo("  → Update the corresponding config/*/config.json to enable the service.")
+    click.echo("  → No changes were made to app startup, so the server will continue to run.")
+    click.echo()
 
 
 # ============================================================================

@@ -53,7 +53,13 @@ from loguru import logger
 
 from constants.api_status import APIStatus
 from constants.default import Default
+from controllers.channels import router as ChannelsRouter
+from controllers.notifications import router as NotificationsRouter
 from controllers.user import router as UserRouter
+from controllers.webrtc import router as WebRTCRouter
+from core.health.dashboard import router as HealthDashboardRouter
+from core.api_dashboard import ApiDashboardRouter
+from core.observability import configure_datadog, configure_otel
 from dtos.responses.base import BaseResponseDTO
 from errors.unexpected_response_error import UnexpectedResponseError
 
@@ -107,6 +113,13 @@ RATE_LIMIT_BURST_LIMIT: int = _get_int_env(
     "RATE_LIMIT_BURST_LIMIT",
     Default.RATE_LIMIT_BURST_LIMIT,
 )
+
+# Optional Datadog / OpenTelemetry integration
+if os.getenv("DATADOG_ENABLED", "").lower() in {"1", "true", "yes"}:
+    configure_datadog()
+
+if os.getenv("TELEMETRY_ENABLED", "").lower() in {"1", "true", "yes"}:
+    configure_otel(app)
 
 
 @app.exception_handler(RequestValidationError)
@@ -291,6 +304,11 @@ logger.info("Initialized middleware stack with fastmiddleware")
 
 logger.info("Initializing routers")
 app.include_router(UserRouter, tags=["User"])
+app.include_router(WebRTCRouter)
+app.include_router(NotificationsRouter)
+app.include_router(ChannelsRouter)
+app.include_router(HealthDashboardRouter)
+app.include_router(ApiDashboardRouter)
 logger.info("Initialized routers")
 
 

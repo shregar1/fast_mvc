@@ -22,9 +22,9 @@ from alembic import context
 # Add the project root to the path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Import models and configuration
+# Import models and database configuration
 from models import Base
-from start_utils import db_config
+from configurations.db import DBConfiguration
 
 # Alembic Config object
 config = context.config
@@ -39,14 +39,34 @@ target_metadata = Base.metadata
 
 def get_database_url() -> str:
     """
-    Construct database URL from environment configuration.
-    
+    Construct database URL from database configuration.
+
     Returns:
-        str: PostgreSQL connection URL.
+        str: SQLAlchemy connection URL.
     """
-    return (
-        f"postgresql://{db_config.db_user}:{db_config.db_password}"
-        f"@{db_config.db_host}:{db_config.db_port}/{db_config.db_name}"
+    db_config = DBConfiguration().get_config()
+
+    # Prefer explicit connection_string template if provided
+    if db_config.connection_string:
+        try:
+            return db_config.connection_string.format(
+                user_name=db_config.user_name,
+                password=db_config.password,
+                host=db_config.host,
+                port=db_config.port,
+                database=db_config.database,
+            )
+        except Exception:
+            # Fall back to a basic URL if formatting fails
+            pass
+
+    # Generic fallback; assumes driver and credentials in connection_string
+    if db_config.connection_string:
+        return db_config.connection_string
+
+    raise RuntimeError(
+        "Database configuration is incomplete for Alembic. "
+        "Please update config/db/config.json with valid connection details."
     )
 
 

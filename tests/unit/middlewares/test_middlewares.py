@@ -440,3 +440,154 @@ class TestAuthenticationMiddleware:
         result = await middleware.dispatch(request, call_next)
 
         assert result == expected_response
+
+    @pytest.mark.asyncio
+    @patch('middlewares.authetication.unprotected_routes', set())
+    @patch('middlewares.authetication.callback_routes', set())
+    @patch('middlewares.authetication.logger')
+    async def test_missing_authorization_header_returns_401(
+        self,
+        mock_logger,
+        mock_app,
+    ):
+        """Test 401 is returned when Authorization header is missing."""
+        from middlewares.authetication import AuthenticationMiddleware
+
+        middleware = AuthenticationMiddleware(mock_app)
+
+        request = MagicMock()
+        request.state = MagicMock()
+        request.state.urn = "test-urn"
+        request.url.path = "/api/protected"
+        request.method = "GET"
+        request.headers = {}
+
+        async def call_next(req):
+            return MagicMock()
+
+        response = await middleware.dispatch(request, call_next)
+
+        assert response.status_code == 401
+        body = response.body.decode()
+        assert "error_authetication_error" in body
+
+    @pytest.mark.asyncio
+    @patch('middlewares.authetication.unprotected_routes', set())
+    @patch('middlewares.authetication.callback_routes', set())
+    @patch('middlewares.authetication.JWTUtility')
+    @patch('middlewares.authetication.logger')
+    async def test_invalid_token_payload_returns_401(
+        self,
+        mock_logger,
+        mock_jwt_utility,
+        mock_app,
+    ):
+        """Test invalid token payload returns 401."""
+        from middlewares.authetication import AuthenticationMiddleware
+
+        # Configure JWTUtility to raise ValueError when decoding
+        instance = mock_jwt_utility.return_value
+        instance.decode_token.side_effect = ValueError("bad token")
+
+        middleware = AuthenticationMiddleware(mock_app)
+
+        request = MagicMock()
+        request.state = MagicMock()
+        request.state.urn = "test-urn"
+        request.url.path = "/api/protected"
+        request.method = "GET"
+        request.headers = {"authorization": "Bearer badtoken"}
+
+        async def call_next(req):
+            return MagicMock()
+
+        response = await middleware.dispatch(request, call_next)
+
+        assert response.status_code == 401
+        body = response.body.decode()
+        assert "error_authetication_error" in body
+
+    @pytest.mark.asyncio
+    @patch('middlewares.authetication.unprotected_routes', set())
+    @patch('middlewares.authetication.callback_routes', set())
+    @patch('middlewares.authetication.UserRepository')
+    @patch('middlewares.authetication.JWTUtility')
+    @patch('middlewares.authetication.logger')
+    async def test_user_not_found_returns_session_expired(
+        self,
+        mock_logger,
+        mock_jwt_utility,
+        mock_user_repository,
+        mock_app,
+    ):
+        """Test when user is not found, session expired response is returned."""
+        from middlewares.authetication import AuthenticationMiddleware
+
+        # JWT decodes successfully
+        jwt_instance = mock_jwt_utility.return_value
+        jwt_instance.decode_token.return_value = {"user_id": 1, "user_urn": "urn"}
+
+        # UserRepository returns no user
+        repo_instance = mock_user_repository.return_value
+        repo_instance.retrieve_record_by_id_and_is_logged_in.return_value = None
+
+        middleware = AuthenticationMiddleware(mock_app)
+
+        request = MagicMock()
+        request.state = MagicMock()
+        request.state.urn = "test-urn"
+        request.url.path = "/api/protected"
+        request.method = "GET"
+        request.headers = {"authorization": "Bearer sometoken"}
+
+        async def call_next(req):
+            return MagicMock()
+
+        response = await middleware.dispatch(request, call_next)
+
+        assert response.status_code == 401
+        body = response.body.decode()
+        assert "error_session_expiry" in body
+
+    @pytest.mark.asyncio
+    @patch('middlewares.authetication.unprotected_routes', set())
+    @patch('middlewares.authetication.callback_routes', set())
+    @patch('middlewares.authetication.UserRepository')
+    @patch('middlewares.authetication.JWTUtility')
+    @patch('middlewares.authetication.logger')
+    async def test_successful_authentication_calls_next(
+        self,
+        mock_logger,
+        mock_jwt_utility,
+        mock_user_repository,
+        mock_app,
+    ):
+        """Test successful authentication proceeds to next handler."""
+        from middlewares.authetication import AuthenticationMiddleware
+
+        jwt_instance = mock_jwt_utility.return_value
+        jwt_instance.decode_token.return_value = {"user_id": 1, "user_urn": "urn"}
+
+        user = MagicMock()
+        repo_instance = mock_user_repository.return_value
+        repo_instance.retrieve_record_by_id_and_is_logged_in.return_value = user
+
+        middleware = AuthenticationMiddleware(mock_app)
+
+        request = MagicMock()
+        request.state = MagicMock()
+        request.state.urn = "test-urn"
+        request.url.path = "/api/protected"
+        request.method = "GET"
+        request.headers = {"authorization": "Bearer validtoken"}
+
+        expected_response = MagicMock()
+
+        async def call_next(req):
+            return expected_response
+
+        response = await middleware.dispatch(request, call_next)
+
+        assert response == expected_response
+        assert request.state.user_id == 1
+        assert request.state.user_urn == "urn"

@@ -22,12 +22,16 @@ Usage:
 """
 
 from core.observability.audit import AuditLog, audit_log
+from core.observability.datadog import configure_datadog
 from core.observability.logging import StructuredLogger
 from core.observability.metrics import Metrics, MetricsMiddleware
+from core.observability.otel import configure_otel
 from core.observability.tracing import Tracer, TracingMiddleware
 
 __all__ = [
     "StructuredLogger",
+    "configure_datadog",
+    "configure_otel",
     "Metrics",
     "MetricsMiddleware",
     "Tracer",

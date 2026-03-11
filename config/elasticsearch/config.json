@@ -1,0 +1,8 @@
+{
+    "enabled": false,
+    "hosts": ["http://localhost:9200"],
+    "username": null,
+    "password": null,
+    "verify_certs": true
+}
+

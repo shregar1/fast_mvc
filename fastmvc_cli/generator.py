@@ -130,7 +130,8 @@ class ProjectGenerator:
         # Ensure it doesn't start with a number
         if sanitized and sanitized[0].isdigit():
             sanitized = "_" + sanitized
-        return sanitized or "fastmvc_project"
+        # Use a neutral default if nothing valid remains
+        return sanitized or "my_project"
 
     def _get_template_path(self) -> Path:
         """
@@ -228,6 +229,10 @@ class ProjectGenerator:
         self._step("Creating environment configuration")
         self._create_env_example()
 
+        # Remove optional service configs that are not enabled for this project
+        self._step("Pruning unused service configurations")
+        self._prune_optional_configs()
+
         # Create .gitignore
         self._step("Creating .gitignore")
         self._create_gitignore()
@@ -235,6 +240,10 @@ class ProjectGenerator:
         # Create project README
         self._step("Creating README.md")
         self._create_readme()
+
+        # Create runtime helper scripts (Makefile, scripts)
+        self._step("Creating runtime helpers")
+        self._create_runtime_helpers()
 
         # Update configurations with project name
         self._step("Customizing configurations")
@@ -301,54 +310,469 @@ class ProjectGenerator:
             else:
                 shutil.copy2(item, dst_item)
 
+    def _prune_optional_configs(self) -> None:
+        """
+        Remove configuration files/directories for services that are not enabled.
+
+        This keeps generated projects lean by only including configs for the
+        services explicitly selected in the project wizard (or defaults).
+        """
+        # Flags are optionally set by the CLI wizard; fall back to False.
+        optional_services: dict[str, bool] = {
+            "mongo": getattr(self, "use_mongo", False),
+            "cassandra": getattr(self, "use_cassandra", False),
+            "scylla": getattr(self, "use_scylla", False),
+            "dynamo": getattr(self, "use_dynamo", False),
+            "cosmos": getattr(self, "use_cosmos", False),
+            "elasticsearch": getattr(self, "use_elasticsearch", False),
+            "email": getattr(self, "use_email", False),
+            "slack": getattr(self, "use_slack", False),
+            "datadog": getattr(self, "use_datadog", False),
+            "telemetry": getattr(self, "use_telemetry", False),
+            "payments": getattr(self, "use_payments", False),
+        }
+
+        for service_name, enabled in optional_services.items():
+            if enabled:
+                continue
+
+            # Remove config/<service>/ directory
+            cfg_dir = self.project_path / "config" / service_name
+            if cfg_dir.exists():
+                shutil.rmtree(cfg_dir, ignore_errors=True)
+
+            # Remove configurations/<service>.py module
+            cfg_module = self.project_path / "configurations" / f"{service_name}.py"
+            if cfg_module.exists():
+                try:
+                    cfg_module.unlink()
+                except OSError:
+                    pass
+
+            # Remove dtos/configurations/<service>.py DTO module
+            dto_module = (
+                self.project_path / "dtos" / "configurations" / f"{service_name}.py"
+            )
+            if dto_module.exists():
+                try:
+                    dto_module.unlink()
+                except OSError:
+                    pass
+
     def _create_env_example(self):
         """Create the .env.example file with default configuration."""
-        env_content = f"""# {self.project_name.upper()} Environment Configuration
-# Copy this file to .env and update with your values
+        # Read preset options if they exist (set by the CLI wizard)
+        db_backend = getattr(self, "db_backend", "postgres")
+        use_redis = getattr(self, "use_redis", True)
+        use_mongo = getattr(self, "use_mongo", False)
+        use_cassandra = getattr(self, "use_cassandra", False)
+        use_dynamo = getattr(self, "use_dynamo", False)
+        use_cosmos = getattr(self, "use_cosmos", False)
+        use_scylla = getattr(self, "use_scylla", False)
+        use_elasticsearch = getattr(self, "use_elasticsearch", False)
+        use_email = getattr(self, "use_email", False)
+        use_slack = getattr(self, "use_slack", False)
+        use_datadog = getattr(self, "use_datadog", False)
+        use_telemetry = getattr(self, "use_telemetry", False)
+        use_payments = getattr(self, "use_payments", False)
+        api_preset = getattr(self, "api_preset", "crud")
+        profile = getattr(self, "profile", "standard")
+        sqlalchemy_mode = getattr(self, "sqlalchemy_mode", "sync")
+        app_port = getattr(self, "app_port", 8000)
+        db_name = getattr(self, "db_name", self.project_name)
+        db_host = getattr(self, "db_host", "localhost")
+        db_port = getattr(self, "db_port", "5432" if db_backend == "postgres" else "3306")
+        jwt_secret = getattr(
+            self,
+            "jwt_secret",
+            "your-super-secret-jwt-key-change-this-in-production",
+        )
+        bcrypt_salt = getattr(
+            self,
+            "bcrypt_salt",
+            "$2b$12$LQv3c1yqBWVHxkd0LHAkCO",
+        )
+        cors_origins = getattr(
+            self,
+            "cors_origins",
+            "http://localhost:3000,http://localhost:8000",
+        )
 
-# Application Settings
-APP_NAME="{self.project_name}"
-APP_ENV="development"
-APP_DEBUG="true"
-APP_HOST="0.0.0.0"
-APP_PORT="8000"
+        lines = [
+            f"# {self.project_name.upper()} Environment Configuration",
+            "# Copy this file to .env and update with your values",
+            "",
+            "# Preset information",
+            f"# API_PRESET={api_preset}",
+            f"# PROFILE={profile}",
+            f"# DB_BACKEND={db_backend}",
+            f"# SQLALCHEMY_MODE={sqlalchemy_mode}",
+            "",
+            "# Application Settings",
+            f'APP_NAME="{self.project_name}"',
+            'APP_ENV="development"',
+            'APP_DEBUG="true"',
+            'APP_HOST="0.0.0.0"',
+            f'APP_PORT="{app_port}"',
+            "",
+            "# Database Configuration",
+        ]
 
-# Database Configuration
-DATABASE_HOST="localhost"
-DATABASE_PORT="5432"
-DATABASE_NAME="{self.project_name}"
-DATABASE_USER="postgres"
-DATABASE_PASSWORD="postgres123"
-DATABASE_POOL_SIZE="5"
-DATABASE_MAX_OVERFLOW="10"
+        if db_backend == "sqlite":
+            lines.extend(
+                [
+                    f'DATABASE_URL="sqlite:///./{db_name}.db"',
+                    '# NOTE: SQLite is file-based; host/port/user/password are not used.',
+                ]
+            )
+        else:
+            # mysql or postgres-style separate settings
+            db_user = getattr(self, "db_user", "postgres" if db_backend == "postgres" else "root")
+            db_password = getattr(
+                self,
+                "db_password",
+                "postgres123" if db_backend == "postgres" else "mysql123",
+            )
+            lines.extend(
+                [
+                    f'DATABASE_HOST="{db_host}"',
+                    f'DATABASE_PORT="{db_port}"',
+                    f'DATABASE_NAME="{db_name}"',
+                    f'DATABASE_USER="{db_user}"',
+                    f'DATABASE_PASSWORD="{db_password}"',
+                    'DATABASE_POOL_SIZE="5"',
+                    'DATABASE_MAX_OVERFLOW="10"',
+                ]
+            )
 
-# Redis Configuration
-REDIS_HOST="localhost"
-REDIS_PORT="6379"
-REDIS_PASSWORD="test123"
-REDIS_DB="0"
+        lines.append("")
 
-# Security Settings
-JWT_SECRET_KEY="your-super-secret-jwt-key-change-this-in-production"
-JWT_ALGORITHM="HS256"
-JWT_EXPIRATION_HOURS="24"
-BCRYPT_SALT="$2b$12$LQv3c1yqBWVHxkd0LHAkCO"
+        if use_redis:
+            lines.extend(
+                [
+                    "# Redis Configuration",
+                    'REDIS_HOST="localhost"',
+                    'REDIS_PORT="6379"',
+                    'REDIS_PASSWORD="test123"',
+                    'REDIS_DB="0"',
+                    "",
+                ]
+            )
+        else:
+            lines.extend(
+                [
+                    "# Redis Configuration (disabled in this preset)",
+                    '# REDIS_HOST="localhost"',
+                    '# REDIS_PORT="6379"',
+                    '# REDIS_PASSWORD="test123"',
+                    '# REDIS_DB="0"',
+                    "",
+                ]
+            )
 
-# CORS Settings
-CORS_ORIGINS="http://localhost:3000,http://localhost:8000"
-CORS_ALLOW_CREDENTIALS="true"
-CORS_ALLOW_METHODS="GET,POST,PUT,DELETE,OPTIONS,PATCH"
-CORS_ALLOW_HEADERS="*"
+        # Optional document / NoSQL / cloud data stores
+        if use_mongo:
+            lines.extend(
+                [
+                    "# MongoDB Configuration",
+                    'MONGO_ENABLED="true"',
+                    'MONGO_URI="mongodb://localhost:27017"',
+                    f'MONGO_DATABASE="{db_name}"',
+                    "",
+                ]
+            )
+        else:
+            lines.extend(
+                [
+                    "# MongoDB Configuration (disabled in this preset)",
+                    '# MONGO_ENABLED="false"',
+                    '# MONGO_URI="mongodb://localhost:27017"',
+                    f'# MONGO_DATABASE="{db_name}"',
+                    "",
+                ]
+            )
 
-# Rate Limiting
-RATE_LIMIT_REQUESTS_PER_MINUTE="60"
-RATE_LIMIT_REQUESTS_PER_HOUR="1000"
-RATE_LIMIT_BURST_LIMIT="10"
+        if use_cassandra:
+            lines.extend(
+                [
+                    "# Cassandra Configuration",
+                    'CASSANDRA_ENABLED="true"',
+                    'CASSANDRA_CONTACT_POINTS="127.0.0.1"',
+                    'CASSANDRA_PORT="9042"',
+                    f'CASSANDRA_KEYSPACE="{db_name}_ks"',
+                    "",
+                ]
+            )
+        else:
+            lines.extend(
+                [
+                    "# Cassandra Configuration (disabled in this preset)",
+                    '# CASSANDRA_ENABLED="false"',
+                    '# CASSANDRA_CONTACT_POINTS="127.0.0.1"',
+                    '# CASSANDRA_PORT="9042"',
+                    f'# CASSANDRA_KEYSPACE="{db_name}_ks"',
+                    "",
+                ]
+            )
 
-# Logging
-LOG_LEVEL="DEBUG"
-LOG_FORMAT="json"
-"""
+        if use_scylla:
+            lines.extend(
+                [
+                    "# ScyllaDB Configuration",
+                    'SCYLLA_ENABLED="true"',
+                    'SCYLLA_CONTACT_POINTS="127.0.0.1"',
+                    'SCYLLA_PORT="9042"',
+                    f'SCYLLA_KEYSPACE="{db_name}_ks"',
+                    "",
+                ]
+            )
+        else:
+            lines.extend(
+                [
+                    "# ScyllaDB Configuration (disabled in this preset)",
+                    '# SCYLLA_ENABLED="false"',
+                    '# SCYLLA_CONTACT_POINTS="127.0.0.1"',
+                    '# SCYLLA_PORT="9042"',
+                    f'# SCYLLA_KEYSPACE="{db_name}_ks"',
+                    "",
+                ]
+            )
+
+        if use_dynamo:
+            lines.extend(
+                [
+                    "# AWS DynamoDB Configuration",
+                    'DYNAMO_ENABLED="true"',
+                    'DYNAMO_REGION="us-east-1"',
+                    f'DYNAMO_TABLE_PREFIX="{self.project_name}_"',
+                    "",
+                ]
+            )
+        else:
+            lines.extend(
+                [
+                    "# AWS DynamoDB Configuration (disabled in this preset)",
+                    '# DYNAMO_ENABLED="false"',
+                    '# DYNAMO_REGION="us-east-1"',
+                    f'# DYNAMO_TABLE_PREFIX="{self.project_name}_"',
+                    "",
+                ]
+            )
+
+        if use_cosmos:
+            lines.extend(
+                [
+                    "# Azure Cosmos DB Configuration",
+                    'COSMOS_ENABLED="true"',
+                    'COSMOS_ACCOUNT_URI="https://your-account.documents.azure.com:443/"',
+                    'COSMOS_ACCOUNT_KEY="your-key-here"',
+                    f'COSMOS_DATABASE="{db_name}"',
+                    "",
+                ]
+            )
+        else:
+            lines.extend(
+                [
+                    "# Azure Cosmos DB Configuration (disabled in this preset)",
+                    '# COSMOS_ENABLED="false"',
+                    '# COSMOS_ACCOUNT_URI="https://your-account.documents.azure.com:443/"',
+                    '# COSMOS_ACCOUNT_KEY="your-key-here"',
+                    f'# COSMOS_DATABASE="{db_name}"',
+                    "",
+                ]
+            )
+
+        if use_elasticsearch:
+            lines.extend(
+                [
+                    "# Elasticsearch Configuration",
+                    'ELASTICSEARCH_ENABLED="true"',
+                    'ELASTICSEARCH_HOSTS="http://localhost:9200"',
+                    'ELASTICSEARCH_USERNAME=""',
+                    'ELASTICSEARCH_PASSWORD=""',
+                    "",
+                ]
+            )
+        else:
+            lines.extend(
+                [
+                    "# Elasticsearch Configuration (disabled in this preset)",
+                    '# ELASTICSEARCH_ENABLED="false"',
+                    '# ELASTICSEARCH_HOSTS="http://localhost:9200"',
+                    '# ELASTICSEARCH_USERNAME=""',
+                    '# ELASTICSEARCH_PASSWORD=""',
+                    "",
+                ]
+            )
+
+        if use_email:
+            lines.extend(
+                [
+                    "# Email Configuration (SMTP / SendGrid)",
+                    'EMAIL_SMTP_ENABLED="true"',
+                    'EMAIL_SMTP_HOST="localhost"',
+                    'EMAIL_SMTP_PORT="587"',
+                    'EMAIL_SMTP_USERNAME=""',
+                    'EMAIL_SMTP_PASSWORD=""',
+                    'EMAIL_SMTP_USE_TLS="true"',
+                    'EMAIL_SMTP_USE_SSL="false"',
+                    'EMAIL_SMTP_DEFAULT_FROM="no-reply@example.com"',
+                    'EMAIL_SENDGRID_ENABLED="false"',
+                    'EMAIL_SENDGRID_API_KEY=""',
+                    'EMAIL_SENDGRID_DEFAULT_FROM="no-reply@example.com"',
+                    "",
+                ]
+            )
+        else:
+            lines.extend(
+                [
+                    "# Email Configuration (disabled in this preset)",
+                    '# EMAIL_SMTP_ENABLED="false"',
+                    '# EMAIL_SMTP_HOST="localhost"',
+                    '# EMAIL_SMTP_PORT="587"',
+                    '# EMAIL_SMTP_USERNAME=""',
+                    '# EMAIL_SMTP_PASSWORD=""',
+                    '# EMAIL_SMTP_USE_TLS="true"',
+                    '# EMAIL_SMTP_USE_SSL="false"',
+                    '# EMAIL_SMTP_DEFAULT_FROM="no-reply@example.com"',
+                    '# EMAIL_SENDGRID_ENABLED="false"',
+                    '# EMAIL_SENDGRID_API_KEY=""',
+                    '# EMAIL_SENDGRID_DEFAULT_FROM="no-reply@example.com"',
+                    "",
+                ]
+            )
+
+        if use_slack:
+            lines.extend(
+                [
+                    "# Slack Configuration",
+                    'SLACK_ENABLED="true"',
+                    'SLACK_WEBHOOK_URL=""',
+                    'SLACK_BOT_TOKEN=""',
+                    'SLACK_DEFAULT_CHANNEL="#alerts"',
+                    "",
+                ]
+            )
+        else:
+            lines.extend(
+                [
+                    "# Slack Configuration (disabled in this preset)",
+                    '# SLACK_ENABLED="false"',
+                    '# SLACK_WEBHOOK_URL=""',
+                    '# SLACK_BOT_TOKEN=""',
+                    '# SLACK_DEFAULT_CHANNEL="#alerts"',
+                    "",
+                ]
+            )
+
+        if use_datadog:
+            lines.extend(
+                [
+                    "# Datadog Configuration",
+                    'DATADOG_ENABLED="true"',
+                    'DATADOG_ENV="development"',
+                    'DATADOG_SERVICE="fastmvc-api"',
+                    'DATADOG_VERSION=""',
+                    'DATADOG_AGENT_HOST="127.0.0.1"',
+                    'DATADOG_AGENT_PORT="8126"',
+                    "",
+                ]
+            )
+        else:
+            lines.extend(
+                [
+                    "# Datadog Configuration (disabled in this preset)",
+                    '# DATADOG_ENABLED="false"',
+                    '# DATADOG_ENV="development"',
+                    '# DATADOG_SERVICE="fastmvc-api"',
+                    '# DATADOG_VERSION=""',
+                    '# DATADOG_AGENT_HOST="127.0.0.1"',
+                    '# DATADOG_AGENT_PORT="8126"',
+                    "",
+                ]
+            )
+
+        if use_telemetry:
+            lines.extend(
+                [
+                    "# OpenTelemetry Configuration",
+                    'TELEMETRY_ENABLED="true"',
+                    'TELEMETRY_EXPORTER="otlp"',
+                    'TELEMETRY_ENDPOINT="http://localhost:4317"',
+                    'TELEMETRY_PROTOCOL="grpc"',
+                    'TELEMETRY_SERVICE_NAME="fastmvc-api"',
+                    'TELEMETRY_ENVIRONMENT="development"',
+                    "",
+                ]
+            )
+        else:
+            lines.extend(
+                [
+                    "# OpenTelemetry Configuration (disabled in this preset)",
+                    '# TELEMETRY_ENABLED="false"',
+                    '# TELEMETRY_EXPORTER="otlp"',
+                    '# TELEMETRY_ENDPOINT="http://localhost:4317"',
+                    '# TELEMETRY_PROTOCOL="grpc"',
+                    '# TELEMETRY_SERVICE_NAME="fastmvc-api"',
+                    '# TELEMETRY_ENVIRONMENT="development"',
+                    "",
+                ]
+            )
+
+        if use_payments:
+            lines.extend(
+                [
+                    "# Payments Configuration",
+                    'PAYMENTS_ENABLED="true"',
+                    'PAYMENT_DEFAULT_PROVIDER="stripe"',
+                    "",
+                ]
+            )
+        else:
+            lines.extend(
+                [
+                    "# Payments Configuration (disabled in this preset)",
+                    '# PAYMENTS_ENABLED="false"',
+                    '# PAYMENT_DEFAULT_PROVIDER="stripe"',
+                    "",
+                ]
+            )
+
+        lines.extend(
+            [
+                "# Security Settings",
+                f'JWT_SECRET_KEY="{jwt_secret}"',
+                'JWT_ALGORITHM="HS256"',
+                'JWT_EXPIRATION_HOURS="24"',
+                f'BCRYPT_SALT="{bcrypt_salt}"',
+                "",
+                "# CORS Settings",
+                f'CORS_ORIGINS="{cors_origins}"',
+                'CORS_ALLOW_CREDENTIALS="true"',
+                'CORS_ALLOW_METHODS="GET,POST,PUT,DELETE,OPTIONS,PATCH"',
+                'CORS_ALLOW_HEADERS="*"',
+                "",
+                 "# Channels (pub-sub) backend",
+                 'CHANNEL_BACKEND="none"',
+                 "",
+                "# Rate Limiting",
+                'RATE_LIMIT_REQUESTS_PER_MINUTE="60"',
+                'RATE_LIMIT_REQUESTS_PER_HOUR="1000"',
+                'RATE_LIMIT_BURST_LIMIT="10"',
+                "",
+                "# WebRTC Settings",
+                'WEBRTC_ENABLED="false"',
+                'WEBRTC_STUN_SERVERS=""',
+                'WEBRTC_TURN_SERVERS=""',
+                "",
+                "# Logging",
+                'LOG_LEVEL="DEBUG"',
+                'LOG_FORMAT="json"',
+                "",
+            ]
+        )
+
+        env_content = "\n".join(lines)
         env_path = self.project_path / ".env.example"
         env_path.write_text(env_content)
 
@@ -493,201 +917,206 @@ logs/
     def _create_readme(self):
         """Create the project README.md file."""
         project_title = self.project_name.replace('_', ' ').title()
-        readme_content = f"""<div align="center">
+        # Read optional feature/layout flags set by the CLI wizard
+        api_preset = getattr(self, "api_preset", "crud")
+        db_backend = getattr(self, "db_backend", "postgres")
+        use_redis = getattr(self, "use_redis", True)
+        layout = getattr(self, "layout", "monolith")
+        enable_auth = getattr(self, "enable_auth", True)
+        enable_user_mgmt = getattr(self, "enable_user_mgmt", True)
+        enable_product_crud = getattr(self, "enable_product_crud", True)
+        enable_alembic = getattr(self, "enable_alembic", True)
 
-# 🚀 {project_title}
+        features_line = []
+        if enable_auth:
+            features_line.append("auth")
+        if enable_user_mgmt:
+            features_line.append("user-management")
+        if enable_product_crud:
+            features_line.append("product-crud-example")
+        if not features_line:
+            features_line.append("core-api")
 
-### Production-Ready API built with FastMVC
+        features_str = ", ".join(features_line)
 
-[![Python](https://img.shields.io/badge/Python-3.10+-3776ab.svg?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688.svg?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+        readme_content = f"""# {project_title}
 
-</div>
+Production-ready FastAPI service generated from a template.
 
----
+## Project configuration
 
-## ⚡ Quick Start
+- API preset: **{api_preset}**
+- DB backend: **{db_backend}**
+- Redis: **{"enabled" if use_redis else "disabled"}**
+- Layout: **{layout}**
+- Features: **{features_str}**
+- Alembic migrations: **{"enabled" if enable_alembic else "disabled"}**
 
-### 1️⃣ Setup Environment
+## Quick Start
+
+### 1. Setup environment
 
 ```bash
-# Create virtual environment
 python -m venv venv
 source venv/bin/activate  # Windows: venv\\Scripts\\activate
 
-# Install dependencies
 pip install -r requirements.txt
-
-# Configure environment
 cp .env.example .env
 ```
 
-### 2️⃣ Start Infrastructure
+### 2. Start infrastructure (optional)
 
 ```bash
-# Start PostgreSQL + Redis
 docker-compose up -d
-
-# Run database migrations
-fastmvc migrate upgrade
 ```
 
-### 3️⃣ Run the Server
+### 3. Run the API
 
 ```bash
 python -m uvicorn app:app --reload
 ```
 
-### 4️⃣ Done! 🎉
+- API:  http://localhost:8000
+- Docs: http://localhost:8000/docs
 
-- **API:** http://localhost:8000
-- **Docs:** http://localhost:8000/docs
-- **ReDoc:** http://localhost:8000/redoc
+## Project structure
 
----
-
-## 🏗️ Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                         HTTP Request                            │
-└─────────────────────────────────────────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  🛡️ MIDDLEWARE STACK (fastmiddleware - 90+ components)         │
-│  RequestContext → Timing → RateLimit → Auth → Security         │
-└─────────────────────────────────────────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  🎮 CONTROLLER → 🔧 SERVICE → 🗄️ REPOSITORY → 💾 DATABASE       │
-└─────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 📁 Project Structure
-
-```
+```text
 {self.project_name}/
-├── 🎯 app.py                 # FastAPI entry point
-├── ⚙️ start_utils.py         # Startup configuration
-│
-├── 📋 abstractions/          # Base interfaces & contracts
-├── 🎮 controllers/           # HTTP route handlers
-├── 🔧 services/              # Business logic layer
-├── 🗄️ repositories/          # Data access layer
-├── 📊 models/                # SQLAlchemy ORM models
-├── 📨 dtos/                  # Data Transfer Objects
-├── 🛡️ middlewares/           # Request processing
-├── 🔄 migrations/            # Alembic migrations
-├── 🧪 tests/                 # Test suite
-│
-└── 🐳 docker-compose.yml     # PostgreSQL + Redis
+├── app.py              # FastAPI entry point
+├── start_utils.py      # Startup configuration
+├── abstractions/       # Base interfaces & contracts
+├── controllers/        # HTTP route handlers
+├── services/           # Business logic
+├── repositories/       # Data access layer
+├── models/             # SQLAlchemy ORM models
+├── dtos/               # Data Transfer Objects
+├── middlewares/        # Request processing
+├── migrations/         # Alembic migrations
+├── tests/              # Test suite
+└── docker-compose.yml  # Optional infrastructure
 ```
 
----
-
-## 🔌 API Endpoints
-
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| GET | `/health` | Health check | ❌ |
-| POST | `/user/register` | User registration | ❌ |
-| POST | `/user/login` | User authentication | ❌ |
-| POST | `/user/logout` | Session termination | ✅ |
-| GET | `/docs` | Swagger UI | ❌ |
-
----
-
-## 🛠️ CLI Commands
-
-### Add New Entity
+## Testing
 
 ```bash
-# Generate complete CRUD for an entity
-fastmvc add entity Product
-
-# Creates: model, repository, service, controller, DTOs, tests
-```
-
-### Database Migrations
-
-```bash
-fastmvc migrate generate "add product table"  # Create migration
-fastmvc migrate upgrade                        # Apply migrations
-fastmvc migrate downgrade                      # Rollback
-fastmvc migrate status                         # Show status
-```
-
----
-
-## 🛡️ Middleware Stack
-
-This project uses [**fastmvc-middleware**](https://pypi.org/project/fastmvc-middleware/) with 90+ production-ready components:
-
-```python
-from fastmiddleware import (
-    SecurityHeadersMiddleware,    # CSP, HSTS, X-Frame-Options
-    RateLimitMiddleware,          # Sliding window rate limiting
-    RequestContextMiddleware,     # Request tracking & URN
-    TimingMiddleware,             # Response time headers
-    LoggingMiddleware,            # Structured request logging
-)
-```
-
----
-
-## 🔐 Security Features
-
-| Feature | Description |
-|---------|-------------|
-| 🔑 JWT Authentication | Secure token-based auth |
-| 🔒 Password Hashing | Bcrypt with salt |
-| 🚦 Rate Limiting | Sliding window (60/min, 1000/hr) |
-| 🛡️ Security Headers | CSP, HSTS, X-Frame-Options |
-| 📍 Request Tracing | Unique URN per request |
-
----
-
-## 🧪 Testing
-
-```bash
-# Run all tests
 pytest
-
-# With coverage report
 pytest --cov=. --cov-report=html
-
-# Run specific tests
-pytest tests/unit/services/ -v
 ```
 
----
+## Database migrations (Alembic)
 
-## 🐳 Docker
+Alembic support is already wired via the `fastmvc` CLI:
 
 ```bash
-# Start all services
-docker-compose up -d
+# Generate a new migration from model changes
+fastmvc migrate generate "describe your change"
 
-# View logs
-docker-compose logs -f
+# Apply all pending migrations
+fastmvc migrate upgrade
 
-# Stop everything
-docker-compose down
+# Roll back one step
+fastmvc migrate downgrade -1
+
+# Show current revision and history
+fastmvc migrate status
+fastmvc migrate history
 ```
 
----
+The Alembic configuration lives in `alembic.ini` and the `migrations/` package.
+The `DATABASE_*` values in `.env` control which database the migrations apply to.
 
-## 📄 License
+If you prefer Make, you can also run:
 
-MIT License - Built with ❤️ using [FastMVC](https://github.com/shregar1/fastMVC)
+```bash
+make migrate
+```
+
+## License
+
+This project is licensed under the MIT License.
 """
         readme_path = self.project_path / "README.md"
         readme_path.write_text(readme_content)
+
+    def _create_runtime_helpers(self):
+        """Create Makefile and helper scripts for common tasks."""
+        # Respect optional flag from CLI; default to enabled
+        enable_helpers = getattr(self, "enable_runtime_helpers", True)
+        if not enable_helpers:
+            return
+
+        makefile_content = """# Common developer commands
+
+.PHONY: dev test lint fmt migrate db-up db-down health
+
+dev:
+\tuvicorn app:app --reload
+
+test:
+\tpytest
+
+lint:
+\truff . || true
+
+fmt:
+\tblack . || true
+\tisort . || true
+
+migrate:
+\tfastmvc migrate upgrade
+
+db-up:
+\tdocker-compose up -d postgres redis
+
+db-down:
+\tdocker-compose down
+
+health:
+\tpython scripts/health_check.py
+"""
+        (self.project_path / "Makefile").write_text(makefile_content)
+
+        scripts_dir = self.project_path / "scripts"
+        scripts_dir.mkdir(parents=True, exist_ok=True)
+
+        bootstrap_sh = """#!/usr/bin/env bash
+set -e
+
+echo "Starting local infrastructure (Postgres + Redis) with docker-compose..."
+docker-compose up -d postgres redis
+
+echo "Running database migrations..."
+fastmvc migrate upgrade || echo "fastmvc migrate upgrade failed or not configured."
+
+echo "Done."
+"""
+        health_py = """import sys
+
+import httpx
+
+
+def main() -> int:
+    url = "http://localhost:8000/health"
+    try:
+        resp = httpx.get(url, timeout=5.0)
+    except Exception as exc:  # pragma: no cover - network error path
+        print(f"Health check failed: {exc}")
+        return 1
+
+    if resp.status_code != 200:
+        print(f"Health check failed with status {resp.status_code}: {resp.text}")
+        return 1
+
+    print("Health check OK")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+"""
+        (scripts_dir / "bootstrap.sh").write_text(bootstrap_sh)
+        (scripts_dir / "health_check.py").write_text(health_py)
 
     def _customize_configs(self):
         """Update configuration files with the project name."""
@@ -700,7 +1129,49 @@ MIT License - Built with ❤️ using [FastMVC](https://github.com/shregar1/fast
             content = content.replace('POSTGRES_DB: fastmvc', f'POSTGRES_DB: {self.project_name}')
             docker_compose_path.write_text(content)
 
-        # Update app.py title
+        # Update DB config for Alembic / runtime if present
+        db_config_path = self.project_path / "config" / "db" / "config.json"
+        if db_config_path.exists():
+            try:
+                import json
+
+                with db_config_path.open() as f:
+                    cfg = json.load(f)
+
+                # Basic alignment with wizard choices (host/port/database only;
+                # credentials are intentionally left for the user to fill).
+                db_backend = getattr(self, "db_backend", "postgres")
+                db_name = getattr(self, "db_name", self.project_name)
+                db_host = getattr(self, "db_host", "localhost")
+                db_port = getattr(
+                    self,
+                    "db_port",
+                    "5432" if db_backend == "postgres" else "3306",
+                )
+
+                cfg["host"] = db_host
+                cfg["port"] = int(db_port)
+                cfg["database"] = db_name
+
+                # Adjust connection_string driver based on backend
+                if db_backend == "mysql":
+                    cfg["connection_string"] = (
+                        "mysql+pymysql://{user_name}:{password}@{host}:{port}/{database}"
+                    )
+                elif db_backend == "sqlite":
+                    cfg["connection_string"] = f"sqlite:///./{db_name}.db"
+                else:
+                    cfg["connection_string"] = (
+                        "postgresql+psycopg2://{user_name}:{password}@{host}:{port}/{database}"
+                    )
+
+                with db_config_path.open("w") as f:
+                    json.dump(cfg, f, indent=4)
+            except Exception:
+                # If anything goes wrong here, leave the template as-is.
+                pass
+
+        # Update app.py title/description to use the project name without FastMVC branding
         app_path = self.project_path / "app.py"
         if app_path.exists():
             content = app_path.read_text()
@@ -710,7 +1181,7 @@ MIT License - Built with ❤️ using [FastMVC](https://github.com/shregar1/fast
             )
             content = content.replace(
                 'description="Production-grade FastAPI application with MVC architecture"',
-                f'description="{self.project_name.replace("_", " ").title()} - Built with FastMVC"'
+                f'description="{self.project_name.replace("_", " ").title()} API service"'
             )
             app_path.write_text(content)
 
@@ -730,7 +1201,7 @@ MIT License - Built with ❤️ using [FastMVC](https://github.com/shregar1/fast
                 check=True
             )
             subprocess.run(
-                ["git", "commit", "-m", "Initial commit - FastMVC project"],
+                ["git", "commit", "-m", "Initial commit"],
                 cwd=self.project_path,
                 capture_output=True,
                 check=True

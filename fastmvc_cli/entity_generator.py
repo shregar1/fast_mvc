@@ -1,5 +1,5 @@
 """
-FastMVC Entity Generator.
+Entity scaffolding generator.
 
 This module generates complete CRUD scaffolding for new entities,
 including models, repositories, services, controllers, DTOs, and tests.
@@ -28,7 +28,7 @@ class EntityGenerator:
     """
     Generator for complete entity CRUD scaffolding.
 
-    Creates all layers needed for a new entity following FastMVC patterns.
+    Creates all layers needed for a new entity following the project's patterns.
     """
 
     def __init__(
