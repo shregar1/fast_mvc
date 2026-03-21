@@ -128,7 +128,7 @@ Factory for creating UserRegistrationService instances.
 Factory for creating DictionaryUtility instances.
 
 ```python
-from dependencies.utilities.dictionary import DictionaryUtilityDependency
+from dependencies.fastmvc_utilities.dictionary import DictionaryUtilityDependency
 
 util_factory = Depends(DictionaryUtilityDependency.derive)
 util = util_factory(urn=urn, user_urn=user_urn, api_name=api_name, user_id=user_id)

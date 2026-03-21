@@ -151,9 +151,9 @@ class TestAuthenticationMiddleware:
         return MagicMock()
 
     @pytest.mark.asyncio
-    @patch('middlewares.authetication.unprotected_routes', {'/health', '/docs'})
-    @patch('middlewares.authetication.callback_routes', set())
-    @patch('middlewares.authetication.logger')
+    @patch('middlewares.authentication.unprotected_routes', {'/health', '/docs'})
+    @patch('middlewares.authentication.callback_routes', set())
+    @patch('middlewares.authentication.logger')
     async def test_unprotected_route_passes_through(self, mock_logger, mock_app):
         """Test unprotected routes pass through without auth."""
         from middlewares import AuthenticationMiddleware
@@ -176,9 +176,9 @@ class TestAuthenticationMiddleware:
         assert result == expected_response
 
     @pytest.mark.asyncio
-    @patch('middlewares.authetication.unprotected_routes', set())
-    @patch('middlewares.authetication.callback_routes', set())
-    @patch('middlewares.authetication.logger')
+    @patch('middlewares.authentication.unprotected_routes', set())
+    @patch('middlewares.authentication.callback_routes', set())
+    @patch('middlewares.authentication.logger')
     async def test_options_request_passes_through(self, mock_logger, mock_app):
         """Test OPTIONS requests pass through."""
         from middlewares import AuthenticationMiddleware
@@ -201,9 +201,9 @@ class TestAuthenticationMiddleware:
         assert result == expected_response
 
     @pytest.mark.asyncio
-    @patch('middlewares.authetication.unprotected_routes', set())
-    @patch('middlewares.authetication.callback_routes', set())
-    @patch('middlewares.authetication.logger')
+    @patch('middlewares.authentication.unprotected_routes', set())
+    @patch('middlewares.authentication.callback_routes', set())
+    @patch('middlewares.authentication.logger')
     async def test_missing_authorization_header_returns_401(
         self,
         mock_logger,
@@ -231,10 +231,10 @@ class TestAuthenticationMiddleware:
         assert "error_authetication_error" in body
 
     @pytest.mark.asyncio
-    @patch('middlewares.authetication.unprotected_routes', set())
-    @patch('middlewares.authetication.callback_routes', set())
-    @patch('middlewares.authetication.JWTUtility')
-    @patch('middlewares.authetication.logger')
+    @patch('middlewares.authentication.unprotected_routes', set())
+    @patch('middlewares.authentication.callback_routes', set())
+    @patch('middlewares.authentication.JWTUtility')
+    @patch('middlewares.authentication.logger')
     async def test_invalid_token_payload_returns_401(
         self,
         mock_logger,
@@ -267,11 +267,11 @@ class TestAuthenticationMiddleware:
         assert "error_authetication_error" in body
 
     @pytest.mark.asyncio
-    @patch('middlewares.authetication.unprotected_routes', set())
-    @patch('middlewares.authetication.callback_routes', set())
-    @patch('middlewares.authetication.UserRepository')
-    @patch('middlewares.authetication.JWTUtility')
-    @patch('middlewares.authetication.logger')
+    @patch('middlewares.authentication.unprotected_routes', set())
+    @patch('middlewares.authentication.callback_routes', set())
+    @patch('middlewares.authentication.UserRepository')
+    @patch('middlewares.authentication.JWTUtility')
+    @patch('middlewares.authentication.logger')
     async def test_user_not_found_returns_session_expired(
         self,
         mock_logger,
@@ -309,11 +309,11 @@ class TestAuthenticationMiddleware:
         assert "error_session_expiry" in body
 
     @pytest.mark.asyncio
-    @patch('middlewares.authetication.unprotected_routes', set())
-    @patch('middlewares.authetication.callback_routes', set())
-    @patch('middlewares.authetication.UserRepository')
-    @patch('middlewares.authetication.JWTUtility')
-    @patch('middlewares.authetication.logger')
+    @patch('middlewares.authentication.unprotected_routes', set())
+    @patch('middlewares.authentication.callback_routes', set())
+    @patch('middlewares.authentication.UserRepository')
+    @patch('middlewares.authentication.JWTUtility')
+    @patch('middlewares.authentication.logger')
     async def test_successful_authentication_calls_next(
         self,
         mock_logger,

@@ -176,7 +176,7 @@ from sqlalchemy.orm import Session
 from loguru import logger
 
 from abstractions.repository import IRepository
-from models.{self.entity_snake} import {self.entity_name}
+from fastmvc_db_models.{self.entity_snake} import {self.entity_name}
 
 
 class {self.entity_name}Repository(IRepository):
@@ -525,10 +525,10 @@ from constants.api_status import APIStatus
 from dtos.requests.{self.entity_snake}.create import {self.entity_name}CreateRequestDTO
 from dtos.requests.{self.entity_snake}.update import {self.entity_name}UpdateRequestDTO
 from dtos.responses.base import BaseResponseDTO
-from errors.not_found_error import NotFoundError
-from errors.bad_input_error import BadInputError
-from models.{self.entity_snake} import {self.entity_name}
-from repositories.{self.entity_snake} import {self.entity_name}Repository
+from fastmvc_errors.not_found_error import NotFoundError
+from fastmvc_errors.bad_input_error import BadInputError
+from fastmvc_db_models.{self.entity_snake} import {self.entity_name}
+from fastmvc_repositories.{self.entity_snake} import {self.entity_name}Repository
 from services.{self.entity_snake}.abstraction import I{self.entity_name}Service
 
 
@@ -777,14 +777,14 @@ from sqlalchemy.orm import Session
 
 from constants.api_status import APIStatus
 from fastmvc_db import DBDependency
-from dependencies.utilities.dictionary import DictionaryUtilityDependency
+from dependencies.fastmvc_utilities.dictionary import DictionaryUtilityDependency
 from dtos.requests.{self.entity_snake}.create import {self.entity_name}CreateRequestDTO
 from dtos.requests.{self.entity_snake}.update import {self.entity_name}UpdateRequestDTO
-from errors.not_found_error import NotFoundError
-from errors.bad_input_error import BadInputError
-from repositories.{self.entity_snake} import {self.entity_name}Repository
+from fastmvc_errors.not_found_error import NotFoundError
+from fastmvc_errors.bad_input_error import BadInputError
+from fastmvc_repositories.{self.entity_snake} import {self.entity_name}Repository
 from services.{self.entity_snake}.crud import {self.entity_name}CRUDService
-from utilities.dictionary import DictionaryUtility
+from fastmvc_utilities.dictionary import DictionaryUtility
 
 from loguru import logger
 
@@ -1136,7 +1136,7 @@ Provides dependency injection for {self.entity_name}Repository.
 from sqlalchemy.orm import Session
 
 from abstractions.dependency import IDependency
-from repositories.{self.entity_snake} import {self.entity_name}Repository
+from fastmvc_repositories.{self.entity_snake} import {self.entity_name}Repository
 
 
 class {self.entity_name}RepositoryDependency(IDependency):
@@ -1172,7 +1172,7 @@ Tests for {self.entity_name} model.
 import pytest
 from datetime import datetime
 
-from models.{self.entity_snake} import {self.entity_name}
+from fastmvc_db_models.{self.entity_snake} import {self.entity_name}
 
 
 class Test{self.entity_name}Model:
@@ -1232,7 +1232,7 @@ class Test{self.entity_name}Model:
         models_init = self.project_path / "models" / "__init__.py"
         if models_init.exists():
             content = models_init.read_text()
-            import_line = f"from models.{self.entity_snake} import {self.entity_name}"
+            import_line = f"from fastmvc_db_models.{self.entity_snake} import {self.entity_name}"
             if import_line not in content:
                 content += f"\n{import_line}\n"
                 models_init.write_text(content)

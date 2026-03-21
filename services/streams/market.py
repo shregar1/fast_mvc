@@ -16,7 +16,7 @@ from typing import Any, AsyncGenerator, Deque, Dict, List, Tuple
 from loguru import logger
 
 from fastmvc_core import StreamsConfiguration
-from services.queues import QueueBroker
+
 from .abstractions import OrderEvent, Tick
 
 
@@ -35,9 +35,11 @@ class MarketDataHub:
         self._symbol_subscribers: Dict[str, List[asyncio.Queue]] = {}
         self._tenant_orders: Dict[str, Deque[OrderEvent]] = {}
         self._tenant_subscribers: Dict[str, List[asyncio.Queue]] = {}
-        self._queue_broker: QueueBroker | None = None
+        self._queue_broker = None
         if self._fanout_backend:
             try:
+                from fastmvc_queues import QueueBroker
+
                 self._queue_broker = QueueBroker()
             except Exception as exc:  # pragma: no cover - defensive
                 logger.warning(f"Failed to initialize QueueBroker for streams fan-out: {exc}")

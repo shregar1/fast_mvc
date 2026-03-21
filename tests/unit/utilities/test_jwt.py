@@ -8,7 +8,7 @@ from unittest.mock import patch
 import jwt
 import pytest
 
-from utilities.jwt import JWTUtility
+from fastmvc_utilities.jwt import JWTUtility
 
 
 class TestJWTUtility:
@@ -136,7 +136,7 @@ class TestJWTUtility:
         # This test verifies the decode_token method handles expired tokens
         # The actual behavior depends on PyJWT's verification settings
         # We test that the method accepts and processes a token
-        from utilities.jwt import ALGORITHM, SECRET_KEY
+        from fastmvc_utilities.jwt import ALGORITHM, SECRET_KEY
         payload = {"user_id": 1, "exp": datetime.now() - timedelta(hours=1)}
         token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 

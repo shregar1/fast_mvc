@@ -19,7 +19,7 @@ Usage:
 from collections.abc import Callable
 
 from start_utils import logger
-from utilities.jwt import JWTUtility
+from fastmvc_utilities.jwt import JWTUtility
 
 
 class JWTUtilityDependency:

@@ -42,6 +42,11 @@ class IUtility(ABC):
         user_id (str): Database identifier of the user.
         logger: Structured logger bound with utility context.
 
+    Note:
+        Subclasses should call ``super().__init__(...)`` so request context
+        and logging stay consistent. Extra constructor parameters should follow
+        ``**kwargs`` forwarding to the base when appropriate.
+
     Example:
         >>> class EmailUtility(IUtility):
         ...     def __init__(self, smtp_config: dict, **kwargs):
@@ -84,49 +89,59 @@ class IUtility(ABC):
     @property
     def urn(self) -> str:
         """str: Get the Unique Request Number."""
+
         return self._urn
 
     @urn.setter
     def urn(self, value: str) -> None:
         """Set the Unique Request Number."""
+
         self._urn = value
 
     @property
     def user_urn(self) -> str:
         """str: Get the user's unique resource name."""
+
         return self._user_urn
 
     @user_urn.setter
     def user_urn(self, value: str) -> None:
         """Set the user's unique resource name."""
+
         self._user_urn = value
 
     @property
     def api_name(self) -> str:
         """str: Get the API endpoint name."""
+
         return self._api_name
 
     @api_name.setter
     def api_name(self, value: str) -> None:
         """Set the API endpoint name."""
+
         self._api_name = value
 
     @property
     def logger(self):
         """loguru.Logger: Get the structured logger instance."""
+
         return self._logger
 
     @logger.setter
     def logger(self, value) -> None:
         """Set the structured logger instance."""
+
         self._logger = value
 
     @property
     def user_id(self) -> str:
         """str: Get the user's database identifier."""
+
         return self._user_id
 
     @user_id.setter
     def user_id(self, value: str) -> None:
         """Set the user's database identifier."""
+
         self._user_id = value

@@ -7,7 +7,7 @@ request-specific context.
 
 Usage:
     >>> from fastapi import Depends
-    >>> from dependencies.utilities.dictionary import DictionaryUtilityDependency
+    >>> from dependencies.fastmvc_utilities.dictionary import DictionaryUtilityDependency
     >>>
     >>> async def my_endpoint(
     ...     util_factory: Callable = Depends(DictionaryUtilityDependency.derive)
@@ -19,7 +19,7 @@ Usage:
 from collections.abc import Callable
 
 from start_utils import logger
-from utilities.dictionary import DictionaryUtility
+from fastmvc_utilities.dictionary import DictionaryUtility
 
 
 class DictionaryUtilityDependency:
@@ -35,7 +35,7 @@ class DictionaryUtilityDependency:
         - Easy testing with mock factories
 
     Example:
-        >>> from dependencies.utilities.dictionary import DictionaryUtilityDependency
+        >>> from dependencies.fastmvc_utilities.dictionary import DictionaryUtilityDependency
         >>>
         >>> util_factory = Depends(DictionaryUtilityDependency.derive)
         >>> util = util_factory(

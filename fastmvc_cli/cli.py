@@ -5,18 +5,23 @@ This module provides the main CLI entry point for FastMVC framework.
 It uses Click for building the command-line interface.
 
 Commands:
-    generate: Create a new FastMVC project from template
-    add: Add entities, migrations, etc. to existing project
-    migrate: Database migration commands
-    version: Display the current FastMVC version (optional PyPI check)
-    lint: Ruff and optional mypy for the project tree
+    generate / init: Create a new project (flags or interactive wizard)
+    add: entity, service — scaffolding or integration assets
+    remove service: Remove integration assets added by ``add service``
+    migrate: Alembic (generate, upgrade, downgrade, status, history)
+    doctor: Environment and optional DB check
+    version: CLI version (optional PyPI check)
+    lint: Ruff and optional mypy
     run: pre_run hooks then uvicorn
-    info: Display information about FastMVC
+    info: Framework overview and CLI summary
 
 Example:
     $ fastmvc generate my_api
+    $ fastmvc init my_api --ci
     $ fastmvc add entity Product
+    $ fastmvc add service payments
     $ fastmvc migrate upgrade
+    $ fastmvc doctor
     $ fastmvc version
     $ fastmvc lint
     $ fastmvc run
@@ -36,13 +41,14 @@ from typing import Optional
 import click
 
 from fastmvc_cli import __version__
-from fastmvc_cli.alembic_utils import alembic_base_args, alembic_cwd, find_alembic_ini
+from fastmvc_cli.alembic_utils import find_alembic_ini, run_alembic
 from fastmvc_cli.doctor import export_openapi_json, run_doctor
 from fastmvc_cli.entity_generator import EntityGenerator
 from fastmvc_cli.generator import ProjectGenerator
 from fastmvc_cli.hooks import run_post_generate, run_pre_run
 from fastmvc_cli.init_ci import run_init_ci
 from fastmvc_cli.presets import apply_template_pack
+from fastmvc_cli.project_checks import require_fastmvc_project_root
 from fastmvc_cli.scaffold_helpers import (
     write_ci_workflow,
     write_codeowners,
@@ -505,7 +511,7 @@ def generate(
         if not install:
             click.echo(f"  {step}. pip install -r requirements.txt")
             step += 1
-        click.echo(f"  {step}. cp .env.example .env  # Configure your environment")
+        click.echo(f"  {step}. Edit `.env` for your environment (a starter `.env` was created)")
         step += 1
         click.echo(f"  {step}. docker-compose up -d  # Start PostgreSQL and Redis (optional)")
         step += 1
@@ -1011,15 +1017,7 @@ def add_entity(entity_name: str, tests: bool):
         entity_name = entity_name[0].upper() + entity_name[1:]
         click.secho(f"  Using: {entity_name}", fg="white")
 
-    # Check we're in a FastMVC project
-    project_path = Path.cwd()
-    if not (project_path / "app.py").exists():
-        click.secho(
-            "✗ Not in a FastMVC project directory. "
-            "Run this command from your project root.",
-            fg="red"
-        )
-        sys.exit(1)
+    project_path = require_fastmvc_project_root()
 
     try:
         generator = EntityGenerator(
@@ -1142,14 +1140,7 @@ def add_service(service_name: str):
     click.secho(f"→ Adding service integration: {service_name}", fg="blue", bold=True)
     click.echo()
 
-    project_path = Path.cwd()
-    if not (project_path / "app.py").exists():
-        click.secho(
-            "✗ Not in a FastMVC project directory. "
-            "Run this command from your project root.",
-            fg="red",
-        )
-        sys.exit(1)
+    project_path = require_fastmvc_project_root()
 
     # Resolve template root using ProjectGenerator helper
     try:
@@ -1253,14 +1244,7 @@ def remove_service(service_name: str):
     click.secho(f"→ Removing service integration: {service_name}", fg="blue", bold=True)
     click.echo()
 
-    project_path = Path.cwd()
-    if not (project_path / "app.py").exists():
-        click.secho(
-            "✗ Not in a FastMVC project directory. "
-            "Run this command from your project root.",
-            fg="red",
-        )
-        sys.exit(1)
+    project_path = require_fastmvc_project_root()
 
     def _rm_dir(rel: str) -> None:
         dst = project_path / rel
@@ -1306,12 +1290,13 @@ def remove_service(service_name: str):
 # ============================================================================
 
 
-def _alembic_run(argv: list[str]) -> subprocess.CompletedProcess:
-    """Run Alembic with resolved ``alembic.ini`` (walks up from cwd)."""
-    ini = find_alembic_ini()
-    cwd = alembic_cwd(ini)
-    cmd = alembic_base_args(ini) + argv
-    return subprocess.run(cmd, cwd=cwd, capture_output=True, text=True)
+def _alembic_invoke(argv: list[str]) -> subprocess.CompletedProcess:
+    """Run Alembic; exit with a clear message if the ``alembic`` CLI is missing."""
+    try:
+        return run_alembic(argv)
+    except FileNotFoundError:
+        click.secho("✗ Alembic not found. Install with: pip install alembic", fg="red")
+        sys.exit(1)
 
 
 def _require_alembic_ini() -> None:
@@ -1391,27 +1376,20 @@ def migrate_generate(message: str, autogenerate: bool):
     """
     click.secho(f"→ Generating migration: {message}", fg="blue")
 
-    if find_alembic_ini() is None:
-        click.secho("✗ alembic.ini not found. Are you in a FastMVC project?", fg="red")
-        sys.exit(1)
+    _require_alembic_ini()
+    cmd = ["revision"]
+    if autogenerate:
+        cmd.append("--autogenerate")
+    cmd.extend(["-m", message])
 
-    try:
-        cmd = ["revision"]
-        if autogenerate:
-            cmd.append("--autogenerate")
-        cmd.extend(["-m", message])
+    result = _alembic_invoke(cmd)
 
-        result = _alembic_run(cmd)
-
-        if result.returncode == 0:
-            click.secho("✓ Migration generated successfully!", fg="green")
-            click.echo(result.stdout)
-        else:
-            click.secho("✗ Migration generation failed:", fg="red")
-            click.echo(result.stderr)
-            sys.exit(1)
-    except FileNotFoundError:
-        click.secho("✗ Alembic not found. Install with: pip install alembic", fg="red")
+    if result.returncode == 0:
+        click.secho("✓ Migration generated successfully!", fg="green")
+        click.echo(result.stdout)
+    else:
+        click.secho("✗ Migration generation failed:", fg="red")
+        click.echo(result.stderr)
         sys.exit(1)
 
 
@@ -1434,19 +1412,15 @@ def migrate_upgrade(revision: str):
     click.secho(f"→ Upgrading database to: {revision}", fg="blue")
 
     _require_alembic_ini()
-    try:
-        result = _alembic_run(["upgrade", revision])
+    result = _alembic_invoke(["upgrade", revision])
 
-        if result.returncode == 0:
-            click.secho("✓ Database upgraded successfully!", fg="green")
-            if result.stdout:
-                click.echo(result.stdout)
-        else:
-            click.secho("✗ Upgrade failed:", fg="red")
-            click.echo(result.stderr)
-            sys.exit(1)
-    except FileNotFoundError:
-        click.secho("✗ Alembic not found. Install with: pip install alembic", fg="red")
+    if result.returncode == 0:
+        click.secho("✓ Database upgraded successfully!", fg="green")
+        if result.stdout:
+            click.echo(result.stdout)
+    else:
+        click.secho("✗ Upgrade failed:", fg="red")
+        click.echo(result.stderr)
         sys.exit(1)
 
 
@@ -1469,19 +1443,15 @@ def migrate_downgrade(revision: str):
     click.secho(f"→ Downgrading database to: {revision}", fg="yellow")
 
     _require_alembic_ini()
-    try:
-        result = _alembic_run(["downgrade", revision])
+    result = _alembic_invoke(["downgrade", revision])
 
-        if result.returncode == 0:
-            click.secho("✓ Database downgraded successfully!", fg="green")
-            if result.stdout:
-                click.echo(result.stdout)
-        else:
-            click.secho("✗ Downgrade failed:", fg="red")
-            click.echo(result.stderr)
-            sys.exit(1)
-    except FileNotFoundError:
-        click.secho("✗ Alembic not found. Install with: pip install alembic", fg="red")
+    if result.returncode == 0:
+        click.secho("✓ Database downgraded successfully!", fg="green")
+        if result.stdout:
+            click.echo(result.stdout)
+    else:
+        click.secho("✗ Downgrade failed:", fg="red")
+        click.echo(result.stderr)
         sys.exit(1)
 
 
@@ -1495,17 +1465,13 @@ def migrate_status():
     click.secho("→ Checking migration status...", fg="blue")
 
     _require_alembic_ini()
-    try:
-        result = _alembic_run(["current"])
+    result = _alembic_invoke(["current"])
 
-        if result.returncode == 0:
-            click.secho("Current revision:", fg="cyan", bold=True)
-            click.echo(result.stdout or "  No migrations applied yet")
-        else:
-            click.echo(result.stderr)
-    except FileNotFoundError:
-        click.secho("✗ Alembic not found. Install with: pip install alembic", fg="red")
-        sys.exit(1)
+    if result.returncode == 0:
+        click.secho("Current revision:", fg="cyan", bold=True)
+        click.echo(result.stdout or "  No migrations applied yet")
+    else:
+        click.echo(result.stderr)
 
 
 @migrate.command("history")
@@ -1519,20 +1485,16 @@ def migrate_history(verbose: bool):
     click.secho("→ Migration history:", fg="blue")
 
     _require_alembic_ini()
-    try:
-        cmd = ["history"]
-        if verbose:
-            cmd.append("--verbose")
+    cmd = ["history"]
+    if verbose:
+        cmd.append("--verbose")
 
-        result = _alembic_run(cmd)
+    result = _alembic_invoke(cmd)
 
-        if result.returncode == 0:
-            click.echo(result.stdout or "  No migrations found")
-        else:
-            click.echo(result.stderr)
-    except FileNotFoundError:
-        click.secho("✗ Alembic not found. Install with: pip install alembic", fg="red")
-        sys.exit(1)
+    if result.returncode == 0:
+        click.echo(result.stdout or "  No migrations found")
+    else:
+        click.echo(result.stderr)
 
 
 # ============================================================================
@@ -1594,16 +1556,21 @@ def info():
     click.secho("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", fg="white", dim=True)
     click.secho("CLI Commands:", fg="cyan", bold=True)
     click.secho("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", fg="white", dim=True)
-    click.echo("  fastmvc generate <name>          → Create new project")
+    click.echo("  fastmvc generate <name> …        → New project (flags & template pack)")
+    click.echo("  fastmvc init [name]              → Interactive wizard (or --ci for automation)")
+    click.echo("  fastmvc add entity <Name>        → CRUD scaffolding (model, repo, service, …)")
+    click.echo("  fastmvc add service <name>       → Copy integration assets (payments, identity, …)")
+    click.echo("  fastmvc remove service <name>    → Remove integration config copied by add")
     click.echo("  fastmvc doctor [--check-db]      → Env / deps / optional DB check")
-    click.echo("  fastmvc add entity <name>        → Add CRUD entity")
-    click.echo("  fastmvc migrate generate <msg>   → Create migration")
-    click.echo("  fastmvc migrate upgrade          → Apply migrations")
-    click.echo("  fastmvc migrate downgrade        → Rollback migrations")
-    click.echo("  fastmvc migrate status           → Show current status")
-    click.echo("  fastmvc version [--check-pypi]   → Show version / PyPI latest")
-    click.echo("  fastmvc lint                     → Ruff (+ mypy if configured)")
+    click.echo("  fastmvc migrate generate <msg>   → Alembic revision")
+    click.echo("  fastmvc migrate upgrade|downgrade|status|history")
+    click.echo("  fastmvc version [--check-pypi]   → Version / optional PyPI latest")
+    click.echo("  fastmvc lint [--no-mypy]         → Ruff (+ mypy if configured)")
     click.echo("  fastmvc run                      → pre_run hooks + uvicorn")
+    click.echo()
+    click.secho("Ecosystem packages:", fg="yellow", bold=True)
+    click.secho("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", fg="white", dim=True)
+    click.echo("  fastmvc_core, fastmvc_db, fastmvc_middleware — core stack (see pyproject optional deps)")
     click.echo()
 
 

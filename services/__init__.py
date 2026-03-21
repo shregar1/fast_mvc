@@ -7,7 +7,12 @@ external systems, and return structured responses.
 
 Subpackages:
     - user/: User authentication and management services
-    - apis/: API feature services (versioned)
+    - product/: Example CRUD service
+    - streams/: Market data hub for WebSocket demos (optional ``fastmvc_queues`` fan-out)
+    - events/: Cloud event bus helpers used by streams
+
+Integrations (payments, storage, vectors, search, etc.) use the published ``fastmvc_*``
+packages — see pyproject optional-dependencies.
 
 Usage:
     >>> from services.user.login import UserLoginService

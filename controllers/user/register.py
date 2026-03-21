@@ -41,14 +41,14 @@ from dependencies.repositiories.user import UserRepositoryDependency
 from dependencies.services.user.register import (
     UserRegistrationServiceDependency,
 )
-from dependencies.utilities.dictionary import DictionaryUtilityDependency
+from dependencies.fastmvc_utilities.dictionary import DictionaryUtilityDependency
 from dtos.requests.user.registration import UserRegistrationRequestDTO
 from dtos.responses.base import BaseResponseDTO
-from errors.bad_input_error import BadInputError
-from errors.not_found_error import NotFoundError
-from errors.unexpected_response_error import UnexpectedResponseError
-from repositories.user import UserRepository
-from utilities.dictionary import DictionaryUtility
+from fastmvc_errors.bad_input_error import BadInputError
+from fastmvc_errors.not_found_error import NotFoundError
+from fastmvc_errors.unexpected_response_error import UnexpectedResponseError
+from fastmvc_repositories.user import UserRepository
+from fastmvc_utilities.dictionary import DictionaryUtility
 
 
 class UserRegistrationController(IUserController):

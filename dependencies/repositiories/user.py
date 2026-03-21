@@ -18,7 +18,7 @@ Usage:
 
 from collections.abc import Callable
 
-from repositories.user import UserRepository
+from fastmvc_repositories.user import UserRepository
 from start_utils import logger
 
 

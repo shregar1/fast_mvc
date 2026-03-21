@@ -15,8 +15,8 @@ with patch.dict('sys.modules', {'bcrypt': MagicMock()}):
     from services.user.registration import UserRegistrationService
 
 from constants.api_status import APIStatus
-from errors.bad_input_error import BadInputError
-from errors.not_found_error import NotFoundError
+from fastmvc_errors.bad_input_error import BadInputError
+from fastmvc_errors.not_found_error import NotFoundError
 
 
 class TestUserLoginService:

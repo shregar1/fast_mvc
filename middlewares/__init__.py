@@ -1,31 +1,19 @@
 """
 Middleware package.
 
-Exports app-specific and shared middleware for the FastMVC application.
+Exports app-specific JWT authentication wired to ``fastmvc_middleware``.
+
+Generic HTTP middleware (security headers, body limits, CORS, timing, etc.) lives in
+the ``fastmvc-middleware`` distribution (import ``fastmvc_middleware`` or ``fastmiddleware``
+depending on your stack). This package only provides :class:`AuthenticationMiddleware`.
+
 Use::
 
-    from middlewares import (
-        AuthenticationMiddleware,
-        RequestBodyLimitMiddleware,
-        SecurityHeadersConfig,
-        SecurityHeadersMiddleware,
-    )
+    from middlewares import AuthenticationMiddleware
 """
 
-from middlewares.authetication import AuthenticationMiddleware
-from middlewares.request_body_limit import (
-    DEFAULT_MAX_BYTES,
-    RequestBodyLimitMiddleware,
-)
-from middlewares.security_headers import (
-    SecurityHeadersConfig,
-    SecurityHeadersMiddleware,
-)
+from .authentication import AuthenticationMiddleware
 
 __all__ = [
     "AuthenticationMiddleware",
-    "DEFAULT_MAX_BYTES",
-    "RequestBodyLimitMiddleware",
-    "SecurityHeadersConfig",
-    "SecurityHeadersMiddleware",
 ]

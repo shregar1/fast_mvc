@@ -6,8 +6,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from models.product import Product
-from repositories.product import ProductRepository
+from fastmvc_db_models.product import Product
+from fastmvc_repositories.product import ProductRepository
 
 
 class TestProductRepositoryInit:

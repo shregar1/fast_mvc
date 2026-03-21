@@ -22,14 +22,14 @@ from sqlalchemy.orm import Session
 
 from constants.api_status import APIStatus
 from dependencies.db import DBDependency
-from dependencies.utilities.dictionary import DictionaryUtilityDependency
+from dependencies.fastmvc_utilities.dictionary import DictionaryUtilityDependency
 from dtos.requests.product.create import ProductCreateRequestDTO
 from dtos.requests.product.update import ProductUpdateRequestDTO
-from errors.bad_input_error import BadInputError
-from errors.not_found_error import NotFoundError
-from repositories.product import ProductRepository
-from services.product.crud import ProductCRUDService
-from utilities.dictionary import DictionaryUtility
+from fastmvc_errors.bad_input_error import BadInputError
+from fastmvc_errors.not_found_error import NotFoundError
+from fastmvc_repositories.product import ProductRepository
+from services.example.crud import ProductCRUDService
+from fastmvc_utilities.dictionary import DictionaryUtility
 
 logger.debug("Registering Product routes.")
 

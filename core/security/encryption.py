@@ -16,6 +16,8 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
+from abstractions.utility import IUtility
+
 T = TypeVar("T")
 
 
@@ -235,7 +237,7 @@ class KeyRotation:
         return self.encrypt(plaintext)
 
 
-class HashingUtility:
+class HashingUtility(IUtility):
     """
     Utility for hashing sensitive data (one-way encryption).
 
@@ -243,13 +245,30 @@ class HashingUtility:
     (e.g., lookup tokens, fingerprints).
     """
 
-    def __init__(self, salt: Optional[str] = None):
+    def __init__(
+        self,
+        salt: Optional[str] = None,
+        urn: str = None,
+        user_urn: str = None,
+        api_name: str = None,
+        user_id: str = None,
+    ) -> None:
         """
         Initialize with optional salt.
 
         Args:
             salt: Salt for hashing (use environment variable in production).
+            urn: Optional request URN for tracing (see :class:`IUtility`).
+            user_urn: Optional user URN (see :class:`IUtility`).
+            api_name: Optional API name (see :class:`IUtility`).
+            user_id: Optional user id (see :class:`IUtility`).
         """
+        super().__init__(
+            urn=urn,
+            user_urn=user_urn,
+            api_name=api_name,
+            user_id=user_id,
+        )
         self._salt = (salt or "").encode()
 
     def hash(self, data: Union[str, bytes]) -> str:

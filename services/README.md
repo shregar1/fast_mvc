@@ -2,6 +2,8 @@
 
 ## Overview
 
+The `services` package in this app holds **domain services** used by controllers (user auth, product CRUD), plus **streams** (market/WebSocket demo) and **events** (cloud event-bus wiring for stream fan-out). Stubs for payments, vectors, storage, search, jobs, and other integrations were removed; use the published **`fastmvc_*`** libraries from PyPI (see root `pyproject.toml` optional-dependencies) instead of duplicating them here.
+
 The `services` module contains the business logic layer of the FastMVC application. Services encapsulate domain rules, coordinate between repositories and external systems, and return structured responses.
 
 ## Purpose
@@ -174,8 +176,8 @@ class UserLoginService(IUserService):
 Services raise custom errors that controllers catch:
 
 ```python
-from errors.not_found_error import NotFoundError
-from errors.bad_input_error import BadInputError
+from fastmvc_errors.not_found_error import NotFoundError
+from fastmvc_errors.bad_input_error import BadInputError
 
 # In service
 if not user:

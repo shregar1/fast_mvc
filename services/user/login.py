@@ -7,12 +7,12 @@ import bcrypt
 from constants.api_status import APIStatus
 from dtos.requests.user.login import UserLoginRequestDTO
 from dtos.responses.base import BaseResponseDTO
-from errors.bad_input_error import BadInputError
-from errors.not_found_error import NotFoundError
-from models.user import User
-from repositories.user import UserRepository
+from fastmvc_errors.bad_input_error import BadInputError
+from fastmvc_errors.not_found_error import NotFoundError
+from fastmvc_db_models.user import User
+from fastmvc_repositories.user import UserRepository
 from services.user.abstraction import IUserService
-from utilities.jwt import JWTUtility
+from fastmvc_utilities.jwt import JWTUtility
 
 
 class UserLoginService(IUserService):

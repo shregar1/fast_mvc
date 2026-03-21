@@ -6,9 +6,9 @@ from http import HTTPStatus
 
 import pytest
 
-from errors.bad_input_error import BadInputError
-from errors.not_found_error import NotFoundError
-from errors.unexpected_response_error import UnexpectedResponseError
+from fastmvc_errors.bad_input_error import BadInputError
+from fastmvc_errors.not_found_error import NotFoundError
+from fastmvc_errors.unexpected_response_error import UnexpectedResponseError
 
 
 class TestBadInputError:

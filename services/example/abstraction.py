@@ -9,9 +9,9 @@ from loguru import logger
 from abstractions.service import IService
 
 
-class IProductService(IService):
+class IExampleService(IService):
     """
-    Abstract base class for Product services.
+    Abstract base class for Example services.
     """
 
     def __init__(

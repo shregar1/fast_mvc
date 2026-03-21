@@ -61,7 +61,7 @@ class MyRepository(IRepository):
 Repository for user data access.
 
 ```python
-from repositories.user import UserRepository
+from fastmvc_repositories.user import UserRepository
 
 # Initialize with session
 repo = UserRepository(
@@ -141,8 +141,8 @@ def retrieve_record_by_email(self, email, is_deleted=False):
 ## Usage Example
 
 ```python
-from repositories.user import UserRepository
-from models.user import User
+from fastmvc_repositories.user import UserRepository
+from fastmvc_db_models.user import User
 
 # In a service
 class UserLoginService(IService):

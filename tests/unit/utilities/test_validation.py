@@ -5,7 +5,7 @@ Tests for ValidationUtility and SecurityValidators classes.
 from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch
 
-from utilities.validation import SecurityValidators, ValidationUtility
+from fastmvc_utilities.validation import SecurityValidators, ValidationUtility
 
 
 class TestValidationUtility:

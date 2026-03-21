@@ -19,7 +19,7 @@ from pydantic import EmailStr, field_validator
 
 from dtos.base import EnhancedBaseModel
 from dtos.requests.abstraction import IRequestDTO
-from utilities.validation import ValidationUtility
+from fastmvc_utilities.validation import ValidationUtility
 
 
 class UserRegistrationRequestDTO(IRequestDTO, EnhancedBaseModel):

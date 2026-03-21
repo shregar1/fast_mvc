@@ -3,7 +3,7 @@ Tests for User model.
 """
 
 from constants.db.table import Table
-from models.user import User
+from fastmvc_db_models.user import User
 
 
 class TestUserModel:

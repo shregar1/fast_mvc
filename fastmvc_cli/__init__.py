@@ -18,7 +18,13 @@ Example:
     $ python -m uvicorn app:app --reload
 """
 
-__version__ = "1.4.0"
+from importlib.metadata import PackageNotFoundError, version
+
+try:
+    __version__ = version("pyfastmvc")
+except PackageNotFoundError:
+    __version__ = "1.4.0"
+
 __author__ = "FastMVC Team"
 __package_name__ = "pyfastmvc"
 

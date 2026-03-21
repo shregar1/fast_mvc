@@ -34,7 +34,7 @@ The `utilities` module provides helper classes and functions for common operatio
 Operations for dictionary manipulation and key transformation.
 
 ```python
-from utilities.dictionary import DictionaryUtility
+from fastmvc_utilities.dictionary import DictionaryUtility
 
 util = DictionaryUtility(urn="urn:req:123", ...)
 
@@ -77,7 +77,7 @@ cleaned = util.remove_keys_from_dict(data, ["password", "token"])
 JWT token creation and validation.
 
 ```python
-from utilities.jwt import JWTUtility
+from fastmvc_utilities.jwt import JWTUtility
 
 jwt_util = JWTUtility(urn="urn:req:123", ...)
 
@@ -110,7 +110,7 @@ payload = jwt_util.decode_token(token)
 Input validation and sanitization.
 
 ```python
-from utilities.validation import ValidationUtility, SecurityValidators
+from fastmvc_utilities.validation import ValidationUtility, SecurityValidators
 
 # Password validation
 result = ValidationUtility.validate_password_strength("MyP@ss123")
@@ -241,7 +241,7 @@ utilities/
 Utilities are typically injected via dependency factories:
 
 ```python
-from dependencies.utilities.dictionary import DictionaryUtilityDependency
+from dependencies.fastmvc_utilities.dictionary import DictionaryUtilityDependency
 from dependencies.utilities.jwt import JWTUtilityDependency
 
 class MyController:

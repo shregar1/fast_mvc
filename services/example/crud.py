@@ -13,13 +13,10 @@ from constants.api_status import APIStatus
 from dtos.requests.product.create import ProductCreateRequestDTO
 from dtos.requests.product.update import ProductUpdateRequestDTO
 from dtos.responses.base import BaseResponseDTO
-from errors.not_found_error import NotFoundError
-from models.product import Product
-from repositories.product import ProductRepository
-from services.product.abstraction import IProductService
+from services.example.abstraction import IExampleService
 
 
-class ProductCRUDService(IProductService):
+class ExampleCrudService(IExampleService):
     """
     Service for Product CRUD operations.
 

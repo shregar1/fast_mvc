@@ -8,10 +8,10 @@ import pytest
 
 from dtos.requests.product.create import ProductCreateRequestDTO
 from dtos.requests.product.update import ProductUpdateRequestDTO
-from errors.not_found_error import NotFoundError
-from models.product import Product
-from services.product.abstraction import IProductService
-from services.product.crud import ProductCRUDService
+from fastmvc_errors.not_found_error import NotFoundError
+from fastmvc_db_models.product import Product
+from services.example.abstraction import IProductService
+from services.example.crud import ProductCRUDService
 
 
 class TestProductCRUDServiceInit:

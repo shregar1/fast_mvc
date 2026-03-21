@@ -20,7 +20,7 @@ from typing import Any
 from pydantic import BaseModel, validator
 
 from start_utils import logger
-from utilities.validation import SecurityValidators, ValidationUtility
+from fastmvc_utilities.validation import SecurityValidators, ValidationUtility
 
 
 class EnhancedBaseModel(BaseModel):

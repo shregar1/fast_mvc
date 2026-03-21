@@ -91,6 +91,7 @@ dependencies = [
     "fastmvc_db",
     "fastmvc_payments",
     "fastmvc_identity",
+    "fastmvc_queues>=0.1.0",
 ]
 
 [project.optional-dependencies]
@@ -177,8 +178,8 @@ packages = [
     "models",
     "repositories",
     "services",
-    "services.apis",
-    "services.apis.v1",
+    "services.events",
+    "services.streams",
     "services.user",
     "services.product",
     "tests",
