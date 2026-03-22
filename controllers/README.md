@@ -40,7 +40,7 @@ In the MVC (Model-View-Controller) pattern, **controllers** are responsible for:
               ▼                               ▼
 ┌─────────────────────────┐     ┌─────────────────────────────┐
 │        Services         │     │      Dependencies           │
-│   (Business Logic)      │     │  (DB, Utils, Repos)         │
+│   (Business Logic)      │     │  (DB, Utility, Repos)         │
 └─────────────────────────┘     └─────────────────────────────┘
 ```
 

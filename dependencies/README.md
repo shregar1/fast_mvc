@@ -31,7 +31,7 @@ The `dependencies` module provides FastAPI dependency injection components for t
               ▼                               ▼
 ┌─────────────────────────┐     ┌─────────────────────────────┐
 │   Shared Instances      │     │   Factory Functions         │
-│   (DB, Cache sessions)  │     │   (Services, Repos, Utils)  │
+│   (DB, Cache sessions)  │     │   (Services, Repos, Utility)  │
 └─────────────────────────┘     └─────────────────────────────┘
 ```
 
