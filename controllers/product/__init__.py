@@ -27,7 +27,7 @@ from dtos.requests.product.create import ProductCreateRequestDTO
 from dtos.requests.product.update import ProductUpdateRequestDTO
 from fast_errors.bad_input_error import BadInputError
 from fast_errors.not_found_error import NotFoundError
-from fast_database.repositories.product import ProductRepository
+from fast_database.persistence.repositories.product import ProductRepository
 from services.example.crud import ProductCRUDService
 from fast_utilities.dictionary import DictionaryUtility
 

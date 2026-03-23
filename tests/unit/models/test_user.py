@@ -3,7 +3,7 @@ Tests for User model.
 """
 
 from constants.db.table import Table
-from fast_database.models.user import User
+from fast_database.persistence.models.user import User
 
 
 class TestUserModel:

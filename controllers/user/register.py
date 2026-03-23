@@ -47,7 +47,7 @@ from dtos.responses.base import BaseResponseDTO
 from fast_errors.bad_input_error import BadInputError
 from fast_errors.not_found_error import NotFoundError
 from fast_errors.unexpected_response_error import UnexpectedResponseError
-from fast_database.repositories.user import UserRepository
+from fast_database.persistence.repositories.user import UserRepository
 from fast_utilities.dictionary import DictionaryUtility
 
 

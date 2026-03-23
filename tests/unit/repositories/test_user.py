@@ -6,8 +6,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from fast_database.models.user import User
-from fast_database.repositories.user import UserRepository
+from fast_database.persistence.models.user import User
+from fast_database.persistence.repositories.user import UserRepository
 
 
 class TestUserRepository:

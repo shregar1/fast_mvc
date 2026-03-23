@@ -528,7 +528,7 @@ from dtos.responses.base import BaseResponseDTO
 from fast_errors.not_found_error import NotFoundError
 from fast_errors.bad_input_error import BadInputError
 from models.{self.entity_snake} import {self.entity_name}
-from fast_database.repositories.{self.entity_snake} import {self.entity_name}Repository
+from fast_database.persistence.repositories.{self.entity_snake} import {self.entity_name}Repository
 from services.{self.entity_snake}.abstraction import I{self.entity_name}Service
 
 
@@ -782,7 +782,7 @@ from dtos.requests.{self.entity_snake}.create import {self.entity_name}CreateReq
 from dtos.requests.{self.entity_snake}.update import {self.entity_name}UpdateRequestDTO
 from fast_errors.not_found_error import NotFoundError
 from fast_errors.bad_input_error import BadInputError
-from fast_database.repositories.{self.entity_snake} import {self.entity_name}Repository
+from fast_database.persistence.repositories.{self.entity_snake} import {self.entity_name}Repository
 from services.{self.entity_snake}.crud import {self.entity_name}CRUDService
 from fast_utilities.dictionary import DictionaryUtility
 
@@ -1136,7 +1136,7 @@ Provides dependency injection for {self.entity_name}Repository.
 from sqlalchemy.orm import Session
 
 from abstractions.dependency import IDependency
-from fast_database.repositories.{self.entity_snake} import {self.entity_name}Repository
+from fast_database.persistence.repositories.{self.entity_snake} import {self.entity_name}Repository
 
 
 class {self.entity_name}RepositoryDependency(IDependency):

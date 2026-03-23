@@ -9,7 +9,7 @@ import pytest
 from dtos.requests.product.create import ProductCreateRequestDTO
 from dtos.requests.product.update import ProductUpdateRequestDTO
 from fast_errors.not_found_error import NotFoundError
-from fast_database.models.product import Product
+from fast_database.persistence.models.product import Product
 from services.example.abstraction import IProductService
 from services.example.crud import ProductCRUDService
 

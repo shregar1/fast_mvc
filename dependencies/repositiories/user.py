@@ -18,7 +18,7 @@ Usage:
 
 from collections.abc import Callable
 
-from fast_database.repositories.user import UserRepository
+from fast_database.persistence.repositories.user import UserRepository
 from start_utils import logger
 
 

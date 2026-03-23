@@ -11,7 +11,7 @@ from fastapi.responses import JSONResponse
 from constants.api_status import APIStatus
 from dtos.responses.base import BaseResponseDTO
 from fast_middleware import ErrorKind, JWTBearerAuthMiddleware
-from fast_database.repositories.user import UserRepository
+from fast_database.persistence.repositories.user import UserRepository
 from start_utils import callback_routes, db_session, logger, unprotected_routes
 from fast_utilities.jwt import JWTUtility
 
