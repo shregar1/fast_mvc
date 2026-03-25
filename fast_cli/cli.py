@@ -14,6 +14,13 @@ Commands:
     lint: Ruff and optional mypy
     run: pre_run hooks then uvicorn
     info: Framework overview and CLI summary
+    logs: Tail and filter application logs
+    config: View and validate configuration
+    shell: Interactive shell with app context
+    test: Run tests with coverage
+    db: Database operations (seed, reset, stats)
+    middleware: List and manage middlewares
+    openapi: Export OpenAPI specification
 
 Example:
     $ fastmvc generate my_api
@@ -26,6 +33,10 @@ Example:
     $ fastmvc lint
     $ fastmvc run
     $ fastmvc info
+    $ fastmvc logs --follow
+    $ fastmvc config show
+    $ fastmvc shell
+    $ fastmvc test --coverage
 """
 
 import os
@@ -42,11 +53,15 @@ import click
 
 from fast_cli import __version__
 from fast_cli.alembic_utils import find_alembic_ini, run_alembic
+from fast_cli.config_cmd import diff_config, show_config, validate_config
+from fast_cli.db_cmd import db_drop, db_reset, db_seed, db_stats
 from fast_cli.doctor import export_openapi_json, run_doctor
 from fast_cli.entity_generator import EntityGenerator
 from fast_cli.generator import ProjectGenerator
 from fast_cli.hooks import run_post_generate, run_pre_run
 from fast_cli.init_ci import run_init_ci
+from fast_cli.logs import show_log_stats, tail_logs
+from fast_cli.middleware_cmd import add_middleware, list_middlewares, remove_middleware
 from fast_cli.presets import apply_template_pack
 from fast_cli.project_checks import require_fast_project_root
 from fast_cli.scaffold_helpers import (
@@ -57,6 +72,8 @@ from fast_cli.scaffold_helpers import (
     write_precommit,
     write_pyproject,
 )
+from fast_cli.shell_cmd import start_shell
+from fast_cli.test_cmd import run_tests, show_test_info
 
 
 @click.group()
@@ -1564,6 +1581,13 @@ def info():
     click.echo("  fastmvc doctor [--check-db]      → Env / deps / optional DB check")
     click.echo("  fastmvc migrate generate <msg>   → Alembic revision")
     click.echo("  fastmvc migrate upgrade|downgrade|status|history")
+    click.echo("  fastmvc logs [--follow]          → Tail and filter application logs")
+    click.echo("  fastmvc config show|validate|diff→ View and validate configuration")
+    click.echo("  fastmvc shell                    → Interactive shell with app context")
+    click.echo("  fastmvc test [--coverage]        → Run tests with coverage")
+    click.echo("  fastmvc db seed|reset|stats      → Database operations")
+    click.echo("  fastmvc middleware list|add|remove→ Manage middlewares")
+    click.echo("  fastmvc openapi export           → Export OpenAPI specification")
     click.echo("  fastmvc version [--check-pypi]   → Version / optional PyPI latest")
     click.echo("  fastmvc lint [--no-mypy]         → Ruff (+ mypy if configured)")
     click.echo("  fastmvc run                      → pre_run hooks + uvicorn")
@@ -1680,6 +1704,601 @@ def doctor_cli(project_dir: Path | None, check_db: bool, no_dotenv: bool):
             load_dotenv_file=not no_dotenv,
         )
     )
+
+
+# ============================================================================
+# LOGS COMMAND GROUP
+# ============================================================================
+
+@cli.group()
+def logs():
+    """
+    View and filter application logs.
+
+    \b
+    Examples:
+        $ fastmvc logs                    # Show last 50 log lines
+        $ fastmvc logs --follow           # Tail logs in real-time
+        $ fastmvc logs --level ERROR      # Show only ERROR level
+        $ fastmvc logs --since 1h         # Show logs from last hour
+        $ fastmvc logs --search "error"   # Search for pattern
+        $ fastmvc logs stats              # Show log file statistics
+    """
+    pass
+
+
+@logs.command("tail")
+@click.option(
+    "--log-dir",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=Path),
+    default=None,
+    help="Log directory (default: ./logs or current directory)",
+)
+@click.option(
+    "--file-pattern",
+    default=None,
+    help="Filter log files by pattern regex",
+)
+@click.option(
+    "--level",
+    type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], case_sensitive=False),
+    default=None,
+    help="Filter by log level",
+)
+@click.option(
+    "--service",
+    default=None,
+    help="Filter by service/logger name",
+)
+@click.option(
+    "--search",
+    default=None,
+    help="Search for pattern in log messages",
+)
+@click.option(
+    "--since",
+    default=None,
+    help="Show logs since time (e.g., 1h, 30m, 1d, or ISO timestamp)",
+)
+@click.option(
+    "--follow", "-f",
+    is_flag=True,
+    help="Follow log output (tail -f style)",
+)
+@click.option(
+    "--lines", "-n",
+    default=50,
+    help="Number of lines to show (default: 50)",
+)
+@click.option(
+    "--json-output",
+    is_flag=True,
+    help="Output raw JSON log entries",
+)
+@click.option(
+    "--compact",
+    is_flag=True,
+    help="Compact output format",
+)
+def logs_tail(
+    log_dir: Path | None,
+    file_pattern: str | None,
+    level: str | None,
+    service: str | None,
+    search: str | None,
+    since: str | None,
+    follow: bool,
+    lines: int,
+    json_output: bool,
+    compact: bool,
+):
+    """Tail and filter application logs."""
+    sys.exit(
+        tail_logs(
+            log_dir=log_dir,
+            file_pattern=file_pattern,
+            level=level,
+            service=service,
+            search=search,
+            since=since,
+            follow=follow,
+            lines=lines,
+            json_output=json_output,
+            compact=compact,
+        )
+    )
+
+
+@logs.command("stats")
+@click.option(
+    "--log-dir",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=Path),
+    default=None,
+    help="Log directory (default: ./logs)",
+)
+def logs_stats(log_dir: Path | None):
+    """Show log file statistics."""
+    sys.exit(show_log_stats(log_dir))
+
+
+# ============================================================================
+# CONFIG COMMAND GROUP
+# ============================================================================
+
+@cli.group()
+def config():
+    """
+    View and validate application configuration.
+
+    \b
+    Examples:
+        $ fastmvc config show              # Display all config
+        $ fastmvc config show --json       # Output as JSON
+        $ fastmvc config validate          # Check for issues
+        $ fastmvc config diff              # Compare .env with .env.example
+        $ fastmvc config show --filter DB  # Filter by key
+    """
+    pass
+
+
+@config.command("show")
+@click.option(
+    "--env",
+    default=None,
+    help="Environment name (dev, staging, prod)",
+)
+@click.option(
+    "--format",
+    type=click.Choice(["table", "json", "yaml"], case_sensitive=False),
+    default="table",
+    help="Output format",
+)
+@click.option(
+    "--show-secrets",
+    is_flag=True,
+    help="Show actual secret values (use with caution)",
+)
+@click.option(
+    "--filter",
+    "filter_key",
+    default=None,
+    help="Filter by key substring",
+)
+@click.option(
+    "--project-dir",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=Path),
+    default=Path.cwd(),
+    help="Project directory",
+)
+def config_show(
+    env: str | None,
+    format: str,
+    show_secrets: bool,
+    filter_key: str | None,
+    project_dir: Path,
+):
+    """Display application configuration."""
+    sys.exit(
+        show_config(
+            project_dir=project_dir,
+            env=env,
+            format=format,
+            show_secrets=show_secrets,
+            filter_key=filter_key,
+        )
+    )
+
+
+@config.command("validate")
+@click.option(
+    "--project-dir",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=Path),
+    default=Path.cwd(),
+    help="Project directory",
+)
+def config_validate(project_dir: Path):
+    """Validate configuration and check for common issues."""
+    sys.exit(validate_config(project_dir))
+
+
+@config.command("diff")
+@click.option(
+    "--project-dir",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=Path),
+    default=Path.cwd(),
+    help="Project directory",
+)
+def config_diff(project_dir: Path):
+    """Compare .env with .env.example and show differences."""
+    sys.exit(diff_config(project_dir))
+
+
+# ============================================================================
+# SHELL COMMAND
+# ============================================================================
+
+@cli.command()
+@click.option(
+    "--shell-type",
+    type=click.Choice(["ipython", "bpython", "ptpython", "python", "auto"], case_sensitive=False),
+    default="auto",
+    help="Type of shell to start",
+)
+@click.option(
+    "--no-banner",
+    is_flag=True,
+    help="Suppress the welcome banner",
+)
+@click.option(
+    "--project-dir",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=Path),
+    default=Path.cwd(),
+    help="Project directory",
+)
+def shell(shell_type: str, no_banner: bool, project_dir: Path):
+    """
+    Start an interactive shell with the application context loaded.
+
+    Provides access to app, db, models, and settings variables for debugging.
+
+    \b
+    Examples:
+        $ fastmvc shell              # Start interactive shell
+        $ fastmvc shell --ipython    # Use IPython if available
+        $ fastmvc shell --no-banner  # Start without banner
+    """
+    sys.exit(
+        start_shell(
+            project_dir=project_dir,
+            shell_type=shell_type,
+            no_banner=no_banner,
+        )
+    )
+
+
+# ============================================================================
+# TEST COMMAND GROUP
+# ============================================================================
+
+@cli.group()
+def test():
+    """
+    Run tests with coverage and reporting.
+
+    \b
+    Examples:
+        $ fastmvc test                     # Run all tests
+        $ fastmvc test --coverage          # Run with coverage
+        $ fastmvc test --coverage-html     # Generate HTML report
+        $ fastmvc test -k test_user        # Run matching tests
+        $ fastmvc test --watch             # Watch for changes
+        $ fastmvc test info                # Show test environment
+    """
+    pass
+
+
+@test.command("run")
+@click.argument("paths", nargs=-1, required=False)
+@click.option(
+    "-k", "pattern",
+    default=None,
+    help="Run tests matching pattern",
+)
+@click.option(
+    "-v", "--verbose",
+    is_flag=True,
+    help="Verbose output",
+)
+@click.option(
+    "--coverage",
+    is_flag=True,
+    help="Enable coverage reporting",
+)
+@click.option(
+    "--coverage-html",
+    is_flag=True,
+    help="Generate HTML coverage report",
+)
+@click.option(
+    "--coverage-xml",
+    is_flag=True,
+    help="Generate XML coverage report",
+)
+@click.option(
+    "-x", "--failfast",
+    is_flag=True,
+    help="Stop on first failure",
+)
+@click.option(
+    "-m", "--markers",
+    multiple=True,
+    help="Pytest markers to filter by",
+)
+@click.option(
+    "-n", "--parallel",
+    is_flag=True,
+    help="Run tests in parallel (requires pytest-xdist)",
+)
+@click.option(
+    "--watch",
+    is_flag=True,
+    help="Watch for changes and re-run",
+)
+@click.option(
+    "--maxfail",
+    type=int,
+    default=None,
+    help="Stop after N failures",
+)
+@click.option(
+    "--project-dir",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=Path),
+    default=Path.cwd(),
+    help="Project directory",
+)
+def test_run(
+    paths: tuple[str, ...],
+    pattern: str | None,
+    verbose: bool,
+    coverage: bool,
+    coverage_html: bool,
+    coverage_xml: bool,
+    failfast: bool,
+    markers: tuple[str, ...],
+    parallel: bool,
+    watch: bool,
+    maxfail: int | None,
+    project_dir: Path,
+):
+    """Run tests with pytest."""
+    sys.exit(
+        run_tests(
+            project_dir=project_dir,
+            paths=list(paths) if paths else None,
+            pattern=pattern,
+            verbose=verbose,
+            coverage=coverage,
+            coverage_html=coverage_html,
+            coverage_xml=coverage_xml,
+            failfast=failfast,
+            markers=list(markers) if markers else None,
+            parallel=parallel,
+            watch=watch,
+            maxfail=maxfail,
+        )
+    )
+
+
+@test.command("info")
+@click.option(
+    "--project-dir",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=Path),
+    default=Path.cwd(),
+    help="Project directory",
+)
+def test_info(project_dir: Path):
+    """Show test environment information."""
+    sys.exit(show_test_info(project_dir))
+
+
+# ============================================================================
+# DB COMMAND GROUP
+# ============================================================================
+
+@cli.group()
+def db():
+    """
+    Database operations (seed, reset, stats).
+
+    \b
+    Examples:
+        $ fastmvc db seed                  # Run database seeders
+        $ fastmvc db reset                 # Reset database (drop & recreate)
+        $ fastmvc db drop                  # Drop all tables
+        $ fastmvc db stats                 # Show database statistics
+    """
+    pass
+
+
+@db.command("seed")
+@click.option(
+    "--seeder",
+    default=None,
+    help="Specific seeder to run",
+)
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="Show what would be done without executing",
+)
+@click.option(
+    "--project-dir",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=Path),
+    default=Path.cwd(),
+    help="Project directory",
+)
+def db_seed_cmd(seeder: str | None, dry_run: bool, project_dir: Path):
+    """Seed the database with initial data."""
+    sys.exit(db_seed(project_dir, seeder, dry_run))
+
+
+@db.command("reset")
+@click.option(
+    "--force",
+    is_flag=True,
+    help="Skip confirmation prompt",
+)
+@click.option(
+    "--project-dir",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=Path),
+    default=Path.cwd(),
+    help="Project directory",
+)
+def db_reset_cmd(force: bool, project_dir: Path):
+    """
+    Reset database (drop all tables and recreate).
+
+    WARNING: This will DELETE ALL DATA!
+    """
+    sys.exit(db_reset(project_dir, force))
+
+
+@db.command("drop")
+@click.option(
+    "--force",
+    is_flag=True,
+    help="Skip confirmation prompt",
+)
+@click.option(
+    "--project-dir",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=Path),
+    default=Path.cwd(),
+    help="Project directory",
+)
+def db_drop_cmd(force: bool, project_dir: Path):
+    """
+    Drop all database tables.
+
+    WARNING: This will DELETE ALL DATA!
+    """
+    sys.exit(db_drop(project_dir, force))
+
+
+@db.command("stats")
+@click.option(
+    "--project-dir",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=Path),
+    default=Path.cwd(),
+    help="Project directory",
+)
+def db_stats_cmd(project_dir: Path):
+    """Show database statistics."""
+    sys.exit(db_stats(project_dir))
+
+
+# ============================================================================
+# MIDDLEWARE COMMAND GROUP
+# ============================================================================
+
+@cli.group()
+def middleware():
+    """
+    List, enable, and disable middlewares.
+
+    \b
+    Examples:
+        $ fastmvc middleware list            # List configured middlewares
+        $ fastmvc middleware list --all      # Show all available middlewares
+        $ fastmvc middleware add CORS        # Add a middleware
+        $ fastmvc middleware remove RateLimit  # Remove/disable a middleware
+    """
+    pass
+
+
+@middleware.command("list")
+@click.option(
+    "--show-all",
+    is_flag=True,
+    help="Show all available middlewares (not just configured)",
+)
+@click.option(
+    "--category",
+    type=click.Choice(["core", "security", "auth", "observability", "performance", "reliability"], case_sensitive=False),
+    default=None,
+    help="Filter by category",
+)
+@click.option(
+    "--project-dir",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=Path),
+    default=Path.cwd(),
+    help="Project directory",
+)
+def middleware_list(show_all: bool, category: str | None, project_dir: Path):
+    """List middlewares and their status."""
+    sys.exit(list_middlewares(project_dir, show_all, category))
+
+
+@middleware.command("add")
+@click.argument("middleware_name")
+@click.option(
+    "--project-dir",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=Path),
+    default=Path.cwd(),
+    help="Project directory",
+)
+def middleware_add(middleware_name: str, project_dir: Path):
+    """Add a middleware to the application."""
+    sys.exit(add_middleware(project_dir, middleware_name))
+
+
+@middleware.command("remove")
+@click.argument("middleware_name")
+@click.option(
+    "--project-dir",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=Path),
+    default=Path.cwd(),
+    help="Project directory",
+)
+def middleware_remove(middleware_name: str, project_dir: Path):
+    """Remove/disable a middleware from the application."""
+    sys.exit(remove_middleware(project_dir, middleware_name))
+
+
+# ============================================================================
+# OPENAPI COMMAND GROUP
+# ============================================================================
+
+@cli.group()
+def openapi():
+    """
+    Export and manage OpenAPI specification.
+
+    \b
+    Examples:
+        $ fastmvc openapi export             # Export to openapi.json
+        $ fastmvc openapi export --yaml      # Export to openapi.yaml
+        $ fastmvc openapi export --pretty    # Pretty-printed JSON
+    """
+    pass
+
+
+@openapi.command("export")
+@click.option(
+    "--output", "-o",
+    default="openapi.json",
+    help="Output filename (default: openapi.json)",
+)
+@click.option(
+    "--yaml",
+    "as_yaml",
+    is_flag=True,
+    help="Export as YAML instead of JSON",
+)
+@click.option(
+    "--pretty/--no-pretty",
+    default=True,
+    help="Pretty-print the output",
+)
+@click.option(
+    "--project-dir",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=Path),
+    default=Path.cwd(),
+    help="Project directory",
+)
+def openapi_export(
+    output: str,
+    as_yaml: bool,
+    pretty: bool,
+    project_dir: Path,
+):
+    """Export OpenAPI specification to a file."""
+    ok, msg = export_openapi_json(project_dir, output)
+    if ok:
+        click.secho(f"✓ OpenAPI schema exported: {msg}", fg="green")
+        sys.exit(0)
+    else:
+        click.secho(f"✗ Export failed: {msg}", fg="red")
+        sys.exit(1)
 
 
 def main():
