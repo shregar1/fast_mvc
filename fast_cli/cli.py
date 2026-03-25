@@ -58,6 +58,7 @@ from fast_cli.db_cmd import db_drop, db_reset, db_seed, db_stats
 from fast_cli.doctor import export_openapi_json, run_doctor
 from fast_cli.entity_generator import EntityGenerator
 from fast_cli.generator import ProjectGenerator
+from fast_cli.resource_generator import ResourceGenerator, ResourceConfig, ResourceField
 from fast_cli.hooks import run_post_generate, run_pre_run
 from fast_cli.init_ci import run_init_ci
 from fast_cli.logs import show_log_stats, tail_logs
@@ -1127,6 +1128,180 @@ SERVICE_SPECS: dict[str, dict] = {
         "requirements": ["sendgrid>=6.11.0,<7.0.0"],
     },
 }
+
+
+@add.command("resource")
+@click.argument("resource_name")
+@click.option(
+    "--fields", "-f",
+    multiple=True,
+    help="Field definitions (name:type, e.g., name:str, age:int)"
+)
+@click.option(
+    "--crud/--no-crud",
+    default=True,
+    help="Generate full CRUD operations"
+)
+@click.option(
+    "--auth/--no-auth",
+    default=True,
+    help="Add authentication to endpoints"
+)
+@click.option(
+    "--cache/--no-cache",
+    default=True,
+    help="Add smart caching to repository"
+)
+@click.option(
+    "--tracing/--no-tracing",
+    default=True,
+    help="Add distributed tracing"
+)
+@click.option(
+    "--encryption/--no-encryption",
+    default=False,
+    help="Add field-level encryption support"
+)
+@click.option(
+    "--ws/--no-ws",
+    default=False,
+    help="Add WebSocket support"
+)
+@click.option(
+    "--graphql/--no-graphql",
+    default=False,
+    help="Add GraphQL support"
+)
+@click.option(
+    "--tests/--no-tests",
+    default=True,
+    help="Generate test files"
+)
+@click.option(
+    "--soft-delete/--no-soft-delete",
+    default=True,
+    help="Add soft delete support"
+)
+@click.option(
+    "--audit/--no-audit",
+    default=True,
+    help="Add audit logging"
+)
+@click.option(
+    "--rate-limit/--no-rate-limit",
+    default=True,
+    help="Add rate limiting to endpoints"
+)
+def add_resource(
+    resource_name: str,
+    fields: tuple[str, ...],
+    crud: bool,
+    auth: bool,
+    cache: bool,
+    tracing: bool,
+    encryption: bool,
+    ws: bool,
+    graphql: bool,
+    tests: bool,
+    soft_delete: bool,
+    audit: bool,
+    rate_limit: bool,
+):
+    """
+    Generate a complete resource with production-grade features.
+    
+    Creates model, repository (with caching), service (with tracing),
+    controller (with auth), DTOs, and tests.
+    
+    \b
+    Examples:
+        $ fastmvc add resource Product
+        $ fastmvc add resource Order --fields "total:float" "status:str"
+        $ fastmvc add resource User --encryption --auth
+        $ fastmvc add resource Message --ws --tracing
+    """
+    click.echo()
+    click.secho(f"→ Generating resource: {resource_name}", fg="blue", bold=True)
+    click.echo()
+    
+    # Validate resource name
+    if not resource_name[0].isupper():
+        click.secho(
+            f"⚠ Resource name should be in PascalCase (e.g., Product, not {resource_name})",
+            fg="yellow"
+        )
+        resource_name = resource_name[0].upper() + resource_name[1:]
+        click.secho(f"  Using: {resource_name}", fg="white")
+    
+    project_path = require_fast_project_root()
+    
+    # Parse fields
+    resource_fields = []
+    if fields:
+        for field_str in fields:
+            parts = field_str.split(":")
+            if len(parts) == 2:
+                field_name, field_type = parts
+                resource_fields.append(ResourceField(
+                    name=field_name,
+                    type=field_type,
+                ))
+    
+    # Default fields if none provided
+    if not resource_fields:
+        resource_fields = [
+            ResourceField(name="name", type="str", required=True),
+        ]
+    
+    try:
+        # Create config
+        config = ResourceConfig(
+            name=resource_name,
+            fields=resource_fields,
+            enable_crud=crud,
+            enable_auth=auth,
+            enable_cache=cache,
+            enable_tracing=tracing,
+            enable_encryption=encryption,
+            enable_ws=ws,
+            enable_graphql=graphql,
+            enable_tests=tests,
+            enable_soft_delete=soft_delete,
+            enable_audit=audit,
+            enable_rate_limit=rate_limit,
+        )
+        
+        # Generate resource
+        generator = ResourceGenerator(project_path)
+        created_files = generator.generate(config)
+        
+        click.echo()
+        click.secho("✓ Resource generated successfully!", fg="green", bold=True)
+        click.echo()
+        click.secho("Generated files:", fg="yellow", bold=True)
+        for file_path in created_files:
+            rel_path = file_path.relative_to(project_path)
+            click.secho(f"  ✓ {rel_path}", fg="green")
+        
+        click.echo()
+        click.secho("Next steps:", fg="yellow", bold=True)
+        click.echo("  1. Review and customize the generated files")
+        click.echo("  2. Add the router to your app.py")
+        click.echo("  3. Generate migration: fastmvc migrate generate")
+        click.echo("  4. Apply migration: fastmvc migrate upgrade")
+        click.echo()
+        
+        if encryption:
+            click.secho("⚠ Encryption enabled:", fg="yellow")
+            click.echo("  - Set FASTMVC_ENCRYPTION_KEY in your .env")
+            click.echo("  - Use: export FASTMVC_ENCRYPTION_KEY=$(python -c \"import base64; print(base64.urlsafe_b64encode(__import__('os').urandom(32)).decode())\")")
+            click.echo()
+        
+    except Exception as e:
+        click.secho(f"✗ Error generating resource: {e}", fg="red")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
 
 
 @add.command("service")
