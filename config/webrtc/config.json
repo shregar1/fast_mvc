@@ -1,7 +1,0 @@
-{
-  "enabled": false,
-  "stun_servers": [],
-  "turn_servers": [],
-  "max_peers_per_room": 8
-}
-

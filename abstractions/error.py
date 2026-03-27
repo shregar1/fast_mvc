@@ -14,6 +14,9 @@ Example:
 """
 
 from typing import Any
+
+from loguru import logger
+
 from core.utils.context import ContextMixin
 
 
@@ -65,10 +68,15 @@ class IError(Exception, ContextMixin):
             user_id (str, optional): Database ID of the user. Defaults to None.
             **kwargs: Additional arguments for parent classes.
         """
-        super().__init__(
+        # Initialize Exception without arguments
+        super(Exception, self).__init__()
+        # Initialize ContextMixin with the context parameters and default logger
+        ContextMixin.__init__(
+            self,
             urn=urn,
             user_urn=user_urn,
             api_name=api_name,
             user_id=user_id,
-            **kwargs,
+            logger=logger,
+            **kwargs
         )

@@ -19,10 +19,26 @@ Environment Variables:
     RATE_LIMIT_BURST_LIMIT: Maximum burst requests
 
 Endpoints:
-    GET /health - Health check endpoint
+    GET /health - Comprehensive health check with dependency status
+    GET /health/live - Kubernetes liveness probe (lightweight)
+    GET /health/ready - Kubernetes readiness probe (dependency checks)
     POST /user/login - User authentication
     POST /user/register - New user registration
     POST /user/logout - Session termination
+    
+Example API (if example module is available):
+    GET    /items          - List all items
+    POST   /items          - Create new item
+    GET    /items/{id}     - Get item by ID
+    PATCH  /items/{id}     - Update item
+    DELETE /items/{id}     - Delete item
+    POST   /items/{id}/complete   - Mark as completed
+    POST   /items/{id}/uncomplete - Mark as pending
+    POST   /items/{id}/toggle     - Toggle status
+    GET    /items/search   - Search items
+    GET    /items/completed - List completed items
+    GET    /items/pending  - List pending items
+    GET    /items/statistics - Get item statistics
 """
 
 import os
@@ -43,16 +59,37 @@ from fastmiddleware import (
     RequestContextMiddleware,
     SecurityHeadersConfig,
     SecurityHeadersMiddleware,
-    TimingMiddleware,
+    ResponseTimingMiddleware,
     TrustedHostMiddleware,
 )
 from loguru import logger
 
 from constants.api_status import APIStatus
 from constants.default import Default
-from controllers.user import router as UserRouter
-from core.websockets.router import router as WebSocketRouter
-from core.observability import configure_datadog, configure_otel
+# Optional example controllers (can be removed for minimal core)
+try:
+    from controllers.user import router as UserRouter
+except ImportError:
+    UserRouter = None  # type: ignore
+
+# Optional example API (Item CRUD demonstration)
+try:
+    from example.controllers.item_controller import router as ExampleItemRouter
+except ImportError:
+    ExampleItemRouter = None  # type: ignore
+
+# Optional WebSocket router (requires fast_channels)
+try:
+    from core.websockets.router import router as WebSocketRouter
+except ImportError:
+    WebSocketRouter = None  # type: ignore
+
+# Optional observability (requires fast-platform)
+try:
+    from fast_platform.observability import configure_datadog, configure_otel
+except ImportError:
+    configure_datadog = None  # type: ignore
+    configure_otel = None  # type: ignore
 
 # Optional routers (require corresponding fast_* packages)
 try:
@@ -68,18 +105,37 @@ try:
 except ImportError:
     NotificationsRouter = None  # type: ignore[assignment]
 try:
-    from controllers.webrtc import router as WebRTCRouter
+    from apis import router as MainApiRouter
 except ImportError:
-    WebRTCRouter = None  # type: ignore[assignment]
+    MainApiRouter = None
 
 # Flags for optional routers (used by tests and docs)
 DASHBOARD_ROUTER_ENABLED = DashboardRouter is not None
 
 from dtos.responses.base import BaseResponseDTO
-from fast_errors.unexpected_response_error import UnexpectedResponseError
+
+# Domain errors (requires pyfastmvc[platform])
+try:
+    from fast_platform.errors import (
+        BadInputError, ConflictError, ForbiddenError, NotFoundError,
+        RateLimitError, ServiceUnavailableError, UnauthorizedError, UnexpectedResponseError
+    )
+    HAS_PLATFORM_ERRORS = True
+except ImportError:
+    HAS_PLATFORM_ERRORS = False
 
 # Custom authentication middleware (app-specific with user repository)
 from middlewares import AuthenticationMiddleware
+
+# Configuration validation - fail fast on misconfig
+# Set VALIDATE_CONFIG=false to skip validation
+try:
+    if os.getenv("VALIDATE_CONFIG", "true").lower() not in ("false", "0", "no", "off"):
+        from config.validator import validate_config_or_exit
+        validate_config_or_exit()
+except ImportError:
+    # Config validator is optional
+    pass
 
 
 def _get_int_env(name: str, default: int) -> int:
@@ -96,15 +152,23 @@ def _get_int_env(name: str, default: int) -> int:
         return default
 
 
-app = FastAPI()
 # Initialize FastAPI application
 app = FastAPI(
     title="FastMVC API",
-    description="Production-grade FastAPI application with MVC architecture",
+    description="Production-grade FastAPI application with MVC architecture. Includes example Item API at /items",
     version="1.0.1",
-    docs_url="/docs",
-    redoc_url="/redoc",
+    docs_url=None,  # Custom docs setup below
+    redoc_url=None,
 )
+
+# Setup custom FastMVC branded documentation
+try:
+    from core.docs import setup_custom_docs
+    setup_custom_docs(app)
+except ImportError:
+    # Fallback to default docs if custom setup fails
+    app.docs_url = "/docs"
+    app.redoc_url = "/redoc"
 
 # Load environment variables
 load_dotenv()
@@ -129,11 +193,11 @@ RATE_LIMIT_BURST_LIMIT: int = _get_int_env(
     Default.RATE_LIMIT_BURST_LIMIT,
 )
 
-# Optional Datadog / OpenTelemetry integration
-if os.getenv("DATADOG_ENABLED", "").lower() in {"1", "true", "yes"}:
+# Optional Datadog / OpenTelemetry integration (requires fast-platform)
+if configure_datadog and os.getenv("DATADOG_ENABLED", "").lower() in {"1", "true", "yes"}:
     configure_datadog()
 
-if os.getenv("TELEMETRY_ENABLED", "").lower() in {"1", "true", "yes"}:
+if configure_otel and os.getenv("TELEMETRY_ENABLED", "").lower() in {"1", "true", "yes"}:
     configure_otel(app)
 
 
@@ -177,31 +241,65 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     )
 
 
-@app.exception_handler(UnexpectedResponseError)
-async def unexpected_response_error_handler(
-    request: Request, exc: UnexpectedResponseError
-):
+def _app_error_response(request: Request, exc, log_level: str = "warning") -> JSONResponse:
     """
-    Handle application-specific unexpected response errors with a structured payload.
+    Build a JSONResponse for application error types (Unauthorized, Forbidden, etc.).
     """
     urn = getattr(request.state, "urn", None) or ""
-    logger.error(
-        f"UnexpectedResponseError occurred: {exc.responseMessage} "
-        f"(key={exc.responseKey}, status={exc.httpStatusCode})",
-        urn=urn,
-    )
+    try:
+        getattr(logger, log_level)(
+            f"{exc.__class__.__name__}: {getattr(exc, 'responseMessage', str(exc))} (key={getattr(exc, 'responseKey', 'unknown')})",
+            urn=urn,
+        )
+    except Exception:
+        pass
+    
     response_dto = BaseResponseDTO(
         transactionUrn=urn,
         status=APIStatus.FAILED,
-        responseMessage=exc.responseMessage,
-        responseKey=exc.responseKey,
+        responseMessage=getattr(exc, 'responseMessage', str(exc)),
+        responseKey=getattr(exc, 'responseKey', 'error_unknown'),
         data={},
         errors=None,
     )
     return JSONResponse(
-        status_code=exc.httpStatusCode,
+        status_code=getattr(exc, 'httpStatusCode', HTTPStatus.INTERNAL_SERVER_ERROR),
         content=response_dto.model_dump(),
     )
+
+
+if HAS_PLATFORM_ERRORS:
+    @app.exception_handler(UnexpectedResponseError)
+    async def unexpected_response_error_handler(request: Request, exc: UnexpectedResponseError):
+        return _app_error_response(request, exc, log_level="error")
+
+    @app.exception_handler(BadInputError)
+    async def bad_input_error_handler(request: Request, exc: BadInputError):
+        return _app_error_response(request, exc, log_level="warning")
+
+    @app.exception_handler(NotFoundError)
+    async def not_found_error_handler(request: Request, exc: NotFoundError):
+        return _app_error_response(request, exc, log_level="info")
+
+    @app.exception_handler(UnauthorizedError)
+    async def unauthorized_error_handler(request: Request, exc: UnauthorizedError):
+        return _app_error_response(request, exc, log_level="warning")
+
+    @app.exception_handler(ForbiddenError)
+    async def forbidden_error_handler(request: Request, exc: ForbiddenError):
+        return _app_error_response(request, exc, log_level="warning")
+
+    @app.exception_handler(ConflictError)
+    async def conflict_error_handler(request: Request, exc: ConflictError):
+        return _app_error_response(request, exc, log_level="warning")
+
+    @app.exception_handler(RateLimitError)
+    async def rate_limit_error_handler(request: Request, exc: RateLimitError):
+        return _app_error_response(request, exc, log_level="info")
+
+    @app.exception_handler(ServiceUnavailableError)
+    async def service_unavailable_error_handler(request: Request, exc: ServiceUnavailableError):
+        return _app_error_response(request, exc, log_level="error")
 
 
 @app.exception_handler(Exception)
@@ -227,24 +325,196 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 
-@app.get("/health")
 @app.get("/health", tags=["Health"])
 async def health_check():
     """
-    Health check endpoint.
+    Production health check endpoint with dependency status.
 
-    Used by load balancers, container orchestrators, and monitoring systems
-    to verify the application is running and responsive.
+    Performs comprehensive health checks on:
+    - Application status
+    - Database connectivity (if configured)
+    - Redis cache connectivity (if configured)
+    - Application version
+
+    Used by load balancers, container orchestrators (Kubernetes, Docker Swarm),
+    and monitoring systems to verify application health.
 
     Returns:
-        dict: {"status": "ok"} indicating healthy status.
+        HealthCheckResponse: Status of all system components.
 
     Example:
         >>> curl http://localhost:8000/health
-        {"status": "ok"}
+        {
+            "status": "healthy",
+            "database": "connected",
+            "redis": "connected",
+            "version": "1.5.0",
+            "timestamp": "2024-01-01T00:00:00Z",
+            "uptime_seconds": 3600
+        }
+
+    HTTP Status Codes:
+        200: All systems healthy
+        503: One or more dependencies unhealthy
     """
-    logger.info("Health check endpoint called")
-    return {"status": "ok"}
+    from datetime import datetime, timezone
+    
+    # Import version
+    from __init__ import __version__
+    
+    # Health check results
+    health_status = {
+        "status": "healthy",
+        "version": __version__,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
+    
+    # Check database connectivity
+    db_status: str = "not_configured"
+    try:
+        from start_utils import db_session
+        if db_session is not None:
+            # Try to execute a simple query to verify connectivity
+            if hasattr(db_session, 'execute'):
+                # SQLAlchemy session
+                from sqlalchemy import text
+                db_session.execute(text("SELECT 1"))
+                db_status = "connected"
+            else:
+                db_status = "connected"
+        else:
+            db_status = "not_configured"
+    except Exception as e:
+        db_status = f"disconnected: {str(e)}"
+        health_status["status"] = "unhealthy"
+        logger.error(f"Health check: Database connection failed - {e}")
+    
+    health_status["database"] = db_status
+    
+    # Check Redis connectivity
+    redis_status: str = "not_configured"
+    try:
+        from start_utils import redis_session
+        if redis_session is not None:
+            # Try a ping to verify connectivity
+            if hasattr(redis_session, 'ping'):
+                redis_session.ping()
+                redis_status = "connected"
+            else:
+                redis_status = "connected"
+        else:
+            redis_status = "not_configured"
+    except Exception as e:
+        redis_status = f"disconnected: {str(e)}"
+        health_status["status"] = "unhealthy"
+        logger.error(f"Health check: Redis connection failed - {e}")
+    
+    health_status["redis"] = redis_status
+    
+    # Add uptime if available (requires app start time tracking)
+    if hasattr(app.state, 'start_time'):
+        uptime_seconds = (datetime.now(timezone.utc) - app.state.start_time).total_seconds()
+        health_status["uptime_seconds"] = int(uptime_seconds)
+    
+    # Log health check result
+    logger.info(
+        f"Health check: status={health_status['status']}, "
+        f"database={db_status}, redis={redis_status}"
+    )
+    
+    # Return appropriate HTTP status code
+    status_code = HTTPStatus.OK if health_status["status"] == "healthy" else HTTPStatus.SERVICE_UNAVAILABLE
+    
+    return JSONResponse(
+        status_code=status_code,
+        content=health_status
+    )
+
+
+@app.get("/health/live", tags=["Health"])
+async def liveness_probe():
+    """
+    Kubernetes liveness probe endpoint.
+
+    Lightweight check that indicates the application is running.
+    If this fails, Kubernetes will restart the container.
+
+    Returns:
+        dict: Simple status indicating the application is alive.
+
+    Example:
+        >>> curl http://localhost:8000/health/live
+        {"status": "alive"}
+    """
+    return {"status": "alive"}
+
+
+@app.get("/health/ready", tags=["Health"])
+async def readiness_probe():
+    """
+    Kubernetes readiness probe endpoint.
+
+    Checks if the application is ready to receive traffic.
+    Includes dependency health checks (database, Redis).
+
+    Returns:
+        dict: Readiness status with dependency information.
+
+    Example:
+        >>> curl http://localhost:8000/health/ready
+        {
+            "status": "ready",
+            "checks": {
+                "database": "connected",
+                "redis": "connected"
+            }
+        }
+
+    HTTP Status Codes:
+        200: Application is ready to receive traffic
+        503: Application is not ready (dependencies unavailable)
+    """
+    from datetime import datetime, timezone
+    
+    checks = {}
+    is_ready = True
+    
+    # Check database
+    try:
+        from start_utils import db_session
+        if db_session is not None and hasattr(db_session, 'execute'):
+            from sqlalchemy import text
+            db_session.execute(text("SELECT 1"))
+            checks["database"] = "connected"
+        else:
+            checks["database"] = "not_configured"
+    except Exception as e:
+        checks["database"] = f"disconnected: {str(e)}"
+        is_ready = False
+    
+    # Check Redis
+    try:
+        from start_utils import redis_session
+        if redis_session is not None and hasattr(redis_session, 'ping'):
+            redis_session.ping()
+            checks["redis"] = "connected"
+        else:
+            checks["redis"] = "not_configured"
+    except Exception as e:
+        checks["redis"] = f"disconnected: {str(e)}"
+        is_ready = False
+    
+    status = "ready" if is_ready else "not_ready"
+    status_code = HTTPStatus.OK if is_ready else HTTPStatus.SERVICE_UNAVAILABLE
+    
+    return JSONResponse(
+        status_code=status_code,
+        content={
+            "status": status,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "checks": checks
+        }
+    )
 
 
 # =============================================================================
@@ -304,7 +574,7 @@ app.add_middleware(
 
 # Timing Middleware - Response time tracking
 app.add_middleware(
-    TimingMiddleware,
+    ResponseTimingMiddleware,
     header_name="X-Process-Time",
 )
 
@@ -318,16 +588,22 @@ logger.info("Initialized middleware stack with fastmiddleware")
 # =============================================================================
 
 logger.info("Initializing routers")
-app.include_router(UserRouter, tags=["User"])
-app.include_router(WebSocketRouter)
-if WebRTCRouter is not None:
-    app.include_router(WebRTCRouter)
+if UserRouter is not None:
+    app.include_router(UserRouter, tags=["User"])
+if ExampleItemRouter is not None:
+    app.include_router(ExampleItemRouter)
+    logger.info("Example Item API enabled at /items")
+if WebSocketRouter is not None:
+    app.include_router(WebSocketRouter)
 if NotificationsRouter is not None:
     app.include_router(NotificationsRouter)
 if ChannelsRouter is not None:
     app.include_router(ChannelsRouter)
 if DashboardRouter is not None:
     app.include_router(DashboardRouter)
+if MainApiRouter is not None:
+    app.include_router(MainApiRouter)
+    logger.info("Nested Production API enabled at /api/v1/examples")
 logger.info("Initialized routers")
 
 
@@ -346,6 +622,11 @@ async def on_startup():
     - Starting background tasks
     - Logging startup information
     """
+    from datetime import datetime, timezone
+    
+    # Track application start time for uptime calculation
+    app.state.start_time = datetime.now(timezone.utc)
+    
     logger.info("Application startup event triggered")
     logger.info(f"FastMVC API starting on {HOST}:{PORT}")
     logger.info("Using fast-middleware for request processing")

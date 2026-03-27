@@ -1,20 +1,87 @@
-## FastMVC Documentation
+# FastMVC
 
-FastMVC is a **project generator and MVC framework for FastAPI** that lets you spin up a production-ready backend in minutes.
+A production-grade MVC framework for FastAPI with clean architecture, powerful abstractions, and developer-friendly tools.
 
-- **What this docs set is for**
-  - Understand what FastMVC gives you out of the box.
-  - Learn how to generate and run a new project.
-  - Explore the CLI, architecture, configuration system, and core modules.
-  - Reuse these pages as the content source for a docs website (MkDocs, Docusaurus, etc.).
+## Features
 
-### Key Sections
+- **Clean MVC Architecture**: Separate concerns with clear abstractions
+- **Interactive CLI**: Generate projects with beautiful terminal UI
+- **Database Migration CLI**: Manage Alembic migrations with simple commands
+- **Rich VS Code Integration**: 15+ tasks, 6 debug configs, recommended extensions
+- **Environment Validation**: Fail-fast config validation with clear error messages
+- **Dark-themed API Docs**: FastMVC-branded Swagger UI and ReDoc
+- **Production Health Checks**: Kubernetes-ready liveness and readiness probes
+- **CI/CD Ready**: GitHub Actions workflows auto-generated for every project
+- **Production Ready**: Pre-commit hooks, linting, formatting, and testing setup
 
-- **Getting started**: Installation, `fastmvc generate`, running your first service – see [`getting-started.md`](getting-started.md).
-- **CLI reference**: All `fastmvc` commands (`generate`, `init`, `add`, `migrate`, `info`, `version`) – see [`cli.md`](cli.md).
-- **Architecture**: MVC layering, middleware pipeline, request lifecycle – see [`architecture.md`](architecture.md).
-- **Configuration**: `.env`, JSON configs under `config/**/config.json`, configuration DTOs – see [`configuration.md`](configuration.md).
-- **Modules overview**: High-level docs per package (controllers, services, repositories, etc.) – see [`modules.md`](modules.md).
+## Quick Start
 
-For deeper, code-level documentation, each package also has its own `README.md` in the repo (for example `services/README.md`, `configurations/README.md`, `core/README.md`).
+```bash
+# Install FastMVC
+pip install fastmvc
 
+# Generate a new project
+fastmvc generate
+
+# Or use the quickstart for defaults
+fastmvc quickstart my-project
+```
+
+## Project Structure
+
+```
+my-project/
+├── app.py                 # Application entry point
+├── config/                # Configuration
+│   ├── settings.py        # Settings management
+│   └── validator.py       # Environment validation
+├── example/               # Example API (Item CRUD)
+│   ├── entity.py          # Domain entities
+│   ├── repository.py      # Data access layer
+│   ├── service.py         # Business logic
+│   └── controller.py      # HTTP handlers
+├── abstractions/          # Base classes and interfaces
+├── core/                  # Core utilities
+├── middlewares/           # Custom middleware
+├── dtos/                  # Data transfer objects
+├── tests/                 # Test suite
+├── .vscode/               # VS Code settings
+├── docs/                  # Documentation
+├── Makefile               # Development commands
+└── requirements.txt       # Dependencies
+```
+
+## API Documentation
+
+Once your server is running:
+
+- **FastMVC Swagger UI**: http://localhost:8000/docs (dark theme, branded)
+- **ReDoc**: http://localhost:8000/redoc
+- **OpenAPI Schema**: http://localhost:8000/openapi.json
+
+## Development
+
+```bash
+# Install dependencies
+make install
+
+# Run development server
+make dev
+
+# Run tests
+make test
+
+# Build documentation
+make docs-serve
+```
+
+## Documentation
+
+- [Installation](guide/installation.md) - Install FastMVC and dependencies
+- [Quick Start](guide/quickstart.md) - Your first FastMVC application
+- [CLI Reference](guide/cli.md) - Project generation and management
+- [Configuration](guide/configuration.md) - Environment variables and validation
+- [API Documentation](guide/api-docs.md) - Swagger UI and ReDoc
+- [Database Migrations](guide/database.md) - Manage database schema changes
+- [CI/CD](guide/ci-cd.md) - GitHub Actions workflows and deployment
+- [Project Structure](guide/project-structure.md) - Understanding the layout

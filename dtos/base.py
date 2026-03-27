@@ -29,7 +29,12 @@ from typing import Any
 from loguru import logger
 from pydantic import BaseModel, ConfigDict, field_validator
 
-from fast_utilities.validation import SecurityValidators, ValidationUtility
+# Optional fast_utilities (requires pyfastmvc[platform])
+try:
+    from fast_utilities.validation import SecurityValidators, ValidationUtility
+except ImportError:
+    SecurityValidators = None  # type: ignore
+    ValidationUtility = None  # type: ignore
 
 __all__ = ["EnhancedBaseModel", "enhanced_config"]
 
@@ -66,9 +71,10 @@ class EnhancedBaseModel(BaseModel):
     @classmethod
     def sanitize_strings(cls, v: Any) -> Any:
         """Trim and normalize string inputs before field validation."""
-        logger.debug("Sanitizing string inputs in EnhancedBaseModel")
-        if isinstance(v, str):
-            return ValidationUtility.sanitize_string(v)
+        if ValidationUtility:
+            logger.debug("Sanitizing string inputs in EnhancedBaseModel")
+            if isinstance(v, str):
+                return ValidationUtility.sanitize_string(v)
         return v
 
     def validate_security(self) -> dict[str, Any]:
@@ -78,6 +84,9 @@ class EnhancedBaseModel(BaseModel):
         Returns:
             ``{"is_valid": bool, "issues": list[str]}``
         """
+        if not SecurityValidators:
+            return {"is_valid": True, "issues": []}
+            
         logger.debug("Performing security validation on EnhancedBaseModel")
         issues: list[str] = []
 

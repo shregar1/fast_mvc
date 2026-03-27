@@ -1,2 +1,0 @@
-"""Tests for controllers module."""
-

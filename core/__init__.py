@@ -1,48 +1,84 @@
 """
-Application core integration layer (FastAPI wiring, observability, security, etc.).
+Application core integration layer (FastAPI wiring, optional services).
 
-Shared configuration DTOs, optional-import helpers, OTLP bridge utilities, cache/queue
-streams, and other framework primitives live in the ``fast_platform`` package — import
-from ``fast_platform`` (or ``fast_platform.services.*``) for those instead of duplicating them
-here.
+This module provides re-exports for optional fast_platform services.
+Each import is wrapped in try/except to allow the core to work without
+the optional dependencies.
 
-Multi-tenancy is delegated to ``fast_tenancy`` (re-exported under ``core.tenancy``).
-Background jobs use ``fast_jobs`` (re-exported under ``core.tasks``).
-
-Integration libraries are also re-exported under stable ``core.*`` paths for convenience:
-
-- ``core.storage`` → ``fast_storage``
-- ``core.secrets`` → ``fast_secrets``
-- ``core.queues`` → ``fast_queues``
-- ``core.search`` → ``fast_search``
-- ``core.vectors`` → ``fast_vectors``
-- ``core.webrtc`` → ``fast_webrtc``
-- ``core.webhooks`` → ``fast_webhooks`` (outbound signing/delivery; inbound verification → ``fast_security`` / ``core.security``)
-- ``core.resilience`` → ``fast_resilience``
-- ``core.versioning`` → ``fast_versioning``
-- ``core.features`` → ``fast_features`` (in-app flags; SDK-style flags → ``fast_feature_flags``)
-- ``core.security`` → ``fast_security`` (API keys, inbound webhooks, field encryption)
-- ``core.channels`` → ``fast_channels``
-- ``core.observability`` → ``fast_observability``
-- ``core.datastores`` → ``fast_datastores`` (protocols in ``fast_datastores.interfaces``; ``abstractions.datastore`` re-exports them)
-
-Relational DB access uses ``fast_db``. This ``core`` package holds app-specific glue
-(WebSocket routes and similar wiring tied to this repo).
+Usage:
+    # Core only (no optional dependencies)
+    from core import app
+    
+    # With optional services (requires fast-platform)
+    from core import CircuitBreaker, Metrics
 """
 
-from core.observability import AuditLog, Metrics, StructuredLogger, Tracer
-from core.resilience import CircuitBreaker, RetryPolicy, retry
-from core.tasks import (
-    JobsConfiguration,
-    JobsConfigurationDTO,
-    cancel_job,
-    enqueue,
-    get_job_status,
-)
-from core.security import APIKeyManager, FieldEncryption, WebhookVerifier
-from core.features import FeatureFlags, feature_flag
-from core.tenancy import Tenant, TenantContext, get_current_tenant
-from core.versioning import APIVersion, versioned_router
+# Optional fast_platform services - gracefully degrade if not installed
+# These require: pip install pyfastmvc[platform] or specific extras
+
+# Observability (fast_platform.observability)
+try:
+    from core.observability import AuditLog, Metrics, StructuredLogger, Tracer
+except ImportError:
+    AuditLog = None  # type: ignore
+    Metrics = None  # type: ignore
+    StructuredLogger = None  # type: ignore
+    Tracer = None  # type: ignore
+
+# Resilience (fast_platform.resilience)
+try:
+    from core.resilience import CircuitBreaker, RetryPolicy, retry
+except ImportError:
+    CircuitBreaker = None  # type: ignore
+    RetryPolicy = None  # type: ignore
+    retry = None  # type: ignore
+
+# Tasks/Jobs (fast_platform.jobs)
+try:
+    from core.tasks import (
+        JobsConfiguration,
+        JobsConfigurationDTO,
+        cancel_job,
+        enqueue,
+        get_job_status,
+    )
+except ImportError:
+    JobsConfiguration = None  # type: ignore
+    JobsConfigurationDTO = None  # type: ignore
+    cancel_job = None  # type: ignore
+    enqueue = None  # type: ignore
+    get_job_status = None  # type: ignore
+
+# Security (fast_platform.security)
+try:
+    from core.security import APIKeyManager, FieldEncryption, WebhookVerifier
+except ImportError:
+    APIKeyManager = None  # type: ignore
+    FieldEncryption = None  # type: ignore
+    WebhookVerifier = None  # type: ignore
+
+# Feature Flags (fast_platform.features)
+try:
+    from core.features import FeatureFlags, feature_flag
+except ImportError:
+    FeatureFlags = None  # type: ignore
+    feature_flag = None  # type: ignore
+
+# Tenancy (fast_platform.tenancy)
+try:
+    from core.tenancy import Tenant, TenantContext, get_current_tenant
+except ImportError:
+    Tenant = None  # type: ignore
+    TenantContext = None  # type: ignore
+    get_current_tenant = None  # type: ignore
+
+# Versioning (fast_platform.versioning)
+try:
+    from core.versioning import APIVersion, versioned_router
+except ImportError:
+    APIVersion = None  # type: ignore
+    versioned_router = None  # type: ignore
+
 
 __all__ = [
     # Observability

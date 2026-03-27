@@ -1,7 +1,0 @@
-{
-  "enabled": false,
-  "default_per_minute": 60,
-  "default_burst": 120,
-  "per_tenant_overrides": {}
-}
-

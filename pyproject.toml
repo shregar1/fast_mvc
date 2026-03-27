@@ -68,6 +68,7 @@ requires-python = ">=3.10"
 dependencies = [
     "tomli>=2.0.0,<3.0.0; python_version < '3.11'",
     "click>=8.0.0,<9.0.0",
+    "rich>=13.0.0,<14.0.0",
     "fastapi>=0.100.0,<1.0.0",
     "uvicorn>=0.20.0,<1.0.0",
     "starlette>=0.27.0,<1.0.0",
@@ -87,7 +88,7 @@ dependencies = [
     "mako>=1.2.0,<2.0.0",
     "fast-middleware>=0.6.2",
     "cryptography>=41.0.0,<44.0.0",
-    "fast-platform>=0.12.0",
+    # Note: fast-platform is now optional - install pyfastmvc[platform] for all services
 ]
 
 [project.optional-dependencies]
@@ -107,28 +108,41 @@ docs = [
     "mkdocs-material>=9.0.0",
     "mkdocstrings[python]>=0.24.0",
 ]
-channels = ["fast-platform>=0.12.0"]
+interactive = [
+    "questionary>=2.0.0",
+]
+# Core platform services - install pyfastmvc[platform] for all services
+platform = ["fast-platform>=0.13.0"]
+# Individual service categories (all depend on fast-platform)
+notifications = ["fast-platform[notifications]>=0.13.0"]
+storage = ["fast-platform[storage]>=0.13.0"]
+messaging = ["fast-platform[messaging]>=0.13.0"]
+payments = ["fast-platform[payments]>=0.13.0"]
+observability = ["fast-platform[observability]>=0.13.0"]
+llm = ["fast-platform[llm]>=0.13.0"]
+search = ["fast-platform[search]>=0.13.0"]
+resilience = ["fast-platform[resilience]>=0.13.0"]
+realtime = ["fast-platform[realtime]>=0.13.0"]
+jobs = ["fast-platform[jobs]>=0.13.0"]
+secrets = ["fast-platform[secrets]>=0.13.0"]
+vectors = ["fast-platform[vectors]>=0.13.0"]
+tenancy = ["fast-platform[tenancy]>=0.13.0"]
+# External packages
 dashboards = ["fast_dashboards>=0.1.0"]
-notifications = ["fast-platform>=0.12.0"]
-kafka = ["fast-platform>=0.12.0"]
-webrtc = ["fast-platform>=0.12.0"]
-payments = ["fast-platform>=0.12.0"]
-identity = ["fast-platform>=0.12.0"]
-queues = ["fast-platform>=0.12.0"]
-jobs = ["fast-platform>=0.12.0"]
-storage = ["fast-platform>=0.12.0"]
-secrets = ["fast-platform>=0.12.0"]
-feature-flags = ["fast_feature_flags>=0.1.0"]
-search = ["fast-platform>=0.12.0"]
-analytics = ["fast-platform>=0.12.0"]
-llm = ["fast-platform>=0.12.0"]
-vectors = ["fast-platform>=0.12.0"]
-tenancy = ["fast-platform>=0.12.0"]
 admin = ["fast_admin>=0.1.0"]
-webhooks = ["fast-platform>=0.12.0"]
-media = ["fast-platform>=0.12.0"]
+feature-flags = ["fast_feature_flags>=0.1.0"]
+# Legacy aliases for backward compatibility
+channels = ["fast-platform[notifications]>=0.13.0"]
+kafka = ["fast-platform[messaging]>=0.13.0"]
+webrtc = ["fast-platform[realtime]>=0.13.0"]
+identity = ["fast-platform>=0.13.0"]
+queues = ["fast-platform[messaging]>=0.13.0"]
+webhooks = ["fast-platform[notifications]>=0.13.0"]
+media = ["fast-platform[storage]>=0.13.0"]
+analytics = ["fast-platform[observability]>=0.13.0"]
+# Install everything
 all = [
-    "pyfastmvc[dev,docs,channels,dashboards,notifications,kafka,webrtc,payments,identity,queues,jobs,storage,secrets,feature-flags,search,analytics,llm,vectors,tenancy,admin,webhooks,media]",
+    "pyfastmvc[dev,docs,platform,dashboards,admin,feature-flags,interactive]",
 ]
 
 [project.urls]
@@ -147,6 +161,7 @@ py-modules = ["app", "start_utils"]
 
 [tool.setuptools.packages.find]
 where = ["."]
+include = ["fast_mvc*", "abstractions*", "controllers*", "core*", "dependencies*", "dtos*", "fast_cli*", "middlewares*", "migrations*", "models*", "repositories*", "services*", "utilities*", "constants*", "config*"]
 exclude = ["tests*", "docs*", "scripts*", "dist*", "htmlcov*"]
 
 [tool.setuptools.package-data]

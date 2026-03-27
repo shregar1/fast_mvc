@@ -1,0 +1,101 @@
+site_name: FastMVC API Documentation
+site_description: Interactive API documentation for FastMVC application
+site_url: http://localhost:8000/docs
+
+theme:
+  name: material
+  logo: assets/logo.svg
+  favicon: assets/favicon.ico
+  palette:
+    # Dark mode (default)
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: cyan
+      accent: fuchsia
+      toggle:
+        icon: material/brightness-7
+        name: Switch to light mode
+    # Light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: cyan
+      accent: fuchsia
+      toggle:
+        icon: material/brightness-4
+        name: Switch to dark mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+    - content.code.copy
+    - content.code.annotate
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/fastmvc/fastmvc
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/fastmvc/
+  version:
+    provider: mike
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: true
+            show_root_heading: true
+  - swagger-ui-tag:
+      background: '#0f0f1a'
+      theme: 'dark'
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - admonition
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - attr_list
+  - md_in_html
+  - tables
+  - footnotes
+
+extra_css:
+  - stylesheets/swagger.css
+
+extra_javascript:
+  - javascripts/swagger-embed.js
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: guide/installation.md
+    - Quick Start: guide/quickstart.md
+    - Project Structure: guide/project-structure.md
+  - User Guide:
+    - CLI Reference: guide/cli.md
+    - Configuration: guide/configuration.md
+    - API Documentation: guide/api-docs.md
+    - Database Migrations: guide/database.md
+    - CI/CD: guide/ci-cd.md
+  - API Reference:
+    - Overview: api/overview.md
+    - Authentication: api/authentication.md
+    - Endpoints: api/endpoints.md
+  - Reference: reference/index.md
+
+dev_addr: 127.0.0.1:8001

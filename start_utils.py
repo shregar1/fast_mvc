@@ -39,12 +39,20 @@ import redis
 from dotenv import load_dotenv
 from loguru import logger
 
-from fast_platform import (
-    CacheConfiguration,
-    CacheConfigurationDTO,
-    DBConfiguration,
-    DBConfigurationDTO,
-)
+# Optional fast_platform configuration (requires pyfastmvc[platform])
+try:
+    from fast_platform import (
+        CacheConfiguration,
+        CacheConfigurationDTO,
+        DBConfiguration,
+        DBConfigurationDTO,
+    )
+except ImportError:
+    CacheConfiguration = None  # type: ignore
+    CacheConfigurationDTO = None  # type: ignore
+    DBConfiguration = None  # type: ignore
+    DBConfigurationDTO = None  # type: ignore
+
 from constants.default import Default
 
 # =============================================================================
@@ -93,14 +101,22 @@ os.environ.setdefault(
 )
 
 logger.info("Loading Configurations")
-cache_configuration: CacheConfigurationDTO = CacheConfiguration().get_config()
-db_configuration: DBConfigurationDTO = DBConfiguration().get_config()
+# Load configurations from fast_platform if available
+cache_configuration = None  # type: ignore
+db_configuration = None  # type: ignore
+channels_configuration = None  # type: ignore
+
+if CacheConfiguration:
+    cache_configuration = CacheConfiguration().get_config()
+if DBConfiguration:
+    db_configuration = DBConfiguration().get_config()
+
 try:
     from fast_channels import ChannelsConfiguration, ChannelsConfigurationDTO
-
-    channels_configuration: ChannelsConfigurationDTO = ChannelsConfiguration().get_config()
+    channels_configuration = ChannelsConfiguration().get_config()
 except ImportError:
-    channels_configuration = None  # type: ignore[assignment]
+    pass
+
 logger.info("Loaded Configurations")
 
 # =============================================================================
@@ -172,9 +188,12 @@ logger.info("Loaded environment variables")
 # DATABASE SESSION
 # =============================================================================
 
-from fast_db import create_and_set_session
-
-db_session = create_and_set_session(db_configuration)
+try:
+    from fast_db import create_and_set_session
+    db_session = create_and_set_session(db_configuration)
+except ImportError:
+    create_and_set_session = None  # type: ignore
+    db_session = None  # type: ignore
 """
 SQLAlchemy database session (from fast_db).
 
@@ -187,6 +206,8 @@ Example:
 """
 if db_session:
     logger.info("Initialized PostgreSQL database connection")
+else:
+    logger.info("Database session not initialized (fast_db not available)")
 
 # =============================================================================
 # REDIS SESSION
@@ -206,7 +227,8 @@ Example:
 """
 
 if (
-    cache_configuration.host
+    cache_configuration
+    and cache_configuration.host
     and cache_configuration.port
     and cache_configuration.password
 ):
@@ -220,6 +242,8 @@ if (
         logger.error("No Redis session available")
         raise RuntimeError("No Redis session available")
     logger.info("Initialized Redis database connection")
+else:
+    logger.info("Redis session not initialized (cache configuration not available)")
 
 # =============================================================================
 # CHANNELS BACKEND
@@ -262,6 +286,8 @@ elif CHANNEL_BACKEND == "kafka":
 
 unprotected_routes: set = {
     "/health",
+    "/health/live",
+    "/health/ready",
     "/user/login",
     "/user/register",
     "/user/refresh",
@@ -273,7 +299,9 @@ unprotected_routes: set = {
 Set of routes that bypass authentication middleware.
 
 These routes are accessible without a valid JWT token:
-    - /health: Health check endpoint
+    - /health: Comprehensive health check endpoint
+    - /health/live: Kubernetes liveness probe
+    - /health/ready: Kubernetes readiness probe
     - /user/login: Login endpoint
     - /user/register: Registration endpoint
     - /user/refresh: Token refresh endpoint

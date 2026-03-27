@@ -1,9 +1,0 @@
-{
-    "enabled": false,
-    "exporter": "otlp",
-    "endpoint": null,
-    "protocol": "grpc",
-    "service_name": "fastmvc-api",
-    "environment": "development"
-}
-
