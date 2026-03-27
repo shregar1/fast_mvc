@@ -86,10 +86,10 @@ dependencies = [
     "httpx>=0.24.0,<1.0.0",
     "cachetools>=5.0.0,<6.0.0",
     "mako>=1.2.0,<2.0.0",
-    "fast-middleware>=0.6.2",
+    "fast-middleware>=0.6.2,<1.0.0",
     "cryptography>=41.0.0,<44.0.0",
-    "fast-platform>=0.13.0",
-    "fast-database>=0.1.0",
+    "fast-platform>=0.13.0,<1.0.0",
+    "fast-database>=0.1.0,<1.0.0",
 ]
 
 [project.optional-dependencies]
@@ -112,9 +112,8 @@ docs = [
 interactive = [
     "questionary>=2.0.0",
 ]
-# Core platform services - always included, kept for backward compatibility
-platform = []
-# Individual service categories (all depend on fast-platform)
+# Core platform services - fast-platform and fast-database are now mandatory dependencies
+# Individual service categories (require fast-platform extras)
 notifications = ["fast-platform[notifications]>=0.13.0"]
 storage = ["fast-platform[storage]>=0.13.0"]
 messaging = ["fast-platform[messaging]>=0.13.0"]
@@ -141,9 +140,9 @@ queues = ["fast-platform[messaging]>=0.13.0"]
 webhooks = ["fast-platform[notifications]>=0.13.0"]
 media = ["fast-platform[storage]>=0.13.0"]
 analytics = ["fast-platform[observability]>=0.13.0"]
-# Install everything
+# Install everything (all optional extras)
 all = [
-    "pyfastmvc[dev,docs,platform,dashboards,admin,feature-flags,interactive]",
+    "pyfastmvc[dev,docs,dashboards,admin,feature-flags,interactive]",
 ]
 
 [project.urls]
