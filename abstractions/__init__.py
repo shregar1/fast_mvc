@@ -25,15 +25,15 @@ Patterns Included:
 """
 
 # Base MVC abstractions
-from abstractions.controller import IController
-from abstractions.dependency import IDependency
-from abstractions.error import IError
-from abstractions.repository import IRepository
-from abstractions.service import IService
-from abstractions.utility import IUtility
+from .controller import IController
+from .dependency import IDependency
+from .error import IError
+from .repository import IRepository
+from .service import IService
+from .utility import IUtility
 
 # Unit of Work Pattern
-from abstractions.unit_of_work import (
+from .unit_of_work import (
     IUnitOfWork,
     ISyncUnitOfWork,
     BaseUnitOfWork,
@@ -41,7 +41,7 @@ from abstractions.unit_of_work import (
 )
 
 # Specification Pattern
-from abstractions.specification import (
+from .specification import (
     ISpecification,
     AndSpecification,
     OrSpecification,
@@ -52,7 +52,7 @@ from abstractions.specification import (
 )
 
 # CQRS Pattern
-from abstractions.cqrs import (
+from .cqrs import (
     ICommand,
     IQuery,
     ICommandHandler,
@@ -63,7 +63,7 @@ from abstractions.cqrs import (
 )
 
 # Domain Events
-from abstractions.domain_events import (
+from .domain_events import (
     IDomainEvent,
     IEventHandler,
     EventDispatcher,
@@ -73,7 +73,7 @@ from abstractions.domain_events import (
 )
 
 # Result/Either Pattern
-from abstractions.result import (
+from .result import (
     Result,
     Success,
     Failure,
@@ -86,7 +86,7 @@ from abstractions.result import (
 )
 
 # Value Objects
-from abstractions.value_object import (
+from .value_object import (
     ValueObject,
     Email,
     Money,
@@ -98,7 +98,7 @@ from abstractions.value_object import (
 )
 
 # Mapper Pattern
-from abstractions.mapper import (
+from .mapper import (
     IMapper,
     IBidirectionalMapper,
     LambdaMapper,
@@ -109,7 +109,7 @@ from abstractions.mapper import (
 )
 
 # Validator Pattern
-from abstractions.validator import (
+from .validator import (
     ValidationError,
     ValidationResult as ValidatorResult,
     IValidator,
@@ -121,7 +121,7 @@ from abstractions.validator import (
 )
 
 # Pipeline Pattern
-from abstractions.pipeline import (
+from .pipeline import (
     IPipelineHandler,
     Pipeline,
     SyncPipeline,
@@ -133,7 +133,7 @@ from abstractions.pipeline import (
 )
 
 # Strategy Pattern
-from abstractions.strategy import (
+from .strategy import (
     IStrategy,
     IAsyncStrategy,
     StrategyContext,
@@ -146,7 +146,7 @@ from abstractions.strategy import (
 )
 
 # Observer Pattern
-from abstractions.observer import (
+from .observer import (
     IObserver,
     IAsyncObserver,
     ISubject,
@@ -163,7 +163,7 @@ from abstractions.observer import (
 )
 
 # Decorator Pattern
-from abstractions.decorator import (
+from .decorator import (
     IComponent,
     BaseDecorator,
     timing,
@@ -179,7 +179,7 @@ from abstractions.decorator import (
 )
 
 # Entity/Aggregate Pattern
-from abstractions.entity import (
+from .entity import (
     IEntity,
     Entity,
     IAggregateRoot,
@@ -192,7 +192,7 @@ from abstractions.entity import (
 )
 
 # Presenter Pattern
-from abstractions.presenter import (
+from .presenter import (
     IPresenter,
     ViewModel,
     PaginatedViewModel,
