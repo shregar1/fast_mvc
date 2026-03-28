@@ -153,7 +153,7 @@ Issues = "https://github.com/shregar1/fastMVC/issues"
 Changelog = "https://github.com/shregar1/fastMVC/blob/main/CHANGELOG.md"
 
 [project.scripts]
-fastmvc = "fast_cli.cli:main"
+# CLI entry points are now managed by the fastmvc-cli package.
 
 [tool.setuptools]
 include-package-data = true
@@ -161,7 +161,7 @@ py-modules = ["app", "start_utils"]
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["fast_mvc*", "abstractions*", "controllers*", "core*", "dependencies*", "dtos*", "entities*", "errors*", "fast_cli*", "middlewares*", "migrations*", "models*", "repositories*", "services*", "testing*", "utilities*", "constants*", "config*"]
+include = ["fast_mvc*", "abstractions*", "controllers*", "core*", "dependencies*", "dtos*", "entities*", "errors*", "middlewares*", "migrations*", "models*", "repositories*", "services*", "testing*", "utilities*", "constants*", "config*"]
 exclude = ["tests*", "docs*", "scripts*", "dist*", "htmlcov*"]
 
 [tool.setuptools.package-data]
