@@ -107,10 +107,13 @@ def _post_item(
 
 
 def _clear_app_item_storage() -> None:
-    from controllers.apis.v1.item.item_controller import _controller
+    try:
+        from controllers.apis.v1.item.item_controller import _controller
 
-    repo = _controller._service._repository
-    asyncio.run(repo.clear())
+        repo = _controller._service._repository
+        asyncio.run(repo.clear())
+    except (ImportError, ModuleNotFoundError, AttributeError):
+        pass
 
 
 @pytest.fixture(autouse=True)

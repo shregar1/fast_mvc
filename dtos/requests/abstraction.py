@@ -17,13 +17,11 @@ from pydantic import field_validator
 
 from abstractions.dto import IDTO
 
-from dtos.I import EnhancedIModel
 
-
-class IRequestDTO(EnhancedIModel, IDTO):
+class IRequestDTO(IDTO):
     """Abstract base for all request DTOs.
 
-    Inherits :class:`dtos.I.EnhancedIModel` and :class:`abstractions.dto.IDTO`.
+    Inherits :class:`abstractions.dto.IDTO`.
 
     This dto class defines common fields and validation rules that
     all request DTOs must include. Currently, it requires a reference

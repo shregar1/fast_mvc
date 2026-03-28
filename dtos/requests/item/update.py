@@ -42,6 +42,6 @@ class UpdateItemRequestDTO(IRequestItemDTO):
     @classmethod
     def from_dict(cls, data: dict) -> Self:
         return cls(
-            name=data.get("name"),
-            description=data.get("description"),
+            name=data.get("name", ""),
+            description=data.get("description", ""),
         )

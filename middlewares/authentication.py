@@ -7,7 +7,9 @@ Without the platform package, it will pass through all requests (development mod
 """
 
 from http import HTTPStatus
+from functools import partial
 
+from fastapi import Request
 from fastapi.responses import JSONResponse
 
 from constants.api_status import APIStatus
@@ -73,54 +75,64 @@ def _load_user(user_data: dict, urn: str):
     return None
 
 
+def _on_authenticated(request: Request, user_data: dict) -> None:
+    """Execute _on_authenticated operation.
+
+    Args:
+        request: The request parameter.
+        user_data: The user_data parameter.
+    """
+    request.state.user_id = user_data.get("user_id")
+
+
+class NoOpAuthMiddleware:
+    """No-op authentication middleware for development without fastmiddleware."""
+
+    def __init__(self, app):
+        """Execute __init__ operation.
+
+        Args:
+            app: The app parameter.
+        """
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        """Execute __call__ operation.
+
+        Args:
+            scope: The scope parameter.
+            receive: The receive parameter.
+            send: The send parameter.
+
+        Returns:
+            The result of the operation.
+        """
+        await self.app(scope, receive, send)
+
+
 # Create the middleware only if dependencies are available
 if JWTBearerAuthMiddleware:
-    AuthenticationMiddleware = JWTBearerAuthMiddleware(
+    AuthenticationMiddleware = partial(
+        JWTBearerAuthMiddleware,
+        unprotected_paths=unprotected_routes,
+        callback_paths=callback_routes,
         decode_bearer=_decode_token,
         load_user=_load_user,
-        unprotected_routes=unprotected_routes,
-        callback_routes=callback_routes,
-        error_response_factory=lambda request, error: JSONResponse(
+        on_authenticated=_on_authenticated,
+        build_error_response=lambda urn, kind, error: JSONResponse(
             status_code=HTTPStatus.UNAUTHORIZED,
             content=IResponseAPIDTO(
-                transactionUrn=getattr(request.state, "urn", "") or "",
+                transactionUrn=urn,
                 status=APIStatus.FAILED,
-                responseMessage=error.message,
-                responseKey=f"error_{error.kind.name.lower()}"
-                if hasattr(error.kind, "name")
-                else "error_authentication",
+                responseMessage=getattr(error, "message", str(error))
+                if error
+                else f"Authentication failed: {kind}",
+                responseKey=f"error_{kind.lower()}",
                 data={},
                 errors=None,
-            ).model_dump(),
-            headers=HttpHeader().get_reference_urn_header(
-                reference_urn=request.headers.get(HttpHeader.X_REFERENCE_URN)
-            ),
+            ).model_dump(mode="json"),
+            headers=HttpHeader().get_reference_urn_header(reference_urn=urn),
         ),
     )
 else:
-    # Fallback middleware that allows all requests
-    class _NoOpAuthMiddleware:
-        """No-op authentication middleware for development without fastmiddleware."""
-
-        def __init__(self, app):
-            """Execute __init__ operation.
-
-            Args:
-                app: The app parameter.
-            """
-            self.app = app
-
-        async def __call__(self, scope, receive, send):
-            """Execute __call__ operation.
-
-            Args:
-                scope: The scope parameter.
-                receive: The receive parameter.
-                send: The send parameter.
-
-            Returns:
-                The result of the operation.
-            """
-            await self.app(scope, receive, send)
-
-    AuthenticationMiddleware = _NoOpAuthMiddleware
+    AuthenticationMiddleware = NoOpAuthMiddleware
