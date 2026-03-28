@@ -5,11 +5,12 @@ Demonstrates FastMVC controller patterns with FastAPI routes.
 
 from http import HTTPStatus
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse
 
 from abstractions.controller import IController
 from abstractions.result import Result
+from constants.http_headers import X_REFERENCE_URN, x_reference_urn_headers
 from dtos.requests.item import CreateItemRequestDTO, UpdateItemRequestDTO
 from dtos.responses.item import (
     ItemListResponseDTO,
@@ -17,7 +18,6 @@ from dtos.responses.item import (
     ItemStatsResponseDTO,
 )
 from services.item.item_service import ItemService
-
 
 # Create router
 router = APIRouter(
@@ -28,6 +28,17 @@ router = APIRouter(
         422: {"description": "Validation error"},
     },
 )
+
+
+def _item_response_headers(
+    body_reference: str | None,
+    http_request: Request | None,
+) -> dict[str, str]:
+    """Prefer body ``reference_number``; else echo ``x-reference-urn`` from the request."""
+    ref = body_reference
+    if ref is None and http_request is not None:
+        ref = http_request.headers.get(X_REFERENCE_URN)
+    return x_reference_urn_headers(ref)
 
 
 class ItemController(IController):
@@ -85,18 +96,21 @@ class ItemController(IController):
 
     # CRUD Endpoints
 
-    async def create(self, request: CreateItemRequestDTO) -> JSONResponse:
+    async def create(
+        self, body: CreateItemRequestDTO, http_request: Request | None = None
+    ) -> JSONResponse:
         """Create a new item.
 
         Args:
-            request: Create item request
+            body: Create item request
+            http_request: Incoming HTTP request (for ``x-reference-urn`` echo)
 
         Returns:
             Created item response
 
         """
         # Validate request
-        is_valid, errors = request.validate()
+        is_valid, errors = body.validate()
         if not is_valid:
             raise HTTPException(
                 status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
@@ -105,8 +119,8 @@ class ItemController(IController):
 
         # Create item
         result = await self._service.create_item(
-            name=request.name,
-            description=request.description,
+            name=body.name,
+            description=body.description,
         )
 
         if result.is_failure:
@@ -115,15 +129,18 @@ class ItemController(IController):
                 detail=result.error,
             )
 
-        # Convert to response DTO
-        response = ItemResponseDTO.from_entity(result.value)
+        # Convert to response DTO (echo client reference_number as reference_urn)
+        response = ItemResponseDTO.from_entity(
+            result.value, reference_urn=body.reference_number
+        )
 
         return JSONResponse(
             status_code=HTTPStatus.CREATED,
             content=response.to_dict(),
+            headers=_item_response_headers(body.reference_number, http_request),
         )
 
-    async def get_by_id(self, item_id: str) -> JSONResponse:
+    async def get_by_id(self, item_id: str, http_request: Request | None = None) -> JSONResponse:
         """Get item by ID.
 
         Args:
@@ -148,9 +165,12 @@ class ItemController(IController):
             )
 
         response = ItemResponseDTO.from_entity(result.value)
-        return JSONResponse(content=response.to_dict())
+        return JSONResponse(
+            content=response.to_dict(),
+            headers=_item_response_headers(None, http_request),
+        )
 
-    async def get_all(self) -> JSONResponse:
+    async def get_all(self, http_request: Request | None = None) -> JSONResponse:
         """Get all items.
 
         Returns:
@@ -166,21 +186,30 @@ class ItemController(IController):
             )
 
         response = ItemListResponseDTO.from_entities(result.value)
-        return JSONResponse(content=response.to_dict())
+        return JSONResponse(
+            content=response.to_dict(),
+            headers=_item_response_headers(None, http_request),
+        )
 
-    async def update(self, item_id: str, request: UpdateItemRequestDTO) -> JSONResponse:
+    async def update(
+        self,
+        item_id: str,
+        body: UpdateItemRequestDTO,
+        http_request: Request | None = None,
+    ) -> JSONResponse:
         """Update an item.
 
         Args:
             item_id: Item identifier
-            request: Update item request
+            body: Update item request
+            http_request: Incoming HTTP request (for ``x-reference-urn`` echo)
 
         Returns:
             Updated item response
 
         """
         # Validate request
-        is_valid, errors = request.validate()
+        is_valid, errors = body.validate()
         if not is_valid:
             raise HTTPException(
                 status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
@@ -190,8 +219,8 @@ class ItemController(IController):
         # Update item
         result = await self._service.update_item(
             item_id=item_id,
-            name=request.name,
-            description=request.description,
+            name=body.name,
+            description=body.description,
         )
 
         if result.is_failure:
@@ -200,10 +229,15 @@ class ItemController(IController):
                 detail=result.error,
             )
 
-        response = ItemResponseDTO.from_entity(result.value)
-        return JSONResponse(content=response.to_dict())
+        response = ItemResponseDTO.from_entity(
+            result.value, reference_urn=body.reference_number
+        )
+        return JSONResponse(
+            content=response.to_dict(),
+            headers=_item_response_headers(body.reference_number, http_request),
+        )
 
-    async def delete(self, item_id: str) -> JSONResponse:
+    async def delete(self, item_id: str, http_request: Request | None = None) -> JSONResponse:
         """Delete an item.
 
         Args:
@@ -229,11 +263,12 @@ class ItemController(IController):
 
         return JSONResponse(
             content={"message": f"Item '{item_id}' deleted successfully"},
+            headers=_item_response_headers(None, http_request),
         )
 
     # Action Endpoints
 
-    async def complete(self, item_id: str) -> JSONResponse:
+    async def complete(self, item_id: str, http_request: Request | None = None) -> JSONResponse:
         """Mark item as completed.
 
         Args:
@@ -252,9 +287,12 @@ class ItemController(IController):
             )
 
         response = ItemResponseDTO.from_entity(result.value)
-        return JSONResponse(content=response.to_dict())
+        return JSONResponse(
+            content=response.to_dict(),
+            headers=_item_response_headers(None, http_request),
+        )
 
-    async def uncomplete(self, item_id: str) -> JSONResponse:
+    async def uncomplete(self, item_id: str, http_request: Request | None = None) -> JSONResponse:
         """Mark item as not completed.
 
         Args:
@@ -273,9 +311,12 @@ class ItemController(IController):
             )
 
         response = ItemResponseDTO.from_entity(result.value)
-        return JSONResponse(content=response.to_dict())
+        return JSONResponse(
+            content=response.to_dict(),
+            headers=_item_response_headers(None, http_request),
+        )
 
-    async def toggle(self, item_id: str) -> JSONResponse:
+    async def toggle(self, item_id: str, http_request: Request | None = None) -> JSONResponse:
         """Toggle item completion status.
 
         Args:
@@ -294,11 +335,14 @@ class ItemController(IController):
             )
 
         response = ItemResponseDTO.from_entity(result.value)
-        return JSONResponse(content=response.to_dict())
+        return JSONResponse(
+            content=response.to_dict(),
+            headers=_item_response_headers(None, http_request),
+        )
 
     # Query Endpoints
 
-    async def search(self, query: str = "") -> JSONResponse:
+    async def search(self, query: str = "", http_request: Request | None = None) -> JSONResponse:
         """Search items by name.
 
         Args:
@@ -317,9 +361,12 @@ class ItemController(IController):
             )
 
         response = ItemListResponseDTO.from_entities(result.value)
-        return JSONResponse(content=response.to_dict())
+        return JSONResponse(
+            content=response.to_dict(),
+            headers=_item_response_headers(None, http_request),
+        )
 
-    async def get_completed(self) -> JSONResponse:
+    async def get_completed(self, http_request: Request | None = None) -> JSONResponse:
         """Get all completed items.
 
         Returns:
@@ -335,9 +382,12 @@ class ItemController(IController):
             )
 
         response = ItemListResponseDTO.from_entities(result.value)
-        return JSONResponse(content=response.to_dict())
+        return JSONResponse(
+            content=response.to_dict(),
+            headers=_item_response_headers(None, http_request),
+        )
 
-    async def get_pending(self) -> JSONResponse:
+    async def get_pending(self, http_request: Request | None = None) -> JSONResponse:
         """Get all pending items.
 
         Returns:
@@ -353,9 +403,12 @@ class ItemController(IController):
             )
 
         response = ItemListResponseDTO.from_entities(result.value)
-        return JSONResponse(content=response.to_dict())
+        return JSONResponse(
+            content=response.to_dict(),
+            headers=_item_response_headers(None, http_request),
+        )
 
-    async def get_statistics(self) -> JSONResponse:
+    async def get_statistics(self, http_request: Request | None = None) -> JSONResponse:
         """Get item statistics.
 
         Returns:
@@ -371,7 +424,10 @@ class ItemController(IController):
             )
 
         response = ItemStatsResponseDTO.from_stats(result.value)
-        return JSONResponse(content=response.to_dict())
+        return JSONResponse(
+            content=response.to_dict(),
+            headers=_item_response_headers(None, http_request),
+        )
 
 
 # Route Definitions
@@ -380,72 +436,76 @@ _controller = ItemController()
 
 
 @router.post("", response_model=dict, status_code=HTTPStatus.CREATED)
-async def create_item(request: CreateItemRequestDTO) -> JSONResponse:
+async def create_item(
+    http_request: Request, body: CreateItemRequestDTO
+) -> JSONResponse:
     """Create a new item."""
-    return await _controller.create(request)
+    return await _controller.create(body, http_request)
 
 
 @router.get("", response_model=dict)
-async def get_all_items() -> JSONResponse:
+async def get_all_items(http_request: Request) -> JSONResponse:
     """Get all items."""
-    return await _controller.get_all()
+    return await _controller.get_all(http_request)
 
 
 @router.get("/search", response_model=dict)
-async def search_items(query: str = "") -> JSONResponse:
+async def search_items(http_request: Request, query: str = "") -> JSONResponse:
     """Search items by name."""
-    return await _controller.search(query)
+    return await _controller.search(query, http_request)
 
 
 @router.get("/completed", response_model=dict)
-async def get_completed_items() -> JSONResponse:
+async def get_completed_items(http_request: Request) -> JSONResponse:
     """Get all completed items."""
-    return await _controller.get_completed()
+    return await _controller.get_completed(http_request)
 
 
 @router.get("/pending", response_model=dict)
-async def get_pending_items() -> JSONResponse:
+async def get_pending_items(http_request: Request) -> JSONResponse:
     """Get all pending items."""
-    return await _controller.get_pending()
+    return await _controller.get_pending(http_request)
 
 
 @router.get("/statistics", response_model=dict)
-async def get_item_statistics() -> JSONResponse:
+async def get_item_statistics(http_request: Request) -> JSONResponse:
     """Get item statistics."""
-    return await _controller.get_statistics()
+    return await _controller.get_statistics(http_request)
 
 
 @router.get("/{item_id}", response_model=dict)
-async def get_item(item_id: str) -> JSONResponse:
+async def get_item(http_request: Request, item_id: str) -> JSONResponse:
     """Get item by ID."""
-    return await _controller.get_by_id(item_id)
+    return await _controller.get_by_id(item_id, http_request)
 
 
 @router.patch("/{item_id}", response_model=dict)
-async def update_item(item_id: str, request: UpdateItemRequestDTO) -> JSONResponse:
+async def update_item(
+    http_request: Request, item_id: str, body: UpdateItemRequestDTO
+) -> JSONResponse:
     """Update an item."""
-    return await _controller.update(item_id, request)
+    return await _controller.update(item_id, body, http_request)
 
 
 @router.delete("/{item_id}", response_model=dict)
-async def delete_item(item_id: str) -> JSONResponse:
+async def delete_item(http_request: Request, item_id: str) -> JSONResponse:
     """Delete an item."""
-    return await _controller.delete(item_id)
+    return await _controller.delete(item_id, http_request)
 
 
 @router.post("/{item_id}/complete", response_model=dict)
-async def complete_item(item_id: str) -> JSONResponse:
+async def complete_item(http_request: Request, item_id: str) -> JSONResponse:
     """Mark item as completed."""
-    return await _controller.complete(item_id)
+    return await _controller.complete(item_id, http_request)
 
 
 @router.post("/{item_id}/uncomplete", response_model=dict)
-async def uncomplete_item(item_id: str) -> JSONResponse:
+async def uncomplete_item(http_request: Request, item_id: str) -> JSONResponse:
     """Mark item as not completed."""
-    return await _controller.uncomplete(item_id)
+    return await _controller.uncomplete(item_id, http_request)
 
 
 @router.post("/{item_id}/toggle", response_model=dict)
-async def toggle_item(item_id: str) -> JSONResponse:
+async def toggle_item(http_request: Request, item_id: str) -> JSONResponse:
     """Toggle item completion status."""
-    return await _controller.toggle(item_id)
+    return await _controller.toggle(item_id, http_request)

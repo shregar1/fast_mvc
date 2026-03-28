@@ -11,6 +11,7 @@ from http import HTTPStatus
 from fastapi.responses import JSONResponse
 
 from constants.api_status import APIStatus
+from constants.http_headers import X_REFERENCE_URN, x_reference_urn_headers
 from dtos.responses.I import IResponseDTO
 
 # Optional dependencies (requires pyfastmvc[platform])
@@ -76,6 +77,7 @@ if JWTBearerAuthMiddleware:
                 data={},
                 errors=None,
             ).model_dump(),
+            headers=x_reference_urn_headers(request.headers.get(X_REFERENCE_URN)),
         ),
     )
 else:

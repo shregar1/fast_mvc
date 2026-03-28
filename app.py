@@ -42,8 +42,8 @@ Example API (if example module is available):
 
 import os
 from http import HTTPStatus
-from pathlib import Path
 from importlib.metadata import PackageNotFoundError, version
+from pathlib import Path
 from typing import cast
 
 import uvicorn  # pyright: ignore[reportMissingImports]
@@ -68,6 +68,7 @@ from loguru import logger
 
 from constants.api_status import APIStatus
 from constants.default import Default
+from constants.http_headers import X_REFERENCE_URN, x_reference_urn_headers
 
 # Optional example controllers (can be removed for minimal core)
 try:
@@ -297,6 +298,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     return JSONResponse(
         status_code=HTTPStatus.BAD_REQUEST,
         content=response_payload,
+        headers=x_reference_urn_headers(request.headers.get(X_REFERENCE_URN)),
     )
 
 
@@ -324,6 +326,7 @@ def _app_error_response(
     return JSONResponse(
         status_code=getattr(exc, "httpStatusCode", HTTPStatus.INTERNAL_SERVER_ERROR),
         content=response_dto.model_dump(),
+        headers=x_reference_urn_headers(request.headers.get(X_REFERENCE_URN)),
     )
 
 
@@ -454,6 +457,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     return JSONResponse(
         status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
         content=response_dto.model_dump(),
+        headers=x_reference_urn_headers(request.headers.get(X_REFERENCE_URN)),
     )
 
 

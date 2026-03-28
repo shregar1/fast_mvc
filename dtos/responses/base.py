@@ -51,6 +51,8 @@ class IResponseDTO(BaseModel):
             API version hints, feature flags, etc.). Not the primary resource payload.
         timestamp (datetime): When the response envelope was produced (UTC). Defaults
             to "now" if omitted.
+        referenceUrn (str, optional): Client-supplied correlation id echoed from the
+            request when present (e.g. ``reference_number`` on :class:`dtos.requests.abstraction.IRequestDTO`).
 
     Example (Success):
         >>> response = IResponseDTO(
@@ -84,7 +86,8 @@ class IResponseDTO(BaseModel):
             "data": {...},
             "errors": null,
             "metadata": {"page": 1, "pageSize": 20},
-            "timestamp": "2024-01-15T12:00:00Z"
+            "timestamp": "2024-01-15T12:00:00Z",
+            "referenceUrn": "550e8400-e29b-41d4-a716-446655440000"
         }
         ```
 
@@ -123,4 +126,13 @@ class IResponseDTO(BaseModel):
     timestamp: datetime = Field(
         default_factory=_utc_now,
         description="Server time (UTC) when this response envelope was generated.",
+    )
+
+    reference_urn: str | None = Field(
+        default=None,
+        description=(
+            "Echo of the client correlation id when provided "
+            "(e.g. IRequestDTO.reference_number or the x-reference-urn request header). "
+            "APIs also set the x-reference-urn response header when this value is non-empty."
+        ),
     )
