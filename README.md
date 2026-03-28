@@ -131,12 +131,11 @@ make docker-up-dev
 Generated projects include comprehensive testing utilities:
 
 ```python
-from testing.item import ItemFactory
-from testing.item.fixtures import item_client  # or rely on tests/conftest.py
+from tests.item_factory import ItemFactory
+# Shared fixtures: tests/conftest.py re-exports tests.fixtures.item
 
 # Generate fake test data
-item = ItemFactory.create(name="Test Item")
-payload = ItemFactory.create_dict(completed=True)
+item = ItemFactory.create(name="Test Item", completed=True)
 
 # Use fixtures in tests
 def test_create_item(item_client, create_item_payload, mock_auth):

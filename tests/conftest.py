@@ -30,11 +30,11 @@ PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 # =============================================================================
-# IMPORT FIXTURES FROM ITEM TESTING MODULE
+# IMPORT SHARED ITEM API FIXTURES
 # =============================================================================
 
-# Import all fixtures from testing.item.fixtures
-from testing.item.fixtures import (
+# Import all fixtures from tests.fixtures.item
+from tests.fixtures.item import (
     # DataI fixtures
     item_db,
     item_repository,
@@ -59,7 +59,6 @@ from testing.item.fixtures import (
     invalid_item_payloads,
     # Utility fixtures
     freezer,
-    event_loop,
     reset_factories,
 )
 
@@ -84,7 +83,6 @@ __all__ = [
     "update_item_payload",
     "invalid_item_payloads",
     "freezer",
-    "event_loop",
     "reset_factories",
 ]
 

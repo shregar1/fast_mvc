@@ -23,7 +23,7 @@ tests/
 ├── dependencies/                  # → dependencies/
 ├── dtos/                          # → dtos/
 ├── example/                       # → example/
-│   └── test_example_item.py   # Item API (see testing/item/ for fixtures)
+│   └── test_example_item.py   # Item API (see tests/fixtures/item.py)
 ├── factories/                     # → factories/
 │   └── apis/
 │       └── v1/
@@ -46,13 +46,13 @@ Top-level **`factories/`** (not under `tests/`) provides **DTO-aligned builders*
 
 ## How it fits in the stack
 
-Tests mirror the **production** structure: they import from `services`, `repositories`, `entities`, etc., and may use **`testing/item`** or **`core/testing`** factories and mocks.
+Tests mirror the **production** structure: they import from `services`, `repositories`, `entities`, etc., and may use **`tests/item_factory`**, **`tests/fixtures/item`**, or **`core/testing`** factories and mocks.
 
 ## Related files
 
 - **`pytest.ini`** — markers, defaults  
 - **`pytest.ini` / `pyproject.toml`** — coverage and plugins  
-- **`testing/item/`** — Factories and fixtures for Item API tests  
+- **`tests/item_factory.py`** / **`tests/fixtures/item.py`** — Item factory and fixtures for Item API tests  
 
 ## Practices
 

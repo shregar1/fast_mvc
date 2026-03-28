@@ -23,15 +23,15 @@ The **`tests/`** tree **mirrors** the application layout (controllers, services,
 ```text
 my-project/
 ├── tests/
-│   ├── conftest.py                    # Shared fixtures
+│   ├── conftest.py                    # Re-exports shared fixtures
+│   ├── item_factory.py                # ItemFactory for unit tests
+│   ├── fixtures/
+│   │   └── item.py                    # Item API pytest fixtures
 │   ├── example/
-│   │   └── test_example_item.py       # Item API tests (legacy path)
+│   │   └── test_example_item.py       # Item API tests
 │   ├── factories/apis/v1/example/
 │   │   └── test_factories_example.py
 │   └── …                              # abstractions, controllers, services, …
-└── testing/item/                      # ItemFactory + pytest fixtures (imported by conftest)
-    ├── factories.py
-    └── fixtures.py
 ```
 
 ## Factories
@@ -43,36 +43,22 @@ DTOs in `dtos/requests/<segment>/` follow **one concrete Pydantic class per modu
 ### ItemFactory
 
 ```python
-from testing.item import ItemFactory
+from tests.item_factory import ItemFactory
 
 # Create single entity
 item = ItemFactory.create(name="Custom Name")
+completed = ItemFactory.create(name="Done", completed=True)
 
 # Create multiple entities
 items = ItemFactory.create_batch(5)
-
-# Create API payload
-payload = ItemFactory.create_dict(completed=True)
-
-# Create with specific state
-completed = ItemFactory.completed()
-pending = ItemFactory.pending()
-
-# Boundary testing
-long_name_item = ItemFactory.with_long_name()
 ```
 
 ### Factory Methods
 
 | Method | Description |
 |--------|-------------|
-| `create(**overrides)` | Create Item |
-| `create_batch(n)` | Create n items |
-| `create_dict()` | Create API payload dict |
-| `completed()` | Create completed item |
-| `pending()` | Create pending item |
-| `with_long_name()` | Create with max length name |
-| `invalid_name_empty()` | Invalid payload for testing |
+| `create(**overrides)` | Create `Item` (optional `name`, `description`, `completed`, `id`) |
+| `create_batch(n, **kwargs)` | Create `n` items |
 
 ## Fixtures
 
