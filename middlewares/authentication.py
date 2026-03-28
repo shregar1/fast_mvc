@@ -2,7 +2,7 @@
 
 JWT decode and user session lookup use this application's repositories and DTOs.
 
-Note: This middleware requires pyfastmvc[platform] for full functionality.
+Note: This middleware requires fast-mvc[platform] for full functionality.
 Without the platform package, it will pass through all requests (development mode).
 """
 
@@ -16,7 +16,7 @@ from constants.api_status import APIStatus
 from constants.http_header import HttpHeader
 from dtos.responses.apis import IResponseAPIDTO
 
-# Optional dependencies (requires pyfastmvc[platform])
+# Optional dependencies (requires fast-mvc[platform])
 try:
     from fast_middleware.sec.jwt_bearer_auth import JWTBearerAuthMiddleware
 except ImportError:

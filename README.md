@@ -1,10 +1,10 @@
-# pyfastmvc
+# fast-mvc
 
 **Production-grade MVC tooling for FastAPI** — Beautiful interactive CLInterface for project scaffolding, entity generation, Alembic migrations, and the reference framework layout that ties together the FastMVC ecosystem (SQLAlchemy, Redis, JWT, and optional integrations).
 
 **Python:** 3.10+
 
-**Package name on PyPI:** `pyfastmvc`  
+**Package name on PyPI:** `fast-mvc`  
 **Version:** see `[project]` in [`pyproject.toml`](pyproject.toml).
 
 ## Capabilities
@@ -30,10 +30,10 @@
 ## Install
 
 ```bash
-pip install pyfastmvc
+pip install fast-mvc
 
 # For best interactive experience
-pip install pyfastmvc[interactive]
+pip install fast-mvc[interactive]
 ```
 
 Editable from this directory (when developing the framework):

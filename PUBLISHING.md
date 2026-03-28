@@ -1,4 +1,4 @@
-# Publishing **pyfastmvc** to PyPI
+# Publishing **fast-mvc** to PyPI
 
 ## Prerequisites
 
@@ -26,6 +26,6 @@ export TWINE_PASSWORD=<pypi-token>
 twine upload dist/*
 ```
 
-- **PyPI project name:** `pyfastmvc`
+- **PyPI project name:** `fast-mvc`
 - **Typical import:** `fast_cli`
 - **Repository / homepage:** https://github.com/shregar1/fastMVC

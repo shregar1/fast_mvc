@@ -363,7 +363,7 @@ The database backend (Postgres/MySQL/SQLite) and features like auth/user CRUD ar
 3. **Run it locally:**
 
    ```bash
-   pip install pyfastmvc
+   pip install fast-mvc
    fastmvc generate my_api ... # paste your generated flags
    cd my_api
    pip install -r requirements.txt

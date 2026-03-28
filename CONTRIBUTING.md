@@ -1,4 +1,4 @@
-# Contributing to pyfastmvc
+# Contributing to fast-mvc
 
 Thank you for your interest in contributing.
 
@@ -17,7 +17,7 @@ Standalone clone (if this package is its own git remote):
 
 ```bash
 git clone https://github.com/shregar1/fastMVC.git
-cd pyfastmvc
+cd fast-mvc
 python -m venv .venv
 source .venv/bin/activate   # Windows: .venv\\Scripts\\activate
 pip install -e ".[dev]" || pip install -e .

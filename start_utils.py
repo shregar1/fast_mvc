@@ -39,7 +39,7 @@ import redis
 from dotenv import load_dotenv
 from loguru import logger
 
-# Optional fast_platform configuration (requires pyfastmvc[platform])
+# Optional fast_platform configuration (requires fast-mvc[platform])
 try:
     from fast_platform import (
         CacheConfiguration,

@@ -1,4 +1,4 @@
-# Security policy — pyfastmvc
+# Security policy — fast-mvc
 
 ## Reporting a vulnerability
 

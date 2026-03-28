@@ -1,14 +1,14 @@
-# pyfastmvc (`fast_mvc_main`)
+# fast-mvc (`fast_mvc_main`)
 
 **Production-oriented MVC framework for FastAPI** — project generator, entity scaffolding, migrations, and conventions for controllers, services, repositories, DTOs, and tests.
 
 | | |
 |---|---|
-| **Distribution name** | `pyfastmvc` |
+| **Distribution name** | `fast-mvc` |
 | **Python** | ≥ 3.10 |
 | **License** | MIT (see package metadata) |
 
-This directory is the **main CLI and framework template** that ties the optional `fast_*` packages together. The rest of the monorepo provides integrations (DB, queues, storage, …); **`pyfastmvc`** is what you install to **create and evolve** applications.
+This directory is the **main CLI and framework template** that ties the optional `fast_*` packages together. The rest of the monorepo provides integrations (DB, queues, storage, …); **`fast-mvc`** is what you install to **create and evolve** applications.
 
 ---
 
@@ -32,7 +32,7 @@ python -m pip install -e ./fast_mvc_main
 Verify:
 
 ```bash
-pyfastmvc --help
+fast-mvc --help
 ```
 
 (Exact command name follows `entry_points` in package metadata.)
@@ -41,16 +41,16 @@ pyfastmvc --help
 
 ## Relationship to `fast_*` packages
 
-- **`pyfastmvc`** scaffolds the app shell and patterns.
+- **`fast-mvc`** scaffolds the app shell and patterns.
 - **`fast_platform`**, **`fast_db`**, **`fast_dataI`**, etc. are **optional libraries** you add to `pyproject.toml` / `requirements.txt` when your generated app needs them.
 
-The monorepo’s [`install_packages.sh`](../install_packages.sh) installs `fast_platform` through `fast_media` (and more) plus `pyfastmvc` for local integration testing.
+The monorepo’s [`install_packages.sh`](../install_packages.sh) installs `fast_platform` through `fast_media` (and more) plus `fast-mvc` for local integration testing.
 
 ---
 
 ## Links
 
-- Upstream project URLs, issue tracker, and changelog are listed in `pyfastmvc.egg-info/PKG-INFO` / PyPI when published.
+- Upstream project URLs, issue tracker, and changelog are listed in `fast-mvc.egg-info/PKG-INFO` / PyPI when published.
 - Monorepo overview: [../README.md](../README.md)
 
 ---

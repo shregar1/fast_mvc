@@ -38,7 +38,7 @@ Sample Item API (included):
     # GET    /items/statistics   - Get stats
 
 With Optional Services:
-    # Install: pip install pyfastmvc[platform]
+    # Install: pip install fast-mvc[platform]
     from fast_platform.notifications import EmailClient
     from fast_platform.storage import S3Client
 

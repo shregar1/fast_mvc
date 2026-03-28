@@ -140,7 +140,7 @@ DASHBOARD_ROUTER_ENABLED = DashboardRouter is not None
 
 from dtos.responses.apis.abstraction import IResponseAPIDTO
 
-# Domain errors (requires pyfastmvc[platform])
+# Domain errors (requires fast-mvc[platform])
 try:
     from fast_platform.errors import (  # pyright: ignore[reportMissingImports]
         BadInputError,
@@ -583,7 +583,7 @@ async def health_check(request: Request):
 
     """
     try:
-        api_version = version("pyfastmvc")
+        api_version = version("fast-mvc")
     except PackageNotFoundError:
         api_version = "1.5.0"
 
