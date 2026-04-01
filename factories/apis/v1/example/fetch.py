@@ -11,14 +11,14 @@ from typing import Any
 
 from dtos.requests.apis.v1.user.fetch import FetchUserRequestDTO
 
-from factories.apis.v1.example.common import new_reference_number
+from factories.apis.v1.example.common import new_reference_urn
 
 
 class ExampleFetchRequestFactory:
     """Build valid :class:`FetchUserRequestDTO` payloads and model instances.
 
-    ``reference_number`` must be a valid UUID string (see :class:`dtos.requests.abstraction.IRequestDTO`).
-    A fresh UUID is generated on each :meth:`build` unless you pass ``reference_number``.
+    ``reference_urn`` must be a valid UUID string (see :class:`dtos.requests.abstraction.IRequestDTO`).
+    A fresh UUID is generated on each :meth:`build` unless you pass ``reference_urn``.
 
     Example:
         >>> payload = ExampleFetchRequestFactory.build(name="Alice")
@@ -32,7 +32,7 @@ class ExampleFetchRequestFactory:
     def build(cls, **overrides: Any) -> dict[str, Any]:
         """Return a dict suitable for ``FetchUserRequestDTO(**payload)``."""
         base: dict[str, Any] = {
-            "reference_number": new_reference_number(),
+            "reference_urn": new_reference_urn(),
             "name": cls.DEFAULT_NAME,
             "description": cls.DEFAULT_DESCRIPTION,
         }

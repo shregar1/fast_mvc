@@ -119,9 +119,9 @@ from dtos.requests.abstraction import IRequestDTO
 class MyRequestDTO(IRequestDTO):
     custom_field: str
 
-# Requires valid UUID reference_number
+# Requires valid UUID reference_urn
 request = MyRequestDTO(
-    reference_number="550e8400-e29b-41d4-a716-446655440000",
+    reference_urn="550e8400-e29b-41d4-a716-446655440000",
     custom_field="value"
 )
 ```
@@ -132,7 +132,7 @@ request = MyRequestDTO(
 from dtos.requests.user.login import UserLoginRequestDTO
 
 login = UserLoginRequestDTO(
-    reference_number="550e8400-e29b-41d4-a716-446655440000",
+    reference_urn="550e8400-e29b-41d4-a716-446655440000",
     email="user@example.com",
     password="SecureP@ss123"
 )
@@ -149,7 +149,7 @@ login = UserLoginRequestDTO(
 from dtos.requests.user.registration import UserRegistrationRequestDTO
 
 register = UserRegistrationRequestDTO(
-    reference_number="550e8400-e29b-41d4-a716-446655440000",
+    reference_urn="550e8400-e29b-41d4-a716-446655440000",
     email="newuser@example.com",
     password="SecureP@ss123"
 )
@@ -161,7 +161,7 @@ register = UserRegistrationRequestDTO(
 from dtos.requests.user.logout import UserLogoutRequestDTO
 
 logout = UserLogoutRequestDTO(
-    reference_number="550e8400-e29b-41d4-a716-446655440000"
+    reference_urn="550e8400-e29b-41d4-a716-446655440000"
 )
 ```
 

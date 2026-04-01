@@ -927,7 +927,7 @@ async def on_startup():
     )
     logger.info(
         f"Generated {len(curl_examples)} cURL examples; Postman collection {collection_path}"
-        f"{env_msg} — variables: base_url, reference_id, reference_number, token"
+        f"{env_msg} — variables: base_url, reference_urn, reference_urn, token"
     )
     route_export_engine.clear_memory()
 

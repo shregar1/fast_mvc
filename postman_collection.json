@@ -25,7 +25,7 @@
                       },
                       {
                         "key": "x-reference-urn",
-                        "value": "{{reference_id}}",
+                        "value": "{{reference_urn}}",
                         "type": "text"
                       },
                       {
@@ -36,14 +36,8 @@
                     ],
                     "url": {
                       "raw": "{{base_url}}/api/v1/users",
-                      "host": [
-                        "{{base_url}}"
-                      ],
-                      "path": [
-                        "api",
-                        "v1",
-                        "users"
-                      ]
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "users"]
                     }
                   }
                 },
@@ -58,7 +52,7 @@
                       },
                       {
                         "key": "x-reference-urn",
-                        "value": "{{reference_id}}",
+                        "value": "{{reference_urn}}",
                         "type": "text"
                       },
                       {
@@ -73,18 +67,12 @@
                     ],
                     "url": {
                       "raw": "{{base_url}}/api/v1/users",
-                      "host": [
-                        "{{base_url}}"
-                      ],
-                      "path": [
-                        "api",
-                        "v1",
-                        "users"
-                      ]
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "users"]
                     },
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n  \"reference_urn\": \"{{reference_id}}\",\n  \"name\": \"Alice\",\n  \"email\": \"alice@example.com\",\n  \"active\": true\n}",
+                      "raw": "{\n  \"reference_urn\": \"{{reference_urn}}\",\n  \"name\": \"Alice\",\n  \"email\": \"alice@example.com\",\n  \"active\": true\n}",
                       "options": {
                         "raw": {
                           "language": "json"
@@ -107,7 +95,7 @@
                           },
                           {
                             "key": "x-reference-urn",
-                            "value": "{{reference_id}}",
+                            "value": "{{reference_urn}}",
                             "type": "text"
                           },
                           {
@@ -118,15 +106,8 @@
                         ],
                         "url": {
                           "raw": "{{base_url}}/api/v1/users/:id",
-                          "host": [
-                            "{{base_url}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "users",
-                            "id"
-                          ],
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "users", "id"],
                           "variable": [
                             {
                               "key": "id",
@@ -147,7 +128,7 @@
                           },
                           {
                             "key": "x-reference-urn",
-                            "value": "{{reference_id}}",
+                            "value": "{{reference_urn}}",
                             "type": "text"
                           },
                           {
@@ -162,15 +143,8 @@
                         ],
                         "url": {
                           "raw": "{{base_url}}/api/v1/users/:id",
-                          "host": [
-                            "{{base_url}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "users",
-                            "id"
-                          ],
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "users", "id"],
                           "variable": [
                             {
                               "key": "id",
@@ -180,7 +154,7 @@
                         },
                         "body": {
                           "mode": "raw",
-                          "raw": "{\n  \"reference_urn\": \"{{reference_id}}\",\n  \"name\": \"Alice\",\n  \"email\": \"alice@example.com\",\n  \"active\": true\n}",
+                          "raw": "{\n  \"reference_urn\": \"{{reference_urn}}\",\n  \"name\": \"Alice\",\n  \"email\": \"alice@example.com\",\n  \"active\": true\n}",
                           "options": {
                             "raw": {
                               "language": "json"
@@ -200,7 +174,7 @@
                           },
                           {
                             "key": "x-reference-urn",
-                            "value": "{{reference_id}}",
+                            "value": "{{reference_urn}}",
                             "type": "text"
                           },
                           {
@@ -211,15 +185,8 @@
                         ],
                         "url": {
                           "raw": "{{base_url}}/api/v1/users/:id",
-                          "host": [
-                            "{{base_url}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "users",
-                            "id"
-                          ],
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "users", "id"],
                           "variable": [
                             {
                               "key": "id",
@@ -247,7 +214,7 @@
                       },
                       {
                         "key": "x-reference-urn",
-                        "value": "{{reference_id}}",
+                        "value": "{{reference_urn}}",
                         "type": "text"
                       },
                       {
@@ -258,15 +225,8 @@
                     ],
                     "url": {
                       "raw": "{{base_url}}/api/v1/admin/roles",
-                      "host": [
-                        "{{base_url}}"
-                      ],
-                      "path": [
-                        "api",
-                        "v1",
-                        "admin",
-                        "roles"
-                      ]
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "admin", "roles"]
                     }
                   }
                 },
@@ -281,7 +241,7 @@
                       },
                       {
                         "key": "x-reference-urn",
-                        "value": "{{reference_id}}",
+                        "value": "{{reference_urn}}",
                         "type": "text"
                       },
                       {
@@ -296,19 +256,12 @@
                     ],
                     "url": {
                       "raw": "{{base_url}}/api/v1/admin/roles",
-                      "host": [
-                        "{{base_url}}"
-                      ],
-                      "path": [
-                        "api",
-                        "v1",
-                        "admin",
-                        "roles"
-                      ]
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "admin", "roles"]
                     },
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n  \"reference_urn\": \"{{reference_id}}\",\n  \"name\": \"manager\",\n  \"permissions\": [\n    \"users.read\",\n    \"users.write\"\n  ]\n}",
+                      "raw": "{\n  \"reference_urn\": \"{{reference_urn}}\",\n  \"name\": \"manager\",\n  \"permissions\": [\n    \"users.read\",\n    \"users.write\"\n  ]\n}",
                       "options": {
                         "raw": {
                           "language": "json"
@@ -331,7 +284,7 @@
                           },
                           {
                             "key": "x-reference-urn",
-                            "value": "{{reference_id}}",
+                            "value": "{{reference_urn}}",
                             "type": "text"
                           },
                           {
@@ -342,16 +295,8 @@
                         ],
                         "url": {
                           "raw": "{{base_url}}/api/v1/admin/roles/:id",
-                          "host": [
-                            "{{base_url}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "admin",
-                            "roles",
-                            "id"
-                          ],
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "admin", "roles", "id"],
                           "variable": [
                             {
                               "key": "id",
@@ -372,7 +317,7 @@
                           },
                           {
                             "key": "x-reference-urn",
-                            "value": "{{reference_id}}",
+                            "value": "{{reference_urn}}",
                             "type": "text"
                           },
                           {
@@ -387,16 +332,8 @@
                         ],
                         "url": {
                           "raw": "{{base_url}}/api/v1/admin/roles/:id",
-                          "host": [
-                            "{{base_url}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "admin",
-                            "roles",
-                            "id"
-                          ],
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "admin", "roles", "id"],
                           "variable": [
                             {
                               "key": "id",
@@ -406,7 +343,7 @@
                         },
                         "body": {
                           "mode": "raw",
-                          "raw": "{\n  \"reference_urn\": \"{{reference_id}}\",\n  \"name\": \"manager\",\n  \"permissions\": [\n    \"users.read\",\n    \"users.write\"\n  ]\n}",
+                          "raw": "{\n  \"reference_urn\": \"{{reference_urn}}\",\n  \"name\": \"manager\",\n  \"permissions\": [\n    \"users.read\",\n    \"users.write\"\n  ]\n}",
                           "options": {
                             "raw": {
                               "language": "json"
@@ -426,7 +363,7 @@
                           },
                           {
                             "key": "x-reference-urn",
-                            "value": "{{reference_id}}",
+                            "value": "{{reference_urn}}",
                             "type": "text"
                           },
                           {
@@ -437,16 +374,8 @@
                         ],
                         "url": {
                           "raw": "{{base_url}}/api/v1/admin/roles/:id",
-                          "host": [
-                            "{{base_url}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "admin",
-                            "roles",
-                            "id"
-                          ],
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "admin", "roles", "id"],
                           "variable": [
                             {
                               "key": "id",
@@ -474,7 +403,7 @@
                       },
                       {
                         "key": "x-reference-urn",
-                        "value": "{{reference_id}}",
+                        "value": "{{reference_urn}}",
                         "type": "text"
                       },
                       {
@@ -485,15 +414,8 @@
                     ],
                     "url": {
                       "raw": "{{base_url}}/api/v1/admin/permissions",
-                      "host": [
-                        "{{base_url}}"
-                      ],
-                      "path": [
-                        "api",
-                        "v1",
-                        "admin",
-                        "permissions"
-                      ]
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "admin", "permissions"]
                     }
                   }
                 },
@@ -508,7 +430,7 @@
                       },
                       {
                         "key": "x-reference-urn",
-                        "value": "{{reference_id}}",
+                        "value": "{{reference_urn}}",
                         "type": "text"
                       },
                       {
@@ -523,19 +445,12 @@
                     ],
                     "url": {
                       "raw": "{{base_url}}/api/v1/admin/permissions",
-                      "host": [
-                        "{{base_url}}"
-                      ],
-                      "path": [
-                        "api",
-                        "v1",
-                        "admin",
-                        "permissions"
-                      ]
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "admin", "permissions"]
                     },
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n  \"reference_urn\": \"{{reference_id}}\",\n  \"key\": \"orders.refund\",\n  \"description\": \"Allow refund\"\n}",
+                      "raw": "{\n  \"reference_urn\": \"{{reference_urn}}\",\n  \"key\": \"orders.refund\",\n  \"description\": \"Allow refund\"\n}",
                       "options": {
                         "raw": {
                           "language": "json"
@@ -558,7 +473,7 @@
                           },
                           {
                             "key": "x-reference-urn",
-                            "value": "{{reference_id}}",
+                            "value": "{{reference_urn}}",
                             "type": "text"
                           },
                           {
@@ -569,16 +484,8 @@
                         ],
                         "url": {
                           "raw": "{{base_url}}/api/v1/admin/permissions/:id",
-                          "host": [
-                            "{{base_url}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "admin",
-                            "permissions",
-                            "id"
-                          ],
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "admin", "permissions", "id"],
                           "variable": [
                             {
                               "key": "id",
@@ -599,7 +506,7 @@
                           },
                           {
                             "key": "x-reference-urn",
-                            "value": "{{reference_id}}",
+                            "value": "{{reference_urn}}",
                             "type": "text"
                           },
                           {
@@ -614,16 +521,8 @@
                         ],
                         "url": {
                           "raw": "{{base_url}}/api/v1/admin/permissions/:id",
-                          "host": [
-                            "{{base_url}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "admin",
-                            "permissions",
-                            "id"
-                          ],
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "admin", "permissions", "id"],
                           "variable": [
                             {
                               "key": "id",
@@ -633,7 +532,7 @@
                         },
                         "body": {
                           "mode": "raw",
-                          "raw": "{\n  \"reference_urn\": \"{{reference_id}}\",\n  \"key\": \"orders.refund\",\n  \"description\": \"Allow refund\"\n}",
+                          "raw": "{\n  \"reference_urn\": \"{{reference_urn}}\",\n  \"key\": \"orders.refund\",\n  \"description\": \"Allow refund\"\n}",
                           "options": {
                             "raw": {
                               "language": "json"
@@ -653,7 +552,7 @@
                           },
                           {
                             "key": "x-reference-urn",
-                            "value": "{{reference_id}}",
+                            "value": "{{reference_urn}}",
                             "type": "text"
                           },
                           {
@@ -664,16 +563,8 @@
                         ],
                         "url": {
                           "raw": "{{base_url}}/api/v1/admin/permissions/:id",
-                          "host": [
-                            "{{base_url}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "admin",
-                            "permissions",
-                            "id"
-                          ],
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "admin", "permissions", "id"],
                           "variable": [
                             {
                               "key": "id",
@@ -701,7 +592,7 @@
                       },
                       {
                         "key": "x-reference-urn",
-                        "value": "{{reference_id}}",
+                        "value": "{{reference_urn}}",
                         "type": "text"
                       },
                       {
@@ -712,15 +603,8 @@
                     ],
                     "url": {
                       "raw": "{{base_url}}/api/v1/catalog/products",
-                      "host": [
-                        "{{base_url}}"
-                      ],
-                      "path": [
-                        "api",
-                        "v1",
-                        "catalog",
-                        "products"
-                      ]
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "catalog", "products"]
                     }
                   }
                 },
@@ -735,7 +619,7 @@
                       },
                       {
                         "key": "x-reference-urn",
-                        "value": "{{reference_id}}",
+                        "value": "{{reference_urn}}",
                         "type": "text"
                       },
                       {
@@ -750,19 +634,12 @@
                     ],
                     "url": {
                       "raw": "{{base_url}}/api/v1/catalog/products",
-                      "host": [
-                        "{{base_url}}"
-                      ],
-                      "path": [
-                        "api",
-                        "v1",
-                        "catalog",
-                        "products"
-                      ]
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "catalog", "products"]
                     },
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n  \"reference_urn\": \"{{reference_id}}\",\n  \"sku\": \"SKU-1001\",\n  \"name\": \"Desk Lamp\",\n  \"price\": 59.99\n}",
+                      "raw": "{\n  \"reference_urn\": \"{{reference_urn}}\",\n  \"sku\": \"SKU-1001\",\n  \"name\": \"Desk Lamp\",\n  \"price\": 59.99\n}",
                       "options": {
                         "raw": {
                           "language": "json"
@@ -785,7 +662,7 @@
                           },
                           {
                             "key": "x-reference-urn",
-                            "value": "{{reference_id}}",
+                            "value": "{{reference_urn}}",
                             "type": "text"
                           },
                           {
@@ -796,16 +673,8 @@
                         ],
                         "url": {
                           "raw": "{{base_url}}/api/v1/catalog/products/:id",
-                          "host": [
-                            "{{base_url}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "catalog",
-                            "products",
-                            "id"
-                          ],
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "catalog", "products", "id"],
                           "variable": [
                             {
                               "key": "id",
@@ -826,7 +695,7 @@
                           },
                           {
                             "key": "x-reference-urn",
-                            "value": "{{reference_id}}",
+                            "value": "{{reference_urn}}",
                             "type": "text"
                           },
                           {
@@ -841,16 +710,8 @@
                         ],
                         "url": {
                           "raw": "{{base_url}}/api/v1/catalog/products/:id",
-                          "host": [
-                            "{{base_url}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "catalog",
-                            "products",
-                            "id"
-                          ],
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "catalog", "products", "id"],
                           "variable": [
                             {
                               "key": "id",
@@ -860,7 +721,7 @@
                         },
                         "body": {
                           "mode": "raw",
-                          "raw": "{\n  \"reference_urn\": \"{{reference_id}}\",\n  \"sku\": \"SKU-1001\",\n  \"name\": \"Desk Lamp\",\n  \"price\": 59.99\n}",
+                          "raw": "{\n  \"reference_urn\": \"{{reference_urn}}\",\n  \"sku\": \"SKU-1001\",\n  \"name\": \"Desk Lamp\",\n  \"price\": 59.99\n}",
                           "options": {
                             "raw": {
                               "language": "json"
@@ -880,7 +741,7 @@
                           },
                           {
                             "key": "x-reference-urn",
-                            "value": "{{reference_id}}",
+                            "value": "{{reference_urn}}",
                             "type": "text"
                           },
                           {
@@ -891,16 +752,8 @@
                         ],
                         "url": {
                           "raw": "{{base_url}}/api/v1/catalog/products/:id",
-                          "host": [
-                            "{{base_url}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "catalog",
-                            "products",
-                            "id"
-                          ],
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "catalog", "products", "id"],
                           "variable": [
                             {
                               "key": "id",
@@ -928,7 +781,7 @@
                       },
                       {
                         "key": "x-reference-urn",
-                        "value": "{{reference_id}}",
+                        "value": "{{reference_urn}}",
                         "type": "text"
                       },
                       {
@@ -939,15 +792,8 @@
                     ],
                     "url": {
                       "raw": "{{base_url}}/api/v1/catalog/categories",
-                      "host": [
-                        "{{base_url}}"
-                      ],
-                      "path": [
-                        "api",
-                        "v1",
-                        "catalog",
-                        "categories"
-                      ]
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "catalog", "categories"]
                     }
                   }
                 },
@@ -962,7 +808,7 @@
                       },
                       {
                         "key": "x-reference-urn",
-                        "value": "{{reference_id}}",
+                        "value": "{{reference_urn}}",
                         "type": "text"
                       },
                       {
@@ -977,19 +823,12 @@
                     ],
                     "url": {
                       "raw": "{{base_url}}/api/v1/catalog/categories",
-                      "host": [
-                        "{{base_url}}"
-                      ],
-                      "path": [
-                        "api",
-                        "v1",
-                        "catalog",
-                        "categories"
-                      ]
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "catalog", "categories"]
                     },
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n  \"reference_urn\": \"{{reference_id}}\",\n  \"code\": \"lighting\",\n  \"title\": \"Lighting\"\n}",
+                      "raw": "{\n  \"reference_urn\": \"{{reference_urn}}\",\n  \"code\": \"lighting\",\n  \"title\": \"Lighting\"\n}",
                       "options": {
                         "raw": {
                           "language": "json"
@@ -1012,7 +851,7 @@
                           },
                           {
                             "key": "x-reference-urn",
-                            "value": "{{reference_id}}",
+                            "value": "{{reference_urn}}",
                             "type": "text"
                           },
                           {
@@ -1023,16 +862,8 @@
                         ],
                         "url": {
                           "raw": "{{base_url}}/api/v1/catalog/categories/:id",
-                          "host": [
-                            "{{base_url}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "catalog",
-                            "categories",
-                            "id"
-                          ],
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "catalog", "categories", "id"],
                           "variable": [
                             {
                               "key": "id",
@@ -1053,7 +884,7 @@
                           },
                           {
                             "key": "x-reference-urn",
-                            "value": "{{reference_id}}",
+                            "value": "{{reference_urn}}",
                             "type": "text"
                           },
                           {
@@ -1068,16 +899,8 @@
                         ],
                         "url": {
                           "raw": "{{base_url}}/api/v1/catalog/categories/:id",
-                          "host": [
-                            "{{base_url}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "catalog",
-                            "categories",
-                            "id"
-                          ],
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "catalog", "categories", "id"],
                           "variable": [
                             {
                               "key": "id",
@@ -1087,7 +910,7 @@
                         },
                         "body": {
                           "mode": "raw",
-                          "raw": "{\n  \"reference_urn\": \"{{reference_id}}\",\n  \"code\": \"lighting\",\n  \"title\": \"Lighting\"\n}",
+                          "raw": "{\n  \"reference_urn\": \"{{reference_urn}}\",\n  \"code\": \"lighting\",\n  \"title\": \"Lighting\"\n}",
                           "options": {
                             "raw": {
                               "language": "json"
@@ -1107,7 +930,7 @@
                           },
                           {
                             "key": "x-reference-urn",
-                            "value": "{{reference_id}}",
+                            "value": "{{reference_urn}}",
                             "type": "text"
                           },
                           {
@@ -1118,16 +941,8 @@
                         ],
                         "url": {
                           "raw": "{{base_url}}/api/v1/catalog/categories/:id",
-                          "host": [
-                            "{{base_url}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "catalog",
-                            "categories",
-                            "id"
-                          ],
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "catalog", "categories", "id"],
                           "variable": [
                             {
                               "key": "id",
@@ -1155,7 +970,7 @@
                       },
                       {
                         "key": "x-reference-urn",
-                        "value": "{{reference_id}}",
+                        "value": "{{reference_urn}}",
                         "type": "text"
                       },
                       {
@@ -1166,14 +981,8 @@
                     ],
                     "url": {
                       "raw": "{{base_url}}/api/v1/orders",
-                      "host": [
-                        "{{base_url}}"
-                      ],
-                      "path": [
-                        "api",
-                        "v1",
-                        "orders"
-                      ]
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "orders"]
                     }
                   }
                 },
@@ -1188,7 +997,7 @@
                       },
                       {
                         "key": "x-reference-urn",
-                        "value": "{{reference_id}}",
+                        "value": "{{reference_urn}}",
                         "type": "text"
                       },
                       {
@@ -1203,18 +1012,12 @@
                     ],
                     "url": {
                       "raw": "{{base_url}}/api/v1/orders",
-                      "host": [
-                        "{{base_url}}"
-                      ],
-                      "path": [
-                        "api",
-                        "v1",
-                        "orders"
-                      ]
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "orders"]
                     },
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n  \"reference_urn\": \"{{reference_id}}\",\n  \"customer_id\": 101,\n  \"currency\": \"USD\",\n  \"status\": \"draft\"\n}",
+                      "raw": "{\n  \"reference_urn\": \"{{reference_urn}}\",\n  \"customer_id\": 101,\n  \"currency\": \"USD\",\n  \"status\": \"draft\"\n}",
                       "options": {
                         "raw": {
                           "language": "json"
@@ -1237,7 +1040,7 @@
                           },
                           {
                             "key": "x-reference-urn",
-                            "value": "{{reference_id}}",
+                            "value": "{{reference_urn}}",
                             "type": "text"
                           },
                           {
@@ -1248,15 +1051,8 @@
                         ],
                         "url": {
                           "raw": "{{base_url}}/api/v1/orders/:id",
-                          "host": [
-                            "{{base_url}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "orders",
-                            "id"
-                          ],
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "orders", "id"],
                           "variable": [
                             {
                               "key": "id",
@@ -1277,7 +1073,7 @@
                           },
                           {
                             "key": "x-reference-urn",
-                            "value": "{{reference_id}}",
+                            "value": "{{reference_urn}}",
                             "type": "text"
                           },
                           {
@@ -1292,15 +1088,8 @@
                         ],
                         "url": {
                           "raw": "{{base_url}}/api/v1/orders/:id",
-                          "host": [
-                            "{{base_url}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "orders",
-                            "id"
-                          ],
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "orders", "id"],
                           "variable": [
                             {
                               "key": "id",
@@ -1310,7 +1099,7 @@
                         },
                         "body": {
                           "mode": "raw",
-                          "raw": "{\n  \"reference_urn\": \"{{reference_id}}\",\n  \"customer_id\": 101,\n  \"currency\": \"USD\",\n  \"status\": \"draft\"\n}",
+                          "raw": "{\n  \"reference_urn\": \"{{reference_urn}}\",\n  \"customer_id\": 101,\n  \"currency\": \"USD\",\n  \"status\": \"draft\"\n}",
                           "options": {
                             "raw": {
                               "language": "json"
@@ -1330,7 +1119,7 @@
                           },
                           {
                             "key": "x-reference-urn",
-                            "value": "{{reference_id}}",
+                            "value": "{{reference_urn}}",
                             "type": "text"
                           },
                           {
@@ -1341,15 +1130,8 @@
                         ],
                         "url": {
                           "raw": "{{base_url}}/api/v1/orders/:id",
-                          "host": [
-                            "{{base_url}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "orders",
-                            "id"
-                          ],
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "orders", "id"],
                           "variable": [
                             {
                               "key": "id",
@@ -1377,7 +1159,7 @@
                       },
                       {
                         "key": "x-reference-urn",
-                        "value": "{{reference_id}}",
+                        "value": "{{reference_urn}}",
                         "type": "text"
                       },
                       {
@@ -1388,15 +1170,8 @@
                     ],
                     "url": {
                       "raw": "{{base_url}}/api/v1/orders/items",
-                      "host": [
-                        "{{base_url}}"
-                      ],
-                      "path": [
-                        "api",
-                        "v1",
-                        "orders",
-                        "items"
-                      ]
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "orders", "items"]
                     }
                   }
                 },
@@ -1411,7 +1186,7 @@
                       },
                       {
                         "key": "x-reference-urn",
-                        "value": "{{reference_id}}",
+                        "value": "{{reference_urn}}",
                         "type": "text"
                       },
                       {
@@ -1426,19 +1201,12 @@
                     ],
                     "url": {
                       "raw": "{{base_url}}/api/v1/orders/items",
-                      "host": [
-                        "{{base_url}}"
-                      ],
-                      "path": [
-                        "api",
-                        "v1",
-                        "orders",
-                        "items"
-                      ]
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "orders", "items"]
                     },
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n  \"reference_urn\": \"{{reference_id}}\",\n  \"order_id\": 501,\n  \"product_id\": 1001,\n  \"quantity\": 2\n}",
+                      "raw": "{\n  \"reference_urn\": \"{{reference_urn}}\",\n  \"order_id\": 501,\n  \"product_id\": 1001,\n  \"quantity\": 2\n}",
                       "options": {
                         "raw": {
                           "language": "json"
@@ -1461,7 +1229,7 @@
                           },
                           {
                             "key": "x-reference-urn",
-                            "value": "{{reference_id}}",
+                            "value": "{{reference_urn}}",
                             "type": "text"
                           },
                           {
@@ -1472,16 +1240,8 @@
                         ],
                         "url": {
                           "raw": "{{base_url}}/api/v1/orders/items/:id",
-                          "host": [
-                            "{{base_url}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "orders",
-                            "items",
-                            "id"
-                          ],
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "orders", "items", "id"],
                           "variable": [
                             {
                               "key": "id",
@@ -1502,7 +1262,7 @@
                           },
                           {
                             "key": "x-reference-urn",
-                            "value": "{{reference_id}}",
+                            "value": "{{reference_urn}}",
                             "type": "text"
                           },
                           {
@@ -1517,16 +1277,8 @@
                         ],
                         "url": {
                           "raw": "{{base_url}}/api/v1/orders/items/:id",
-                          "host": [
-                            "{{base_url}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "orders",
-                            "items",
-                            "id"
-                          ],
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "orders", "items", "id"],
                           "variable": [
                             {
                               "key": "id",
@@ -1536,7 +1288,7 @@
                         },
                         "body": {
                           "mode": "raw",
-                          "raw": "{\n  \"reference_urn\": \"{{reference_id}}\",\n  \"order_id\": 501,\n  \"product_id\": 1001,\n  \"quantity\": 2\n}",
+                          "raw": "{\n  \"reference_urn\": \"{{reference_urn}}\",\n  \"order_id\": 501,\n  \"product_id\": 1001,\n  \"quantity\": 2\n}",
                           "options": {
                             "raw": {
                               "language": "json"
@@ -1556,7 +1308,7 @@
                           },
                           {
                             "key": "x-reference-urn",
-                            "value": "{{reference_id}}",
+                            "value": "{{reference_urn}}",
                             "type": "text"
                           },
                           {
@@ -1567,16 +1319,8 @@
                         ],
                         "url": {
                           "raw": "{{base_url}}/api/v1/orders/items/:id",
-                          "host": [
-                            "{{base_url}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "orders",
-                            "items",
-                            "id"
-                          ],
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "orders", "items", "id"],
                           "variable": [
                             {
                               "key": "id",
@@ -1604,7 +1348,7 @@
                       },
                       {
                         "key": "x-reference-urn",
-                        "value": "{{reference_id}}",
+                        "value": "{{reference_urn}}",
                         "type": "text"
                       },
                       {
@@ -1615,15 +1359,8 @@
                     ],
                     "url": {
                       "raw": "{{base_url}}/api/v1/billing/invoices",
-                      "host": [
-                        "{{base_url}}"
-                      ],
-                      "path": [
-                        "api",
-                        "v1",
-                        "billing",
-                        "invoices"
-                      ]
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "billing", "invoices"]
                     }
                   }
                 },
@@ -1638,7 +1375,7 @@
                       },
                       {
                         "key": "x-reference-urn",
-                        "value": "{{reference_id}}",
+                        "value": "{{reference_urn}}",
                         "type": "text"
                       },
                       {
@@ -1653,19 +1390,12 @@
                     ],
                     "url": {
                       "raw": "{{base_url}}/api/v1/billing/invoices",
-                      "host": [
-                        "{{base_url}}"
-                      ],
-                      "path": [
-                        "api",
-                        "v1",
-                        "billing",
-                        "invoices"
-                      ]
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "billing", "invoices"]
                     },
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n  \"reference_urn\": \"{{reference_id}}\",\n  \"order_id\": 501,\n  \"amount\": 119.98,\n  \"due_date\": \"2026-12-31\"\n}",
+                      "raw": "{\n  \"reference_urn\": \"{{reference_urn}}\",\n  \"order_id\": 501,\n  \"amount\": 119.98,\n  \"due_date\": \"2026-12-31\"\n}",
                       "options": {
                         "raw": {
                           "language": "json"
@@ -1688,7 +1418,7 @@
                           },
                           {
                             "key": "x-reference-urn",
-                            "value": "{{reference_id}}",
+                            "value": "{{reference_urn}}",
                             "type": "text"
                           },
                           {
@@ -1699,16 +1429,8 @@
                         ],
                         "url": {
                           "raw": "{{base_url}}/api/v1/billing/invoices/:id",
-                          "host": [
-                            "{{base_url}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "billing",
-                            "invoices",
-                            "id"
-                          ],
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "billing", "invoices", "id"],
                           "variable": [
                             {
                               "key": "id",
@@ -1729,7 +1451,7 @@
                           },
                           {
                             "key": "x-reference-urn",
-                            "value": "{{reference_id}}",
+                            "value": "{{reference_urn}}",
                             "type": "text"
                           },
                           {
@@ -1744,16 +1466,8 @@
                         ],
                         "url": {
                           "raw": "{{base_url}}/api/v1/billing/invoices/:id",
-                          "host": [
-                            "{{base_url}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "billing",
-                            "invoices",
-                            "id"
-                          ],
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "billing", "invoices", "id"],
                           "variable": [
                             {
                               "key": "id",
@@ -1763,7 +1477,7 @@
                         },
                         "body": {
                           "mode": "raw",
-                          "raw": "{\n  \"reference_urn\": \"{{reference_id}}\",\n  \"order_id\": 501,\n  \"amount\": 119.98,\n  \"due_date\": \"2026-12-31\"\n}",
+                          "raw": "{\n  \"reference_urn\": \"{{reference_urn}}\",\n  \"order_id\": 501,\n  \"amount\": 119.98,\n  \"due_date\": \"2026-12-31\"\n}",
                           "options": {
                             "raw": {
                               "language": "json"
@@ -1783,7 +1497,7 @@
                           },
                           {
                             "key": "x-reference-urn",
-                            "value": "{{reference_id}}",
+                            "value": "{{reference_urn}}",
                             "type": "text"
                           },
                           {
@@ -1794,16 +1508,8 @@
                         ],
                         "url": {
                           "raw": "{{base_url}}/api/v1/billing/invoices/:id",
-                          "host": [
-                            "{{base_url}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "billing",
-                            "invoices",
-                            "id"
-                          ],
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "billing", "invoices", "id"],
                           "variable": [
                             {
                               "key": "id",
@@ -1831,7 +1537,7 @@
                       },
                       {
                         "key": "x-reference-urn",
-                        "value": "{{reference_id}}",
+                        "value": "{{reference_urn}}",
                         "type": "text"
                       },
                       {
@@ -1842,15 +1548,8 @@
                     ],
                     "url": {
                       "raw": "{{base_url}}/api/v1/billing/payments",
-                      "host": [
-                        "{{base_url}}"
-                      ],
-                      "path": [
-                        "api",
-                        "v1",
-                        "billing",
-                        "payments"
-                      ]
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "billing", "payments"]
                     }
                   }
                 },
@@ -1865,7 +1564,7 @@
                       },
                       {
                         "key": "x-reference-urn",
-                        "value": "{{reference_id}}",
+                        "value": "{{reference_urn}}",
                         "type": "text"
                       },
                       {
@@ -1880,19 +1579,12 @@
                     ],
                     "url": {
                       "raw": "{{base_url}}/api/v1/billing/payments",
-                      "host": [
-                        "{{base_url}}"
-                      ],
-                      "path": [
-                        "api",
-                        "v1",
-                        "billing",
-                        "payments"
-                      ]
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "billing", "payments"]
                     },
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n  \"reference_urn\": \"{{reference_id}}\",\n  \"invoice_id\": 301,\n  \"amount\": 119.98,\n  \"provider\": \"stripe\"\n}",
+                      "raw": "{\n  \"reference_urn\": \"{{reference_urn}}\",\n  \"invoice_id\": 301,\n  \"amount\": 119.98,\n  \"provider\": \"stripe\"\n}",
                       "options": {
                         "raw": {
                           "language": "json"
@@ -1915,7 +1607,7 @@
                           },
                           {
                             "key": "x-reference-urn",
-                            "value": "{{reference_id}}",
+                            "value": "{{reference_urn}}",
                             "type": "text"
                           },
                           {
@@ -1926,16 +1618,8 @@
                         ],
                         "url": {
                           "raw": "{{base_url}}/api/v1/billing/payments/:id",
-                          "host": [
-                            "{{base_url}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "billing",
-                            "payments",
-                            "id"
-                          ],
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "billing", "payments", "id"],
                           "variable": [
                             {
                               "key": "id",
@@ -1956,7 +1640,7 @@
                           },
                           {
                             "key": "x-reference-urn",
-                            "value": "{{reference_id}}",
+                            "value": "{{reference_urn}}",
                             "type": "text"
                           },
                           {
@@ -1971,16 +1655,8 @@
                         ],
                         "url": {
                           "raw": "{{base_url}}/api/v1/billing/payments/:id",
-                          "host": [
-                            "{{base_url}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "billing",
-                            "payments",
-                            "id"
-                          ],
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "billing", "payments", "id"],
                           "variable": [
                             {
                               "key": "id",
@@ -1990,7 +1666,7 @@
                         },
                         "body": {
                           "mode": "raw",
-                          "raw": "{\n  \"reference_urn\": \"{{reference_id}}\",\n  \"invoice_id\": 301,\n  \"amount\": 119.98,\n  \"provider\": \"stripe\"\n}",
+                          "raw": "{\n  \"reference_urn\": \"{{reference_urn}}\",\n  \"invoice_id\": 301,\n  \"amount\": 119.98,\n  \"provider\": \"stripe\"\n}",
                           "options": {
                             "raw": {
                               "language": "json"
@@ -2010,7 +1686,7 @@
                           },
                           {
                             "key": "x-reference-urn",
-                            "value": "{{reference_id}}",
+                            "value": "{{reference_urn}}",
                             "type": "text"
                           },
                           {
@@ -2021,16 +1697,8 @@
                         ],
                         "url": {
                           "raw": "{{base_url}}/api/v1/billing/payments/:id",
-                          "host": [
-                            "{{base_url}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "billing",
-                            "payments",
-                            "id"
-                          ],
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "billing", "payments", "id"],
                           "variable": [
                             {
                               "key": "id",
@@ -2058,7 +1726,7 @@
                       },
                       {
                         "key": "x-reference-urn",
-                        "value": "{{reference_id}}",
+                        "value": "{{reference_urn}}",
                         "type": "text"
                       },
                       {
@@ -2069,16 +1737,8 @@
                     ],
                     "url": {
                       "raw": "{{base_url}}/api/v1/notifications/email/templates",
-                      "host": [
-                        "{{base_url}}"
-                      ],
-                      "path": [
-                        "api",
-                        "v1",
-                        "notifications",
-                        "email",
-                        "templates"
-                      ]
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "notifications", "email", "templates"]
                     }
                   }
                 },
@@ -2093,7 +1753,7 @@
                       },
                       {
                         "key": "x-reference-urn",
-                        "value": "{{reference_id}}",
+                        "value": "{{reference_urn}}",
                         "type": "text"
                       },
                       {
@@ -2108,20 +1768,12 @@
                     ],
                     "url": {
                       "raw": "{{base_url}}/api/v1/notifications/email/templates",
-                      "host": [
-                        "{{base_url}}"
-                      ],
-                      "path": [
-                        "api",
-                        "v1",
-                        "notifications",
-                        "email",
-                        "templates"
-                      ]
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "notifications", "email", "templates"]
                     },
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n  \"reference_urn\": \"{{reference_id}}\",\n  \"key\": \"welcome\",\n  \"subject\": \"Welcome\",\n  \"html\": \"<h1>Hello</h1>\"\n}",
+                      "raw": "{\n  \"reference_urn\": \"{{reference_urn}}\",\n  \"key\": \"welcome\",\n  \"subject\": \"Welcome\",\n  \"html\": \"<h1>Hello</h1>\"\n}",
                       "options": {
                         "raw": {
                           "language": "json"
@@ -2144,7 +1796,7 @@
                           },
                           {
                             "key": "x-reference-urn",
-                            "value": "{{reference_id}}",
+                            "value": "{{reference_urn}}",
                             "type": "text"
                           },
                           {
@@ -2155,17 +1807,8 @@
                         ],
                         "url": {
                           "raw": "{{base_url}}/api/v1/notifications/email/templates/:id",
-                          "host": [
-                            "{{base_url}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "notifications",
-                            "email",
-                            "templates",
-                            "id"
-                          ],
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "notifications", "email", "templates", "id"],
                           "variable": [
                             {
                               "key": "id",
@@ -2186,7 +1829,7 @@
                           },
                           {
                             "key": "x-reference-urn",
-                            "value": "{{reference_id}}",
+                            "value": "{{reference_urn}}",
                             "type": "text"
                           },
                           {
@@ -2201,17 +1844,8 @@
                         ],
                         "url": {
                           "raw": "{{base_url}}/api/v1/notifications/email/templates/:id",
-                          "host": [
-                            "{{base_url}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "notifications",
-                            "email",
-                            "templates",
-                            "id"
-                          ],
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "notifications", "email", "templates", "id"],
                           "variable": [
                             {
                               "key": "id",
@@ -2221,7 +1855,7 @@
                         },
                         "body": {
                           "mode": "raw",
-                          "raw": "{\n  \"reference_urn\": \"{{reference_id}}\",\n  \"key\": \"welcome\",\n  \"subject\": \"Welcome\",\n  \"html\": \"<h1>Hello</h1>\"\n}",
+                          "raw": "{\n  \"reference_urn\": \"{{reference_urn}}\",\n  \"key\": \"welcome\",\n  \"subject\": \"Welcome\",\n  \"html\": \"<h1>Hello</h1>\"\n}",
                           "options": {
                             "raw": {
                               "language": "json"
@@ -2241,7 +1875,7 @@
                           },
                           {
                             "key": "x-reference-urn",
-                            "value": "{{reference_id}}",
+                            "value": "{{reference_urn}}",
                             "type": "text"
                           },
                           {
@@ -2252,17 +1886,8 @@
                         ],
                         "url": {
                           "raw": "{{base_url}}/api/v1/notifications/email/templates/:id",
-                          "host": [
-                            "{{base_url}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "notifications",
-                            "email",
-                            "templates",
-                            "id"
-                          ],
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "notifications", "email", "templates", "id"],
                           "variable": [
                             {
                               "key": "id",
@@ -2287,11 +1912,11 @@
       "value": "http://0.0.0.0:8000"
     },
     {
-      "key": "reference_id",
+      "key": "reference_urn",
       "value": "{{$randomUUID}}"
     },
     {
-      "key": "reference_number",
+      "key": "reference_urn",
       "value": "{{$randomUUID}}"
     },
     {

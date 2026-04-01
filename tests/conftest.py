@@ -14,7 +14,7 @@ Usage:
 
     def test_factories(fetch_example_request_payload):
         # Top-level factories package (see factories/README.md)
-        assert "reference_number" in fetch_example_request_payload
+        assert "reference_urn" in fetch_example_request_payload
 """
 
 import os
@@ -96,7 +96,7 @@ def _post_item(
     r = client.post(
         "/items",
         json={
-            "reference_number": str(uuid4()),
+            "reference_urn": str(uuid4()),
             "name": name,
             "description": description,
             "completed": completed,
@@ -194,7 +194,7 @@ def mock_expired_token():
 @pytest.fixture
 def create_item_payload() -> dict:
     return {
-        "reference_number": str(uuid4()),
+        "reference_urn": str(uuid4()),
         "name": "Test Item",
         "description": "Test Description",
         "completed": False,
@@ -204,7 +204,7 @@ def create_item_payload() -> dict:
 @pytest.fixture
 def update_item_payload() -> dict:
     return {
-        "reference_number": str(uuid4()),
+        "reference_urn": str(uuid4()),
         "name": "Updated Name",
         "description": "Updated description",
     }
@@ -318,5 +318,5 @@ from factories import ExampleFetchRequestFactory
 
 @pytest.fixture
 def fetch_example_request_payload() -> dict:
-    """Valid ``FetchUserRequestDTO`` body fields as a dict (includes ``reference_number``)."""
+    """Valid ``FetchUserRequestDTO`` body fields as a dict (includes ``reference_urn``)."""
     return ExampleFetchRequestFactory.build()

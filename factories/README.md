@@ -10,7 +10,7 @@ It complements **`tests/factories/apis/v1/item/`** (`ItemFactory`, `ItemServiceF
 
 | Module | HTTP verb (typical) | DTO |
 |--------|---------------------|-----|
-| `common.py` | — | `new_reference_number()` helper |
+| `common.py` | — | `new_reference_urn()` helper |
 | `fetch.py` | GET | `FetchUserRequestDTO` (`dtos/requests/apis/v1/user/fetch`) |
 | `create.py` | POST | `ExampleCreateRequestDTO` |
 | `update.py` | PUT/PATCH (generic) | `ExampleUpdateRequestDTO` (explicit fields) |

@@ -16,7 +16,7 @@ from dtos.requests.item.abstraction import IRequestItemDTO
 class UpdateItemRequestDTO(IRequestItemDTO):
     """DTO for updating an existing item."""
 
-    reference_number: str = Field(default_factory=lambda: str(uuid4()))
+    reference_urn: str = Field(default_factory=lambda: str(uuid4()))
     name: str | None = None
     description: str | None = None
 

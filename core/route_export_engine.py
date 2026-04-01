@@ -178,7 +178,7 @@ class RouteExportEngine:
                 f"# {display_name}",
                 f"curl -X {method} '{{{{base_url}}}}{path_with_values}{query_string}'",
                 "-H 'accept: application/json'",
-                "-H 'x-reference-urn: {{reference_id}}'",
+                "-H 'x-reference-urn: {{reference_urn}}'",
             ]
             if operation.get("needs_bearer"):
                 parts.append("-H 'Authorization: Bearer {{token}}'")
@@ -209,7 +209,7 @@ class RouteExportEngine:
                         {"key": "Accept", "value": "application/json"},
                         {
                             "key": "x-reference-urn",
-                            "value": "{{reference_id}}",
+                            "value": "{{reference_urn}}",
                             "type": "text",
                         },
                     ],
@@ -286,7 +286,7 @@ class RouteExportEngine:
     ) -> str:
         base = (
             "**One-click import:** this file includes **collection variables** "
-            "(`base_url`, `reference_id`, `reference_number`, `token`). "
+            "(`base_url`, `reference_urn`, `reference_urn`, `token`). "
             "Folders mirror the **URL path** (e.g. `health/live`, `items/{id}`). "
             "Import only this collection — no environment required. "
             "Edit values under the collection → **Variables** (or use the collection menu → Edit). "
@@ -344,8 +344,8 @@ class RouteExportEngine:
         """Collection-level defaults (mirror env file for offline use)."""
         return [
             {"key": "base_url", "value": self.base_url},
-            {"key": "reference_id", "value": "{{$randomUUID}}"},
-            {"key": "reference_number", "value": "{{$randomUUID}}"},
+            {"key": "reference_urn", "value": "{{$randomUUID}}"},
+            {"key": "reference_urn", "value": "{{$randomUUID}}"},
             {"key": "token", "value": ""},
         ]
 
@@ -357,12 +357,12 @@ class RouteExportEngine:
             "values": [
                 {"key": "base_url", "value": self.base_url, "enabled": True},
                 {
-                    "key": "reference_id",
+                    "key": "reference_urn",
                     "value": "{{$randomUUID}}",
                     "enabled": True,
                 },
                 {
-                    "key": "reference_number",
+                    "key": "reference_urn",
                     "value": "{{$randomUUID}}",
                     "enabled": True,
                 },

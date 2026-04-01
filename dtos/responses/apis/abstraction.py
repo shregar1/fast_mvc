@@ -40,7 +40,7 @@ class IResponseAPIDTO(IResponseDTO):
         timestamp (datetime): When the response envelope was produced (UTC). Defaults
             to "now" if omitted.
         referenceUrn (str, optional): Client-supplied correlation id echoed from the
-            request when present (e.g. ``reference_number`` on :class:`dtos.requests.abstraction.IRequestDTO`).
+            request when present (e.g. ``reference_urn`` on :class:`dtos.requests.abstraction.IRequestDTO`).
 
     Example (Success):
         >>> response = IResponseDTO(
@@ -122,7 +122,7 @@ class IResponseAPIDTO(IResponseDTO):
         default=None,
         description=(
             "Echo of the client correlation id when provided "
-            "(e.g. IRequestDTO.reference_number or the x-reference-urn request header). "
+            "(e.g. IRequestDTO.reference_urn or the x-reference-urn request header). "
             "APIs also set the x-reference-urn response header when this value is non-empty."
         ),
     )

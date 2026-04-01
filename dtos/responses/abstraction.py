@@ -59,6 +59,6 @@ class IResponseDTO(BaseModel, IDTO):
         default=None,
         description=(
             "Echo of the client correlation id when provided "
-            "(e.g. IRequestDTO.reference_number or the x-reference-urn request header)."
+            "(e.g. IRequestDTO.reference_urn or the x-reference-urn request header)."
         ),
     )

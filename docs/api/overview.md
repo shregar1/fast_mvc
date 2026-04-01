@@ -39,7 +39,7 @@ Many endpoints return the standard envelope from `dtos.responses.abstraction.IRe
 | `errors` | Present when `status` is `FAILED` |
 | `metadata` | Optional cross-cutting metadata |
 | `timestamp` | UTC time the envelope was generated |
-| `referenceUrn` | Echo of client correlation id when provided (e.g. request body `reference_number`) |
+| `referenceUrn` | Echo of client correlation id when provided (e.g. request body `reference_urn`) |
 
 Clients may also send and receive correlation via the **`x-reference-urn`** header (echoed on responses when set).
 

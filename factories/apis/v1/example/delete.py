@@ -6,15 +6,15 @@ from typing import Any
 
 from dtos.requests.example.delete import ExampleDeleteRequestDTO
 
-from factories.apis.v1.example.common import new_reference_number
+from factories.apis.v1.example.common import new_reference_urn
 
 
 class ExampleDeleteRequestFactory:
-    """Body for delete requests that only carry ``reference_number`` (plus optional overrides)."""
+    """Body for delete requests that only carry ``reference_urn`` (plus optional overrides)."""
 
     @classmethod
     def build(cls, **overrides: Any) -> dict[str, Any]:
-        base: dict[str, Any] = {"reference_number": new_reference_number()}
+        base: dict[str, Any] = {"reference_urn": new_reference_urn()}
         return {**base, **overrides}
 
     @classmethod

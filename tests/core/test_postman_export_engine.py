@@ -112,7 +112,7 @@ def test_export_writes_environment_file_when_enabled(
 
     env_payload = json.loads(env_path.read_text(encoding="utf-8"))
     keys = {v["key"] for v in env_payload["values"]}
-    assert {"base_url", "reference_id", "reference_number", "token"} <= keys
+    assert {"base_url", "reference_urn", "reference_urn", "token"} <= keys
 
 
 def test_bearer_security_adds_authorization_header(tmp_path: Path, monkeypatch) -> None:
