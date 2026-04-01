@@ -2,16 +2,13 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from abstractions.dto import IDTO
-
-
-def _utc_now() -> datetime:
-    return datetime.now(timezone.utc)
+from utilities.datetime import DateTimeUtil
 
 
 class IResponseDTO(BaseModel, IDTO):
@@ -51,7 +48,7 @@ class IResponseDTO(BaseModel, IDTO):
     )
 
     timestamp: datetime = Field(
-        default_factory=_utc_now,
+        default_factory=DateTimeUtil.utc_now,
         description="Server time (UTC) when this response envelope was generated.",
     )
 

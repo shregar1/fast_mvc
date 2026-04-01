@@ -96,7 +96,7 @@ If you terminate TLS or reverse-proxy in front of the app (for example `_maint/n
 ### Implementation
 
 - Middleware: `middlewares/docs_auth.py` (`DocsBasicAuthMiddleware`)
-- Helpers: `normalized_openapi_url()`, `resolve_openapi_url_paths()`, `docs_logging_exclude_paths()`
+- Helpers: `DocsAuthConfig.normalized_openapi_url()`, `DocsAuthConfig.resolve_openapi_url_paths()`, `DocsAuthConfig.docs_logging_exclude_paths()`
 - Request logging excludes the same doc/schema paths so high-frequency UI traffic does not flood access logs.
 
 ### Calling the schema from scripts

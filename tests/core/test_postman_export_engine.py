@@ -7,7 +7,10 @@ from pathlib import Path
 
 from fastapi import FastAPI
 
-from core.postman_test_script_engine import enrich_operation_spec_for_tests
+from core.postman_test_script_engine import (
+    PostmanTestScriptEngine,
+    enrich_operation_spec_for_tests,
+)
 from core.route_export_engine import RouteExportEngine
 
 
@@ -112,7 +115,13 @@ def test_export_writes_environment_file_when_enabled(
 
     env_payload = json.loads(env_path.read_text(encoding="utf-8"))
     keys = {v["key"] for v in env_payload["values"]}
-    assert {"base_url", "reference_urn", "reference_urn", "token"} <= keys
+    assert {
+        "base_url",
+        "reference_urn",
+        "reference_number",
+        "token",
+        "refresh_token",
+    } <= keys
 
 
 def test_bearer_security_adds_authorization_header(tmp_path: Path, monkeypatch) -> None:
@@ -211,3 +220,13 @@ def test_enrich_operation_extracts_request_body_and_query_metadata() -> None:
     assert spec["response_json_root_kind"] == "object"
     assert "id" in spec["response_required_keys"]
     assert spec["response_property_types"]["id"] == "integer"
+
+
+def test_collection_test_hook_sets_token_from_envelope_data_tokens() -> None:
+    """Login-style IResponseDTO with nested data.tokens syncs Postman collection vars."""
+    events = PostmanTestScriptEngine.build_collection_events("API")
+    test_event = next(e for e in events if e.get("listen") == "test")
+    joined = "\n".join(test_event["script"]["exec"])
+    assert "data.tokens" in joined
+    assert "accessToken" in joined
+    assert "refresh_token" in joined

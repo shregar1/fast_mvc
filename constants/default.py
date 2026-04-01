@@ -11,6 +11,8 @@ Usage:
 
 from typing import Any, Final
 
+from constants.security_headers import SecurityHeadersConstants
+
 
 class Default:
     """Default configuration values for the FastMVC application.
@@ -90,10 +92,10 @@ class Default:
             "hsts_max_age": 31536000,
             "hsts_include_subdomains": True,
             "hsts_preload": False,
-            "frame_options": "DENY",
-            "content_type_options": "nosniff",
-            "xss_protection": "1; mode=block",
-            "referrer_policy": "strict-origin-when-cross-origin",
+            "frame_options": SecurityHeadersConstants.X_FRAME_OPTIONS,
+            "content_type_options": SecurityHeadersConstants.X_CONTENT_TYPE_OPTIONS,
+            "xss_protection": SecurityHeadersConstants.X_XSS_PROTECTION,
+            "referrer_policy": SecurityHeadersConstants.REFERRER_POLICY,
             "custom_csp": None,
             "custom_permissions_policy": None,
         },

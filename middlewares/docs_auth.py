@@ -13,100 +13,80 @@ Environment:
 
 from __future__ import annotations
 
-import base64
-import binascii
 import os
-import secrets
 from collections.abc import Awaitable, Callable
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import PlainTextResponse, Response
 
-
-def normalized_openapi_url() -> str:
-    """Return the OpenAPI JSON path; keep in sync with ``FastAPI(openapi_url=...)``."""
-    raw = os.environ.get("OPENAPI_URL", "/openapi.json").strip() or "/openapi.json"
-    if not raw.startswith("/"):
-        raw = "/" + raw
-    return raw
+from utilities.auth import AuthUtil
+from utilities.string import StringUtil
 
 
-def resolve_openapi_url_paths() -> frozenset[str]:
-    """All URL paths that expose the OpenAPI schema (for auth + logging excludes)."""
-    out: set[str] = {normalized_openapi_url()}
-    extra = os.environ.get("DOCS_EXTRA_PROTECTED_PATHS", "")
-    for part in extra.split(","):
-        p = part.strip()
-        if not p:
-            continue
-        if not p.startswith("/"):
-            p = "/" + p
-        out.add(p)
-    return frozenset(out)
+class DocsAuthConfig:
+    """Configuration class for OpenAPI documentation authentication settings."""
 
+    @staticmethod
+    def normalized_openapi_url() -> str:
+        """Return the OpenAPI JSON path; keep in sync with ``FastAPI(openapi_url=...)``."""
+        raw = os.environ.get("OPENAPI_URL", "/openapi.json").strip() or "/openapi.json"
+        return StringUtil.normalize_path(raw)
 
-def docs_logging_exclude_paths() -> frozenset[str]:
-    """Paths to skip in request logging (doc UI + schema URLs)."""
-    base = frozenset(
-        {
-            "/",
-            "/health",
-            "/docs",
-            "/redoc",
-            *resolve_openapi_url_paths(),
-        }
-    )
-    return base
+    @classmethod
+    def resolve_openapi_url_paths(cls) -> frozenset[str]:
+        """All URL paths that expose the OpenAPI schema (for auth + logging excludes)."""
+        out: set[str] = {cls.normalized_openapi_url()}
+        extra_paths = StringUtil.split_csv(
+            os.environ.get("DOCS_EXTRA_PROTECTED_PATHS"), default=[]
+        )
+        for p in extra_paths:
+            out.add(StringUtil.normalize_path(p))
+        return frozenset(out)
 
+    @classmethod
+    def docs_logging_exclude_paths(cls) -> frozenset[str]:
+        """Paths to skip in request logging (doc UI + schema URLs)."""
+        base = frozenset(
+            {
+                "/",
+                "/health",
+                "/docs",
+                "/redoc",
+                *cls.resolve_openapi_url_paths(),
+            }
+        )
+        return base
 
-def docs_auth_configured() -> bool:
-    """Return True when Basic auth should be enforced for documentation routes."""
-    u = os.environ.get("DOCS_USERNAME", "").strip()
-    p = os.environ.get("DOCS_PASSWORD", "").strip()
-    return bool(u and p)
+    @staticmethod
+    def is_auth_configured() -> bool:
+        """Return True when Basic auth should be enforced for documentation routes."""
+        u = os.environ.get("DOCS_USERNAME", "").strip()
+        p = os.environ.get("DOCS_PASSWORD", "").strip()
+        return bool(u and p)
 
+    @staticmethod
+    def unauthorized_response() -> PlainTextResponse:
+        """Return 401 Unauthorized response for documentation routes."""
+        return PlainTextResponse(
+            "Authentication required for API documentation.",
+            status_code=401,
+            headers={"WWW-Authenticate": 'Basic realm="FastMVC API Documentation"'},
+        )
 
-def _parse_basic_authorization(header: str | None) -> tuple[str, str] | None:
-    if not header or not header.startswith("Basic "):
-        return None
-    try:
-        raw = base64.b64decode(header[6:].strip())
-        decoded = raw.decode("utf-8")
-    except (binascii.Error, UnicodeDecodeError, ValueError):
-        return None
-    if ":" not in decoded:
-        return None
-    username, _, password = decoded.partition(":")
-    return username, password
-
-
-def _str_match_constant_time(got: str, expected: str) -> bool:
-    if len(got) != len(expected):
-        return False
-    return secrets.compare_digest(got.encode("utf-8"), expected.encode("utf-8"))
-
-
-def _unauthorized() -> PlainTextResponse:
-    return PlainTextResponse(
-        "Authentication required for API documentation.",
-        status_code=401,
-        headers={"WWW-Authenticate": 'Basic realm="FastMVC API Documentation"'},
-    )
-
-
-def path_requires_docs_auth(path: str) -> bool:
-    """Return True if ``path`` is a documentation or OpenAPI schema surface."""
-    np = path.rstrip("/") or "/"
-    for o in resolve_openapi_url_paths():
-        if np == (o.rstrip("/") or "/"):
+    @classmethod
+    def path_requires_auth(cls, path: str) -> bool:
+        """Return True if ``path`` is a documentation or OpenAPI schema surface."""
+        np = path.rstrip("/") or "/"
+        for o in cls.resolve_openapi_url_paths():
+            if np == (o.rstrip("/") or "/"):
+                return True
+        pl = path.lower()
+        if pl == "/docs" or pl.startswith("/docs/"):
             return True
-    pl = path.lower()
-    if pl == "/docs" or pl.startswith("/docs/"):
-        return True
-    if pl == "/redoc" or pl.startswith("/redoc/"):
-        return True
-    return False
+        if pl == "/redoc" or pl.startswith("/redoc/"):
+            return True
+        return False
 
 
 class DocsBasicAuthMiddleware(BaseHTTPMiddleware):
@@ -117,23 +97,29 @@ class DocsBasicAuthMiddleware(BaseHTTPMiddleware):
         request: Request,
         call_next: Callable[[Request], Awaitable[Response]],
     ) -> Response:
-        if not docs_auth_configured():
+        if not DocsAuthConfig.is_auth_configured():
             return await call_next(request)
         # CORS preflight must reach CORSMiddleware without a 401 challenge.
         if request.method == "OPTIONS":
             return await call_next(request)
-        if not path_requires_docs_auth(request.url.path):
+        if not DocsAuthConfig.path_requires_auth(request.url.path):
             return await call_next(request)
 
         expected_user = os.environ["DOCS_USERNAME"].strip()
         expected_pass = os.environ["DOCS_PASSWORD"].strip()
-        parsed = _parse_basic_authorization(request.headers.get("Authorization"))
+        parsed = AuthUtil.parse_basic_authorization(request.headers.get("Authorization"))
         if parsed is None:
-            return _unauthorized()
+            return DocsAuthConfig.unauthorized_response()
         username, password = parsed
         if not (
-            _str_match_constant_time(username, expected_user)
-            and _str_match_constant_time(password, expected_pass)
+            AuthUtil.constant_time_compare(username, expected_user)
+            and AuthUtil.constant_time_compare(password, expected_pass)
         ):
-            return _unauthorized()
+            return DocsAuthConfig.unauthorized_response()
         return await call_next(request)
+
+
+__all__ = [
+    "DocsAuthConfig",
+    "DocsBasicAuthMiddleware",
+]

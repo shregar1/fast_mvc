@@ -1,15 +1,12 @@
 """Response DTO abstraction for ``controllers/apis``-aligned envelopes."""
 
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any
 
 from pydantic import ConfigDict, Field
 
 from dtos.responses.abstraction import IResponseDTO
-
-
-def _utc_now() -> datetime:
-    return datetime.now(timezone.utc)
+from utilities.datetime import DateTimeUtil
 
 
 class IResponseAPIDTO(IResponseDTO):
@@ -114,7 +111,7 @@ class IResponseAPIDTO(IResponseDTO):
     )
 
     timestamp: datetime = Field(
-        default_factory=_utc_now,
+        default_factory=DateTimeUtil.utc_now,
         description="Server time (UTC) when this response envelope was generated.",
     )
 

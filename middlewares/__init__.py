@@ -8,21 +8,19 @@ depending on your stack). This package only provides :class:`AuthenticationMiddl
 
 Use::
 
-    from middlewares import AuthenticationMiddleware
+    from middlewares import AuthenticationMiddleware, DocsAuthConfig
+
+OpenAPI path helpers (``normalized_openapi_url``, logging excludes, auth configured) live on
+:class:`DocsAuthConfig` in :mod:`middlewares.docs_auth`.
 """
 
-from .authentication import AuthenticationMiddleware
-from .docs_auth import (
-    DocsBasicAuthMiddleware,
-    docs_auth_configured,
-    docs_logging_exclude_paths,
-    normalized_openapi_url,
-)
+from .authentication import AuthenticationMiddleware, JWTAuthHelper, NoOpAuthMiddleware
+from .docs_auth import DocsAuthConfig, DocsBasicAuthMiddleware
 
 __all__ = [
+    "JWTAuthHelper",
+    "NoOpAuthMiddleware",
     "AuthenticationMiddleware",
+    "DocsAuthConfig",
     "DocsBasicAuthMiddleware",
-    "docs_auth_configured",
-    "docs_logging_exclude_paths",
-    "normalized_openapi_url",
 ]

@@ -4,9 +4,7 @@ from __future__ import annotations
 
 import json
 import os
-import subprocess
 import uuid
-from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, FastAPI
@@ -16,39 +14,7 @@ from core.postman_test_script_engine import (
     PostmanTestScriptEngine,
     enrich_operation_spec_for_tests,
 )
-
-
-def _git_repository_folder_name() -> str | None:
-    """Return the git work tree root directory name, or None if unavailable."""
-    candidates: list[Path] = []
-    try:
-        candidates.append(Path.cwd().resolve())
-    except OSError:
-        pass
-    try:
-        candidates.append(Path(__file__).resolve().parents[1])
-    except IndexError:
-        pass
-    seen: set[Path] = set()
-    for cwd in candidates:
-        if cwd in seen:
-            continue
-        seen.add(cwd)
-        try:
-            proc = subprocess.run(
-                ["git", "rev-parse", "--show-toplevel"],
-                cwd=str(cwd),
-                capture_output=True,
-                text=True,
-                timeout=3,
-                check=False,
-            )
-        except (FileNotFoundError, OSError, subprocess.TimeoutExpired):
-            continue
-        if proc.returncode != 0 or not proc.stdout.strip():
-            continue
-        return Path(proc.stdout.strip()).name
-    return None
+from utilities.system import git_repository_folder_name
 
 
 class RouteExportEngine:
@@ -81,7 +47,7 @@ class RouteExportEngine:
         override = os.getenv("POSTMAN_COLLECTION_NAME", "").strip()
         if override:
             return override
-        git_name = _git_repository_folder_name()
+        git_name = git_repository_folder_name()
         if git_name:
             return git_name
         return str(self.app.title)
@@ -286,7 +252,7 @@ class RouteExportEngine:
     ) -> str:
         base = (
             "**One-click import:** this file includes **collection variables** "
-            "(`base_url`, `reference_urn`, `reference_urn`, `token`). "
+            "(`base_url`, `reference_urn`, `reference_number`, `token`, `refresh_token`). "
             "Folders mirror the **URL path** (e.g. `health/live`, `items/{id}`). "
             "Import only this collection — no environment required. "
             "Edit values under the collection → **Variables** (or use the collection menu → Edit). "
@@ -345,8 +311,9 @@ class RouteExportEngine:
         return [
             {"key": "base_url", "value": self.base_url},
             {"key": "reference_urn", "value": "{{$randomUUID}}"},
-            {"key": "reference_urn", "value": "{{$randomUUID}}"},
+            {"key": "reference_number", "value": "1"},
             {"key": "token", "value": ""},
+            {"key": "refresh_token", "value": ""},
         ]
 
     def _build_postman_environment(self) -> dict[str, Any]:
@@ -362,11 +329,12 @@ class RouteExportEngine:
                     "enabled": True,
                 },
                 {
-                    "key": "reference_urn",
-                    "value": "{{$randomUUID}}",
+                    "key": "reference_number",
+                    "value": "1",
                     "enabled": True,
                 },
                 {"key": "token", "value": "", "enabled": True},
+                {"key": "refresh_token", "value": "", "enabled": True},
             ],
             "_postman_variable_scope": "environment",
         }

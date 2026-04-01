@@ -9,7 +9,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
 from abstractions.controller import IController
-from controllers.apis.v1.item import http as item_http
+from controllers.apis.v1.item.http import ItemHttpResponseBuilder
 from dtos.requests.item import CreateItemRequestDTO, UpdateItemRequestDTO
 from services.item.item_service import ItemService
 
@@ -49,9 +49,9 @@ class ItemController(IController):
         self, body: CreateItemRequestDTO, http_request: Request | None = None
     ) -> JSONResponse:
         """Create a new item."""
-        item_http.raise_unprocessable_if_dto_invalid(body)
+        ItemHttpResponseBuilder.raise_unprocessable_if_dto_invalid(body)
 
-        return item_http.respond_created_item(
+        return ItemHttpResponseBuilder.respond_created_item(
             await self._service.create_item(
                 name=body.name,
                 description=body.description,
@@ -65,12 +65,12 @@ class ItemController(IController):
     ) -> JSONResponse:
         """Get item by ID."""
         result = await self._service.get_item(item_id)
-        entity = item_http.unwrap_item_or_404(result, item_id=item_id)
-        return item_http.json_item(entity, http_request)
+        entity = ItemHttpResponseBuilder.unwrap_item_or_404(result, item_id=item_id)
+        return ItemHttpResponseBuilder.json_item(entity, http_request)
 
     async def get_all(self, http_request: Request | None = None) -> JSONResponse:
         """Get all items."""
-        return item_http.respond_item_list(
+        return ItemHttpResponseBuilder.respond_item_list(
             await self._service.get_all_items(), http_request
         )
 
@@ -81,9 +81,9 @@ class ItemController(IController):
         http_request: Request | None = None,
     ) -> JSONResponse:
         """Update an item."""
-        item_http.raise_unprocessable_if_dto_invalid(body)
+        ItemHttpResponseBuilder.raise_unprocessable_if_dto_invalid(body)
 
-        return item_http.respond_item_with_ref(
+        return ItemHttpResponseBuilder.respond_item_with_ref(
             await self._service.update_item(
                 item_id=item_id,
                 name=body.name,
@@ -98,14 +98,14 @@ class ItemController(IController):
     ) -> JSONResponse:
         """Delete an item."""
         result = await self._service.delete_item(item_id)
-        item_http.unwrap_deleted_or_404(result, item_id=item_id)
-        return item_http.json_delete_message(item_id, http_request)
+        ItemHttpResponseBuilder.unwrap_deleted_or_404(result, item_id=item_id)
+        return ItemHttpResponseBuilder.json_delete_message(item_id, http_request)
 
     async def complete(
         self, item_id: str, http_request: Request | None = None
     ) -> JSONResponse:
         """Mark item as completed."""
-        return item_http.respond_item(
+        return ItemHttpResponseBuilder.respond_item(
             await self._service.complete_item(item_id), http_request
         )
 
@@ -113,7 +113,7 @@ class ItemController(IController):
         self, item_id: str, http_request: Request | None = None
     ) -> JSONResponse:
         """Mark item as not completed."""
-        return item_http.respond_item(
+        return ItemHttpResponseBuilder.respond_item(
             await self._service.uncomplete_item(item_id), http_request
         )
 
@@ -121,7 +121,7 @@ class ItemController(IController):
         self, item_id: str, http_request: Request | None = None
     ) -> JSONResponse:
         """Toggle item completion status."""
-        return item_http.respond_item(
+        return ItemHttpResponseBuilder.respond_item(
             await self._service.toggle_item(item_id), http_request
         )
 
@@ -129,25 +129,25 @@ class ItemController(IController):
         self, query: str = "", http_request: Request | None = None
     ) -> JSONResponse:
         """Search items by name."""
-        return item_http.respond_item_list(
+        return ItemHttpResponseBuilder.respond_item_list(
             await self._service.search_items(query), http_request
         )
 
     async def get_completed(self, http_request: Request | None = None) -> JSONResponse:
         """Get all completed items."""
-        return item_http.respond_item_list(
+        return ItemHttpResponseBuilder.respond_item_list(
             await self._service.get_completed_items(), http_request
         )
 
     async def get_pending(self, http_request: Request | None = None) -> JSONResponse:
         """Get all pending items."""
-        return item_http.respond_item_list(
+        return ItemHttpResponseBuilder.respond_item_list(
             await self._service.get_pending_items(), http_request
         )
 
     async def get_statistics(self, http_request: Request | None = None) -> JSONResponse:
         """Get item statistics."""
-        return item_http.respond_item_stats(
+        return ItemHttpResponseBuilder.respond_item_stats(
             await self._service.get_statistics(), http_request
         )
 

@@ -15,6 +15,8 @@ Environment Variables:
     PORT: Server port (default: 8000)
     POSTMAN_EXPORT_ENVIRONMENT: Set to 1/true to also write postman_environment.json on boot
     POSTMAN_COLLECTION_NAME: Override Postman collection/env title (default: git repo folder name)
+    POSTMAN_BASE_URL: Override default base_url in collection/environment (else HOST:PORT)
+    POSTMAN_ENV_FILE: Filename for optional environment export (default: postman_environment.json)
     POSTMAN_NEGATIVE_TESTS: Set to 0/false to skip extra pm.sendRequest validation scripts per request
     RATE_LIMIT_REQUESTS_PER_MINUTE: Rate limit per minute
     RATE_LIMIT_REQUESTS_PER_HOUR: Rate limit per hour
@@ -44,7 +46,7 @@ Example API (if example module is available):
 """
 
 import os
-from datetime import datetime, timezone
+from datetime import datetime
 from http import HTTPStatus
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
@@ -80,14 +82,14 @@ from constants.health import (
     HEALTH_CHECK_SQL_PING,
     HEALTH_STATUS_HEALTHY,
     HEALTH_STATUS_UNHEALTHY,
+    HealthMessageUtil,
     LIVENESS_ALIVE,
     READINESS_NOT_READY,
     READINESS_READY,
-    dependency_disconnected_message,
 )
 from constants.http_header import HttpHeader
 from core.route_export_engine import RouteExportEngine
-from utilities.cors import get_cors_middleware_kwargs
+from utilities.cors import CorsConfigUtil
 from utilities.security_headers import get_security_headers_middleware_config
 
 # Optional example controllers (can be removed for minimal core)
@@ -161,10 +163,8 @@ except ImportError:
 # Custom authentication middleware (app-specific with user repository)
 from middlewares import (
     AuthenticationMiddleware,
+    DocsAuthConfig,
     DocsBasicAuthMiddleware,
-    docs_auth_configured,
-    docs_logging_exclude_paths,
-    normalized_openapi_url,
 )
 
 # Configuration validation - fail fast on misconfig
@@ -198,17 +198,9 @@ def _get_int_env(name: str, default: int) -> int:
     Returns:
         The result of the operation.
     """
-    value = os.getenv(name)
-    if value is None:
-        return default
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        logger.warning(
-            f"Invalid integer value for environment variable {name!r}: "
-            f"{value!r}. Falling back to default {default!r}."
-        )
-        return default
+    from utilities.env import get_int_env
+
+    return get_int_env(name, default)
 
 
 # Initialize FastAPI application (openapi_url must match middlewares.docs_auth)
@@ -218,7 +210,7 @@ app = FastAPI(
     version="1.0.1",
     docs_url=None,  # Custom docs setup below
     redoc_url=None,
-    openapi_url=normalized_openapi_url(),
+    openapi_url=DocsAuthConfig.normalized_openapi_url(),
 )
 route_export_engine = RouteExportEngine(app)
 route_export_engine.install()
@@ -594,7 +586,7 @@ async def health_check(request: Request):
     health_status: dict[str, str | int] = {
         "status": HEALTH_STATUS_HEALTHY,
         "version": api_version,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.utcnow().isoformat() + "Z",
     }
 
     # Check database connectivity
@@ -615,7 +607,7 @@ async def health_check(request: Request):
         else:
             db_status = DEPENDENCY_NOT_CONFIGURED
     except Exception as e:
-        db_status = dependency_disconnected_message(e)
+        db_status = HealthMessageUtil.dependency_disconnected_message(e)
         health_status["status"] = HEALTH_STATUS_UNHEALTHY
         logger.error(f"Health check: DataI connection failed - {e}")
 
@@ -636,7 +628,7 @@ async def health_check(request: Request):
         else:
             redis_status = DEPENDENCY_NOT_CONFIGURED
     except Exception as e:
-        redis_status = dependency_disconnected_message(e)
+        redis_status = HealthMessageUtil.dependency_disconnected_message(e)
         health_status["status"] = HEALTH_STATUS_UNHEALTHY
         logger.error(f"Health check: Redis connection failed - {e}")
 
@@ -644,6 +636,8 @@ async def health_check(request: Request):
 
     # Add uptime if available (requires app start time tracking)
     if hasattr(app.state, "start_time"):
+        from datetime import timezone
+
         uptime_seconds = (
             datetime.now(timezone.utc) - app.state.start_time
         ).total_seconds()
@@ -755,7 +749,7 @@ async def readiness_probe(request: Request):
         else:
             checks["database"] = DEPENDENCY_NOT_CONFIGURED
     except Exception as e:
-        checks["database"] = dependency_disconnected_message(e)
+        checks["database"] = HealthMessageUtil.dependency_disconnected_message(e)
         is_ready = False
 
     # Check Redis
@@ -768,11 +762,13 @@ async def readiness_probe(request: Request):
         else:
             checks["redis"] = DEPENDENCY_NOT_CONFIGURED
     except Exception as e:
-        checks["redis"] = dependency_disconnected_message(e)
+        checks["redis"] = HealthMessageUtil.dependency_disconnected_message(e)
         is_ready = False
 
+    from utilities.datetime import DateTimeUtil
+
     status = READINESS_READY if is_ready else READINESS_NOT_READY
-    checked_at = datetime.now(timezone.utc).isoformat()
+    checked_at = DateTimeUtil.utc_now_iso()
     data_ready = {
         "status": status,
         "checkedAt": checked_at,
@@ -805,7 +801,7 @@ app.add_middleware(RequestContextMiddleware)
 app.add_middleware(TrustedHostMiddleware, allowed_hosts=["*"])
 
 # CORS Middleware - Cross-Origin Resource Sharing (see utilities.cors)
-app.add_middleware(CORSMiddleware, **get_cors_middleware_kwargs())
+app.add_middleware(CORSMiddleware, **CorsConfigUtil.get_middleware_kwargs())
 
 # Security Headers Middleware - CSP, HSTS, X-Frame-Options, etc. (see utilities.security_headers)
 app.add_middleware(
@@ -843,7 +839,7 @@ app.add_middleware(
     LoggingMiddleware,
     log_request_body=False,  # Don't log sensitive request bodies
     log_response_body=False,
-    exclude_paths=set(docs_logging_exclude_paths()),
+    exclude_paths=set(DocsAuthConfig.docs_logging_exclude_paths()),
 )
 
 # Timing Middleware - Response time tracking
@@ -859,11 +855,11 @@ app.add_middleware(AuthenticationMiddleware)
 app.add_middleware(DocsBasicAuthMiddleware)
 
 logger.info("Initialized middleware stack with fastmiddleware")
-if docs_auth_configured():
+if DocsAuthConfig.is_auth_configured():
     logger.info(
         "API docs (Swagger/ReDoc under /docs and /redoc, OpenAPI at {}) require "
         "HTTP Basic auth (DOCS_USERNAME / DOCS_PASSWORD).",
-        normalized_openapi_url(),
+        DocsAuthConfig.normalized_openapi_url(),
     )
 else:
     logger.info(
@@ -909,10 +905,10 @@ async def on_startup():
     - Starting background tasks
     - Logging startup information
     """
-    from datetime import datetime, timezone
+    from utilities.datetime import DateTimeUtil
 
     # Track application start time for uptime calculation
-    app.state.start_time = datetime.now(timezone.utc)
+    app.state.start_time = DateTimeUtil.utc_now()
 
     logger.info("Application startup event triggered")
     logger.info(f"FastMVC API starting on {HOST}:{PORT}")
@@ -927,7 +923,7 @@ async def on_startup():
     )
     logger.info(
         f"Generated {len(curl_examples)} cURL examples; Postman collection {collection_path}"
-        f"{env_msg} — variables: base_url, reference_urn, reference_urn, token"
+        f"{env_msg} — variables: base_url, reference_urn, reference_number, token, refresh_token"
     )
     route_export_engine.clear_memory()
 

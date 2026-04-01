@@ -84,7 +84,7 @@ VALIDATE_CONFIG=false
 
 ## CORS
 
-`CORSMiddleware` (from `fastmiddleware`, Starlette-compatible) is configured via `dtos.configuration.CorsSettingsDTO` (inherits `IConfigurationDTO`), loaded by `utilities.cors.load_cors_settings_from_env()` and applied in `app.py` with `get_cors_middleware_kwargs()`.
+`CORSMiddleware` (from `fastmiddleware`, Starlette-compatible) is configured via `dtos.configuration.CorsSettingsDTO` (inherits `IConfigurationDTO`), loaded by `utilities.cors.CorsConfigUtil.load_settings_from_env()` and applied in `app.py` with `CorsConfigUtil.get_middleware_kwargs()`.
 
 | Variable | Purpose |
 |----------|---------|
@@ -99,10 +99,11 @@ VALIDATE_CONFIG=false
 
 ```python
 from dtos.configuration import CorsSettingsDTO
-from utilities.cors import load_cors_settings_from_env
+from utilities.cors import CorsConfigUtil
 
-settings: CorsSettingsDTO = load_cors_settings_from_env()
+settings: CorsSettingsDTO = CorsConfigUtil.load_settings_from_env()
 kwargs = settings.to_middleware_kwargs()  # pass to CORSMiddleware
+# or: kwargs = CorsConfigUtil.get_middleware_kwargs()
 ```
 
 ## Security headers
@@ -121,10 +122,10 @@ Defaults match the previous inline setup (HSTS, `X-Frame-Options: DENY`, CSP all
 | `SECURITY_HSTS_MAX_AGE` | Seconds (default one year) |
 | `SECURITY_HSTS_INCLUDE_SUBDOMAINS` | `true` / `false` |
 | `SECURITY_HSTS_PRELOAD` | `true` / `false` |
-| `SECURITY_CONTENT_SECURITY_POLICY` | Full CSP string; if unset, `DEFAULT_SECURITY_CONTENT_SECURITY_POLICY` in `utilities/security_headers.py` is used |
+| `SECURITY_CONTENT_SECURITY_POLICY` | Full CSP string; if unset, `SecurityHeadersConstants.CONTENT_SECURITY_POLICY` in `constants/security_headers.py` is used |
 | `SECURITY_PERMISSIONS_POLICY` | Optional `Permissions-Policy` |
-| `SECURITY_CROSS_ORIGIN_OPENER_POLICY` | COOP (default `same-origin`) |
-| `SECURITY_CROSS_ORIGIN_RESOURCE_POLICY` | CORP (default `same-origin`) |
+| `SECURITY_CROSS_ORIGIN_OPENER_POLICY` | COOP (default `SecurityHeadersConstants.CROSS_ORIGIN_OPENER_POLICY` in `constants/security_headers.py`) |
+| `SECURITY_CROSS_ORIGIN_RESOURCE_POLICY` | CORP (default `SecurityHeadersConstants.CROSS_ORIGIN_RESOURCE_POLICY` in `constants/security_headers.py`) |
 | `SECURITY_CROSS_ORIGIN_EMBEDDER_POLICY` | Optional COEP |
 | `SECURITY_REMOVE_SERVER_HEADER` | `true` / `false` |
 

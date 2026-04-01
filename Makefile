@@ -2,7 +2,7 @@
 # Convenience commands for development
 # Usage: make <command>
 
-.PHONY: help install dev test lint format migrate shell clean docker-build docker-up docker-down
+.PHONY: help install dev test lint format migrate shell clean docker-build docker-up docker-down postman-export
 
 # Default target when running just 'make'
 .DEFAULT_GOAL := help
@@ -74,6 +74,11 @@ dev:
 dev-no-reload:
 	@echo "$(BLUE)🚀 Starting FastAPI server (no reload)...$(RESET)"
 	@$(UVICORN) app:app --host 0.0.0.0 --port 8000
+
+## postman-export: Regenerate postman_collection.json from the live app (same code path as startup)
+postman-export:
+	@echo "$(BLUE)📮 Exporting Postman collection...$(RESET)"
+	@$(PYTHON) _maint/scripts/export_postman_collection.py
 
 ## prod: Run production server (no reload, 4 workers)
 prod:

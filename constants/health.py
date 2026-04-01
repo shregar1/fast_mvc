@@ -25,6 +25,24 @@ LIVENESS_ALIVE: Final[str] = "alive"
 HEALTH_CHECK_SQL_PING: Final[str] = "SELECT 1"
 
 
-def dependency_disconnected_message(exc: BaseException) -> str:
-    """Format a dependency failure string: ``disconnected: <error>``."""
-    return f"{DEPENDENCY_DISCONNECTED}: {str(exc)}"
+class HealthMessageUtil:
+    """Utility class for health check message formatting."""
+
+    @staticmethod
+    def dependency_disconnected_message(exc: BaseException) -> str:
+        """Format a dependency failure string: ``disconnected: <error>``."""
+        return f"{DEPENDENCY_DISCONNECTED}: {str(exc)}"
+
+
+__all__ = [
+    "HealthMessageUtil",
+    "HEALTH_STATUS_HEALTHY",
+    "HEALTH_STATUS_UNHEALTHY",
+    "DEPENDENCY_NOT_CONFIGURED",
+    "DEPENDENCY_CONNECTED",
+    "DEPENDENCY_DISCONNECTED",
+    "READINESS_READY",
+    "READINESS_NOT_READY",
+    "LIVENESS_ALIVE",
+    "HEALTH_CHECK_SQL_PING",
+]

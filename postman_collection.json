@@ -1916,11 +1916,15 @@
       "value": "{{$randomUUID}}"
     },
     {
-      "key": "reference_urn",
-      "value": "{{$randomUUID}}"
+      "key": "reference_number",
+      "value": "1"
     },
     {
       "key": "token",
+      "value": ""
+    },
+    {
+      "key": "refresh_token",
       "value": ""
     }
   ]

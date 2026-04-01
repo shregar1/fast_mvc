@@ -158,6 +158,39 @@ Auto-generated workflows include:
 - FastMVC branding with cyan/fuchsia color scheme
 - Kubernetes health endpoints at `/health`, `/health/live`, `/health/ready`
 
+### Postman collection
+
+The repo includes `postman_collection.json` (and optionally `postman_environment.json`). They are produced from the **same export path** as application startup (`app.on_startup` → `RouteExportEngine`), so the OpenAPI-derived requests, folder layout, and tests stay aligned with `core/route_export_engine.py`. Prefer **regenerating** over hand-editing structure.
+
+**Regenerate** (same Python environment as `make dev`; run from this directory):
+
+```bash
+make postman-export
+# or: python3 _maint/scripts/export_postman_collection.py
+```
+
+If startup validation blocks the import, ensure `.env` exists (see `.env.example`) or set `VALIDATE_CONFIG=false` for a one-off export.
+
+**Environment variables** (also listed in the `app.py` module docstring; values match what the server uses on boot):
+
+| Variable | Purpose |
+|----------|---------|
+| `POSTMAN_EXPORT_ENVIRONMENT` | Set to `1` or `true` to also write `postman_environment.json` (default is collection-only). |
+| `POSTMAN_COLLECTION_NAME` | Override the collection/environment title (default: git repository folder name). |
+| `POSTMAN_BASE_URL` | Override the `base_url` variable (default: `http://HOST:PORT` from env). |
+| `POSTMAN_ENV_FILE` | Filename for the optional environment export (default: `postman_environment.json`). |
+| `POSTMAN_NEGATIVE_TESTS` | Set to `0` or `false` to skip extra per-request `pm.sendRequest` “negative” scripts. |
+
+On startup, the app logs the written paths and variable names, for example: `variables: base_url, reference_urn, reference_number, token, refresh_token`.
+
+**Login responses (`data.tokens`)** — After a successful login that returns the standard envelope with JWTs under `data` (e.g. `data.tokens.accessToken`, `data.tokens.refreshToken`), the collection **test** script fills the `token` and `refresh_token` collection variables so `Authorization: Bearer {{token}}` works on later requests. Supports camelCase (`accessToken`) and snake_case (`access_token`) field names.
+
+**After importing into Postman** (quick verification):
+
+- Open the collection **Variables** tab and confirm `base_url` is the server you intend to hit (e.g. `http://localhost:8000`).
+- Send one request and confirm `{{reference_urn}}` on `x-reference-urn` and JSON bodies behave as expected; run login first or set `token` manually if the route uses Bearer auth.
+- **Collection Runner** executes tests, including negative cases that issue additional HTTP calls to `{{base_url}}`. Use a dev or staging URL before running the full collection against a shared or production API.
+
 ## Links
 
 - **Repository:** [github.com/shregar1/fastMVC](https://github.com/shregar1/fastMVC) (see `[project.urls]` in `pyproject.toml`).
