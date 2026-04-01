@@ -7,7 +7,7 @@ from typing import Final
 from fastmiddleware import SecurityHeadersConfig  # pyright: ignore[reportMissingImports]
 from pydantic import Field
 
-from constants.security_headers import SecurityHeadersConstants
+from constants.security_headers import SecurityHeadersConstants, SecurityHeadersEnvVar
 from dtos.configuration.abstraction import IConfigurationDTO
 
 
@@ -16,8 +16,9 @@ class SecurityHeadersDefaults:
 
     String defaults for standard headers align with :class:`~constants.security_headers.SecurityHeadersConstants`.
     ``CONTENT_SECURITY_POLICY`` is ``None`` on the model until
-    :func:`utilities.security_headers.load_security_headers_settings_from_env` applies
-    ``SecurityHeadersConstants.CONTENT_SECURITY_POLICY`` when the env var is unset.
+    :meth:`utilities.security_headers.SecurityHeadersUtility.load_settings_from_env` applies
+    ``SecurityHeadersConstants.CONTENT_SECURITY_POLICY`` when
+    :data:`~constants.security_headers.SecurityHeadersEnvVar.CONTENT_SECURITY_POLICY` is unset.
     """
 
     X_CONTENT_TYPE_OPTIONS: Final[str] = SecurityHeadersConstants.X_CONTENT_TYPE_OPTIONS
@@ -25,10 +26,12 @@ class SecurityHeadersDefaults:
     X_XSS_PROTECTION: Final[str] = SecurityHeadersConstants.X_XSS_PROTECTION
     REFERRER_POLICY: Final[str] = SecurityHeadersConstants.REFERRER_POLICY
 
-    ENABLE_HSTS: Final[bool] = True
-    HSTS_MAX_AGE: Final[int] = 31_536_000
-    HSTS_INCLUDE_SUBDOMAINS: Final[bool] = True
-    HSTS_PRELOAD: Final[bool] = False
+    ENABLE_HSTS: Final[bool] = SecurityHeadersConstants.DEFAULT_ENABLE_HSTS
+    HSTS_MAX_AGE: Final[int] = SecurityHeadersConstants.DEFAULT_HSTS_MAX_AGE_SECONDS
+    HSTS_INCLUDE_SUBDOMAINS: Final[bool] = (
+        SecurityHeadersConstants.DEFAULT_HSTS_INCLUDE_SUBDOMAINS
+    )
+    HSTS_PRELOAD: Final[bool] = SecurityHeadersConstants.DEFAULT_HSTS_PRELOAD
 
     CONTENT_SECURITY_POLICY: None = None
     PERMISSIONS_POLICY: None = None
@@ -41,19 +44,19 @@ class SecurityHeadersDefaults:
     )
     CROSS_ORIGIN_EMBEDDER_POLICY: None = None
 
-    REMOVE_SERVER_HEADER: Final[bool] = True
+    REMOVE_SERVER_HEADER: Final[bool] = SecurityHeadersConstants.DEFAULT_REMOVE_SERVER_HEADER
 
     BUILTIN_CONTENT_SECURITY_POLICY: Final[str] = (
         SecurityHeadersConstants.CONTENT_SECURITY_POLICY
     )
-    """CSP applied at env load when ``SECURITY_CONTENT_SECURITY_POLICY`` is omitted."""
+    """CSP applied at env load when :data:`~constants.security_headers.SecurityHeadersEnvVar.CONTENT_SECURITY_POLICY` is omitted."""
 
 
 class SecurityHeadersSettingsDTO(IConfigurationDTO):
     """Typed settings for ``SecurityHeadersMiddleware`` (CSP, HSTS, frame options, …).
 
     Values are typically populated from environment variables; see
-    :func:`utilities.security_headers.load_security_headers_settings_from_env`.
+    :meth:`utilities.security_headers.SecurityHeadersUtility.load_settings_from_env`.
     """
 
     x_content_type_options: str = Field(
@@ -89,26 +92,26 @@ class SecurityHeadersSettingsDTO(IConfigurationDTO):
         default=SecurityHeadersDefaults.HSTS_PRELOAD,
         description="Enable HSTS preload list submission semantics.",
     )
-    content_security_policy: str | None = Field(
+    content_security_policy: str = Field(
         default=SecurityHeadersDefaults.CONTENT_SECURITY_POLICY,
         description=(
             "Full ``Content-Security-Policy`` header value. "
             "When omitted at load time, :class:`~constants.security_headers.SecurityHeadersConstants` is used."
         ),
     )
-    permissions_policy: str | None = Field(
+    permissions_policy: str = Field(
         default=SecurityHeadersDefaults.PERMISSIONS_POLICY,
         description="Optional ``Permissions-Policy`` header value.",
     )
-    cross_origin_opener_policy: str | None = Field(
+    cross_origin_opener_policy: str = Field(
         default=SecurityHeadersDefaults.CROSS_ORIGIN_OPENER_POLICY,
         description="``Cross-Origin-Opener-Policy`` (COOP).",
     )
-    cross_origin_resource_policy: str | None = Field(
+    cross_origin_resource_policy: str = Field(
         default=SecurityHeadersDefaults.CROSS_ORIGIN_RESOURCE_POLICY,
         description="``Cross-Origin-Resource-Policy`` (CORP).",
     )
-    cross_origin_embedder_policy: str | None = Field(
+    cross_origin_embedder_policy: str = Field(
         default=SecurityHeadersDefaults.CROSS_ORIGIN_EMBEDDER_POLICY,
         description="Optional ``Cross-Origin-Embedder-Policy`` (COEP).",
     )

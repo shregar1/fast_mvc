@@ -8,4 +8,4 @@ class FetchUserRequestDTO(IRequestUserV1DTO):
     """FetchUser request payload."""
 
     name: str = Field(..., description="Name")
-    description: str | None = Field(None, description="Description")
+    description: str = Field(None, description="Description")

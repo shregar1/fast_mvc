@@ -15,7 +15,7 @@ Usage:
 """
 
 from http import HTTPStatus
-from typing import Final, NamedTuple
+from typing import Final, NamedTuple, Optional
 
 
 class APIDefinition(NamedTuple):
@@ -39,7 +39,7 @@ class APIDefinition(NamedTuple):
     NAME: str
     METHOD: str
     PATH: str
-    SUMMARY: str | None = None
+    SUMMARY: Optional[str] = None
     TAGS: tuple[str, ...] | None = None
     STATUS_CODE: int | None = None
 

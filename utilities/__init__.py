@@ -3,21 +3,26 @@
 JSON deployment overrides live under :mod:`config`.
 """
 
-from utilities.auth import AuthUtil
-from utilities.cors import CorsConfigUtil
-from utilities.datetime import DateTimeUtil
-from utilities.env import EnvironmentParser
-from utilities.security_headers import SecurityHeadersUtil
-from utilities.string import StringUtil
-from utilities.system import SystemUtil
+from abstractions.utility import IUtility
+from utilities.auth import AuthUtility
+from utilities.cors import CorsConfigUtility
+from utilities.datetime import DateTimeUtility
+from utilities.env import EnvironmentParserUtility
+from utilities.security_headers import SecurityHeadersUtility
+from utilities.string import StringUtility
+from utilities.system import SystemUtility
+from utilities.validator import ConfigValidatorUtility
 
 __all__ = [
+    # Base Interface
+    "IUtility",
     # Utility Classes
-    "AuthUtil",
-    "CorsConfigUtil",
-    "DateTimeUtil",
-    "EnvironmentParser",
-    "SecurityHeadersUtil",
-    "StringUtil",
-    "SystemUtil",
+    "AuthUtility",
+    "ConfigValidatorUtility",
+    "CorsConfigUtility",
+    "DateTimeUtility",
+    "EnvironmentParserUtility",
+    "SecurityHeadersUtility",
+    "StringUtility",
+    "SystemUtility",
 ]

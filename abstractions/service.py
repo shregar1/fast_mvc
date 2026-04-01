@@ -16,7 +16,10 @@ Example:
 
 """
 
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
+from typing import Optional
 
 from typing import Any
 
@@ -64,9 +67,9 @@ class IService(ABC, ContextMixin):
 
     def __init__(
         self,
-        urn: str = None,
-        user_urn: str = None,
-        api_name: str = None,
+        urn: Optional[str] = None,
+        user_urn: Optional[str] = None,
+        api_name: Optional[str] = None,
         user_id: int = None,
         **kwargs: Any,
     ) -> None:

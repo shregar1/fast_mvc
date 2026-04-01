@@ -1,5 +1,7 @@
 """Abstraction for REST API controllers."""
 
+from __future__ import annotations
+
 from typing import Any
 
 from controllers.abstraction import IController
@@ -10,10 +12,10 @@ class IAPIController(IController):
 
     def __init__(
         self,
-        urn: str | None = None,
-        user_urn: str | None = None,
-        api_name: str | None = None,
-        user_id: str | None = None,
+        urn: Optional[str] = None,
+        user_urn: Optional[str] = None,
+        api_name: Optional[str] = None,
+        user_id: Optional[str] = None,
         **kwargs: Any,
     ) -> None:
         """Initialize the API controller base.

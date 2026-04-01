@@ -113,14 +113,19 @@ if payload_type == RequestPayloadType.JSON:
 | `TEXT` | "text" | Plain text response |
 | `CONTENT` | "content" | Binary/raw content |
 
+### CORS (`cors.py`)
+
+`CorsDefaults` (wildcards, methods, expose-headers) and `CorsEnvVar` (``CORS_*`` / ``ALLOWED_ORIGINS`` environment **names**). Use :class:`CorsEnvVar` in code instead of repeating string literals.
+
 ### Security headers (`security_headers.py`)
 
-Default strings for CSP, COOP, CORP, `X-Frame-Options`, `Referrer-Policy`, and related middleware. Used by :mod:`utilities.security_headers` and :class:`~dtos.configuration.security_headers.SecurityHeadersSettingsDTO`.
+`SecurityHeadersConstants` holds default header **values** and HSTS defaults; `SecurityHeadersEnvVar` holds ``SECURITY_*`` environment **names**. Used by :mod:`utilities.security_headers` and :class:`~dtos.configuration.security_headers.SecurityHeadersSettingsDTO`.
 
 ```python
-from constants.security_headers import SecurityHeadersConstants
+from constants.security_headers import SecurityHeadersConstants, SecurityHeadersEnvVar
 
 csp = SecurityHeadersConstants.CONTENT_SECURITY_POLICY
+key = SecurityHeadersEnvVar.CONTENT_SECURITY_POLICY  # "SECURITY_CONTENT_SECURITY_POLICY"
 ```
 
 | Attribute | Role |
@@ -129,6 +134,8 @@ csp = SecurityHeadersConstants.CONTENT_SECURITY_POLICY
 | `SecurityHeadersConstants.CROSS_ORIGIN_OPENER_POLICY` | COOP default (`same-origin`) |
 | `SecurityHeadersConstants.CROSS_ORIGIN_RESOURCE_POLICY` | CORP default (`same-origin`) |
 | `SecurityHeadersConstants.X_*` / `REFERRER_POLICY` | Other header defaults |
+| `SecurityHeadersConstants.DEFAULT_*` | HSTS / remove-server defaults |
+| `SecurityHeadersEnvVar.*` | Env keys for ``SECURITY_*`` variables |
 
 ### RegularExpression (`regular_expression.py`)
 
@@ -187,7 +194,8 @@ constants/
 ├── api_status.py           # Response status values
 ├── default.py              # Default configuration values
 ├── payload_type.py         # Request/response content types
-├── security_headers.py     # CSP, COOP, CORP, and related header defaults
+├── cors.py                 # CORS defaults + env var names (`CorsEnvVar`)
+├── security_headers.py     # Security header defaults + `SecurityHeadersEnvVar`
 ├── regular_expression.py   # Validation regex patterns
 ├── db/
 │   ├── __init__.py

@@ -4,18 +4,43 @@ from __future__ import annotations
 
 import subprocess
 from pathlib import Path
+from typing import Optional
+
+from abstractions.utility import IUtility
 
 
-class SystemUtil:
+class SystemUtility(IUtility):
     """Utility class for system and process operations."""
 
+    def __init__(
+        self,
+        urn: Optional[str] = None,
+        user_urn: Optional[str] = None,
+        api_name: Optional[str] = None,
+        user_id: Optional[str] = None,
+    ) -> None:
+        """Initialize the system utility.
+
+        Args:
+            urn: Unique Request Number for tracing.
+            user_urn: User's unique resource name.
+            api_name: Name of the API endpoint.
+            user_id: Database identifier of the user.
+        """
+        super().__init__(
+            urn=urn,
+            user_urn=user_urn,
+            api_name=api_name,
+            user_id=user_id,
+        )
+
     @staticmethod
-    def git_repository_folder_name() -> str | None:
+    def git_repository_folder_name() -> str:
         """Return the git work tree root directory name, or None if unavailable.
-        
+
         Attempts to find the git repository root by running git commands
         from multiple candidate directories.
-        
+
         Returns:
             The git repository folder name, or None if not in a git repository.
         """
@@ -52,10 +77,10 @@ class SystemUtil:
 
 
 # Backward compatibility: module-level functions delegate to the class
-git_repository_folder_name = SystemUtil.git_repository_folder_name
+git_repository_folder_name = SystemUtility.git_repository_folder_name
 
 
 __all__ = [
-    "SystemUtil",
+    "SystemUtility",
     "git_repository_folder_name",
 ]

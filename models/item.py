@@ -5,7 +5,7 @@ serialization here.
 """
 
 from datetime import datetime
-from typing import Any, Self
+from typing import Any, Optional, Self
 
 from abstractions.entity import Entity
 
@@ -25,7 +25,7 @@ class Item(Entity):
 
     def __init__(
         self,
-        id: str | None = None,
+        id: Optional[str] = None,
         name: str = "",
         description: str = "",
         completed: bool = False,

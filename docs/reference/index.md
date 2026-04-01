@@ -14,7 +14,7 @@ from abstractions.entity import IEntity
 class Item(IEntity):
     id: int
     name: str
-    description: str | None = None
+    description: Optional[str] = None
 ```
 
 ### IRepository
@@ -64,7 +64,7 @@ from dtos.I import IDTO
 
 class CreateItemRequest(IDTO):
     name: str
-    description: str | None = None
+    description: Optional[str] = None
 ```
 
 ## Core Utilities

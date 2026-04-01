@@ -8,7 +8,7 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, Field
 
 from abstractions.dto import IDTO
-from utilities.datetime import DateTimeUtil
+from utilities.datetime import DateTimeUtility
 
 
 class IResponseDTO(BaseModel, IDTO):
@@ -48,11 +48,11 @@ class IResponseDTO(BaseModel, IDTO):
     )
 
     timestamp: datetime = Field(
-        default_factory=DateTimeUtil.utc_now,
+        default_factory=DateTimeUtility.utc_now,
         description="Server time (UTC) when this response envelope was generated.",
     )
 
-    reference_urn: str | None = Field(
+    reference_urn: str = Field(
         default=None,
         description=(
             "Echo of the client correlation id when provided "

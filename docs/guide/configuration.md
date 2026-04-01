@@ -84,59 +84,64 @@ VALIDATE_CONFIG=false
 
 ## CORS
 
-`CORSMiddleware` (from `fastmiddleware`, Starlette-compatible) is configured via `dtos.configuration.CorsSettingsDTO` (inherits `IConfigurationDTO`), loaded by `utilities.cors.CorsConfigUtil.load_settings_from_env()` and applied in `app.py` with `CorsConfigUtil.get_middleware_kwargs()`.
+`CORSMiddleware` (from `fastmiddleware`, Starlette-compatible) is configured via `dtos.configuration.CorsSettingsDTO` (inherits `IConfigurationDTO`), loaded by `utilities.cors.CorsConfigUtility.load_settings_from_env()` and applied in `app.py` with `CorsConfigUtility.get_middleware_kwargs()`.
 
 | Variable | Purpose |
 |----------|---------|
-| `CORS_ORIGINS` | Comma-separated allowed `Origin` values. If unset, `ALLOWED_ORIGINS` is used (e.g. Docker Compose). If both are empty, defaults to `*` (permissive; tighten in production). |
-| `ALLOWED_ORIGINS` | Fallback list when `CORS_ORIGINS` is not set. |
-| `CORS_ALLOW_CREDENTIALS` | `true` / `false` (default `true`). |
-| `CORS_ALLOW_METHODS` | Comma-separated HTTP methods (default: GET, POST, PUT, DELETE, OPTIONS, PATCH). |
-| `CORS_ALLOW_HEADERS` | `*` or comma-separated request header names (default `*`). |
-| `CORS_EXPOSE_HEADERS` | Comma-separated response headers visible to browser JS (defaults include `x-transaction-urn`, `x-reference-urn`). |
-| `CORS_ALLOW_ORIGIN_REGEX` | Optional regex for dynamic origins. |
-| `CORS_MAX_AGE` | Preflight cache seconds (default `600`). |
+| `CorsEnvVar.ORIGINS` | Comma-separated allowed `Origin` values. If unset, `CorsEnvVar.ALLOWED_ORIGINS` is used (e.g. Docker Compose). If both are empty, defaults to `CorsDefaults.FALLBACK_ALLOW_ORIGINS` (wildcard; tighten in production). |
+| `CorsEnvVar.ALLOWED_ORIGINS` | Fallback list when `CorsEnvVar.ORIGINS` is not set. |
+| `CorsEnvVar.ALLOW_CREDENTIALS` | `true` / `false` (default `CorsDefaults.DEFAULT_ALLOW_CREDENTIALS`). |
+| `CorsEnvVar.ALLOW_METHODS` | Comma-separated HTTP methods (default `CorsDefaults.ALLOW_METHODS`). |
+| `CorsEnvVar.ALLOW_HEADERS` | `CorsDefaults.WILDCARD` or comma-separated request header names (default `CorsDefaults.FALLBACK_ALLOW_HEADERS`). |
+| `CorsEnvVar.EXPOSE_HEADERS` | Comma-separated response headers visible to browser JS (default `CorsDefaults.EXPOSE_HEADERS`). |
+| `CorsEnvVar.ALLOW_ORIGIN_REGEX` | Optional regex for dynamic origins. |
+| `CorsEnvVar.MAX_AGE` | Preflight cache seconds (default `CorsDefaults.DEFAULT_MAX_AGE_SECONDS`). |
+
+Each name above is a Python constant whose **value** is the real environment key (for example, `CorsEnvVar.ORIGINS` equals ``CORS_ORIGINS``).
 
 ```python
 from dtos.configuration import CorsSettingsDTO
-from utilities.cors import CorsConfigUtil
+from utilities.cors import CorsConfigUtility
 
-settings: CorsSettingsDTO = CorsConfigUtil.load_settings_from_env()
+settings: CorsSettingsDTO = CorsConfigUtility.load_settings_from_env()
 kwargs = settings.to_middleware_kwargs()  # pass to CORSMiddleware
-# or: kwargs = CorsConfigUtil.get_middleware_kwargs()
+# or: kwargs = CorsConfigUtility.get_middleware_kwargs()
 ```
 
 ## Security headers
 
-`SecurityHeadersMiddleware` (from `fastmiddleware`) is configured via `dtos.configuration.SecurityHeadersSettingsDTO` (inherits `IConfigurationDTO`), loaded by `utilities.security_headers.load_security_headers_settings_from_env()` and applied in `app.py` through `get_security_headers_middleware_config()`.
+`SecurityHeadersMiddleware` (from `fastmiddleware`) is configured via `dtos.configuration.SecurityHeadersSettingsDTO` (inherits `IConfigurationDTO`), loaded by `utilities.security_headers.SecurityHeadersUtility.load_settings_from_env()` and applied in `app.py` through `SecurityHeadersUtility.get_middleware_config()`.
 
 Defaults match the previous inline setup (HSTS, `X-Frame-Options: DENY`, CSP allowing Swagger/ReDoc assets from jsDelivr and Google Fonts). Override with:
 
 | Variable | Purpose |
 |----------|---------|
-| `SECURITY_X_CONTENT_TYPE_OPTIONS` | `X-Content-Type-Options` (default `nosniff`) |
-| `SECURITY_X_FRAME_OPTIONS` | `X-Frame-Options` (default `DENY`) |
-| `SECURITY_X_XSS_PROTECTION` | Legacy `X-XSS-Protection` |
-| `SECURITY_REFERRER_POLICY` | `Referrer-Policy` |
-| `SECURITY_ENABLE_HSTS` | `true` / `false` |
-| `SECURITY_HSTS_MAX_AGE` | Seconds (default one year) |
-| `SECURITY_HSTS_INCLUDE_SUBDOMAINS` | `true` / `false` |
-| `SECURITY_HSTS_PRELOAD` | `true` / `false` |
-| `SECURITY_CONTENT_SECURITY_POLICY` | Full CSP string; if unset, `SecurityHeadersConstants.CONTENT_SECURITY_POLICY` in `constants/security_headers.py` is used |
-| `SECURITY_PERMISSIONS_POLICY` | Optional `Permissions-Policy` |
-| `SECURITY_CROSS_ORIGIN_OPENER_POLICY` | COOP (default `SecurityHeadersConstants.CROSS_ORIGIN_OPENER_POLICY` in `constants/security_headers.py`) |
-| `SECURITY_CROSS_ORIGIN_RESOURCE_POLICY` | CORP (default `SecurityHeadersConstants.CROSS_ORIGIN_RESOURCE_POLICY` in `constants/security_headers.py`) |
-| `SECURITY_CROSS_ORIGIN_EMBEDDER_POLICY` | Optional COEP |
-| `SECURITY_REMOVE_SERVER_HEADER` | `true` / `false` |
+| `SecurityHeadersEnvVar.X_CONTENT_TYPE_OPTIONS` | `X-Content-Type-Options` (default `SecurityHeadersConstants.X_CONTENT_TYPE_OPTIONS`) |
+| `SecurityHeadersEnvVar.X_FRAME_OPTIONS` | `X-Frame-Options` (default `SecurityHeadersConstants.X_FRAME_OPTIONS`) |
+| `SecurityHeadersEnvVar.X_XSS_PROTECTION` | Legacy `X-XSS-Protection` |
+| `SecurityHeadersEnvVar.REFERRER_POLICY` | `Referrer-Policy` |
+| `SecurityHeadersEnvVar.ENABLE_HSTS` | `true` / `false` (default `SecurityHeadersConstants.DEFAULT_ENABLE_HSTS`) |
+| `SecurityHeadersEnvVar.HSTS_MAX_AGE` | Seconds (default `SecurityHeadersConstants.DEFAULT_HSTS_MAX_AGE_SECONDS`) |
+| `SecurityHeadersEnvVar.HSTS_INCLUDE_SUBDOMAINS` | `true` / `false` (default `SecurityHeadersConstants.DEFAULT_HSTS_INCLUDE_SUBDOMAINS`) |
+| `SecurityHeadersEnvVar.HSTS_PRELOAD` | `true` / `false` (default `SecurityHeadersConstants.DEFAULT_HSTS_PRELOAD`) |
+| `SecurityHeadersEnvVar.CONTENT_SECURITY_POLICY` | Full CSP string; if unset, `SecurityHeadersConstants.CONTENT_SECURITY_POLICY` is used |
+| `SecurityHeadersEnvVar.PERMISSIONS_POLICY` | Optional `Permissions-Policy` |
+| `SecurityHeadersEnvVar.CROSS_ORIGIN_OPENER_POLICY` | COOP (default `SecurityHeadersConstants.CROSS_ORIGIN_OPENER_POLICY`) |
+| `SecurityHeadersEnvVar.CROSS_ORIGIN_RESOURCE_POLICY` | CORP (default `SecurityHeadersConstants.CROSS_ORIGIN_RESOURCE_POLICY`) |
+| `SecurityHeadersEnvVar.CROSS_ORIGIN_EMBEDDER_POLICY` | Optional COEP |
+| `SecurityHeadersEnvVar.REMOVE_SERVER_HEADER` | `true` / `false` (default `SecurityHeadersConstants.DEFAULT_REMOVE_SERVER_HEADER`) |
+
+Each row’s constant holds the ``SECURITY_*`` string used in the environment (e.g. `SecurityHeadersEnvVar.CONTENT_SECURITY_POLICY` is ``SECURITY_CONTENT_SECURITY_POLICY``).
 
 Programmatic access:
 
 ```python
 from dtos.configuration import SecurityHeadersSettingsDTO
-from utilities.security_headers import load_security_headers_settings_from_env
+from utilities.security_headers import SecurityHeadersUtility
 
-settings: SecurityHeadersSettingsDTO = load_security_headers_settings_from_env()
+settings: SecurityHeadersSettingsDTO = SecurityHeadersUtility.load_settings_from_env()
 config = settings.to_middleware_config()  # fastmiddleware.SecurityHeadersConfig
+# or: config = SecurityHeadersUtility.get_middleware_config()
 ```
 
 ## Custom Validation
@@ -144,9 +149,9 @@ config = settings.to_middleware_config()  # fastmiddleware.SecurityHeadersConfig
 Add custom validation rules in `utilities/validator.py`:
 
 ```python
-from utilities.validator import ConfigValidator
+from utilities.validator import ConfigValidatorUtility
 
-class MyValidator(ConfigValidator):
+class MyValidator(ConfigValidatorUtility):
     def validate_custom_rule(self, value: str) -> tuple[bool, str]:
         """Custom validation logic."""
         if not value.startswith("custom_"):
@@ -168,7 +173,7 @@ from pydantic_settings import ISettings
 class Settings(ISettings):
     app_name: str = "FastMVC App"
     debug: bool = False
-    dataI_url: str | None = None
+    dataI_url: Optional[str] = None
     
     class Config:
         env_file = ".env"

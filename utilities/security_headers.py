@@ -2,15 +2,40 @@
 
 from __future__ import annotations
 
+from typing import Optional
+
 from fastmiddleware import SecurityHeadersConfig
 
-from constants.security_headers import SecurityHeadersConstants
+from abstractions.utility import IUtility
+from constants.security_headers import SecurityHeadersConstants, SecurityHeadersEnvVar
 from dtos.configuration import SecurityHeadersSettingsDTO
-from utilities.env import EnvironmentParser
+from utilities.env import EnvironmentParserUtility
 
 
-class SecurityHeadersUtil:
+class SecurityHeadersUtility(IUtility):
     """Utility class for security headers middleware configuration."""
+
+    def __init__(
+        self,
+        urn: Optional[str] = None,
+        user_urn: Optional[str] = None,
+        api_name: Optional[str] = None,
+        user_id: Optional[str] = None,
+    ) -> None:
+        """Initialize the security headers utility.
+
+        Args:
+            urn: Unique Request Number for tracing.
+            user_urn: User's unique resource name.
+            api_name: Name of the API endpoint.
+            user_id: Database identifier of the user.
+        """
+        super().__init__(
+            urn=urn,
+            user_urn=user_urn,
+            api_name=api_name,
+            user_id=user_id,
+        )
 
     @classmethod
     def load_settings_from_env(cls) -> SecurityHeadersSettingsDTO:
@@ -20,54 +45,72 @@ class SecurityHeadersUtil:
         inline ``SecurityHeadersConfig`` in ``app.py``.
 
         Variables:
-            ``SECURITY_X_CONTENT_TYPE_OPTIONS``, ``SECURITY_X_FRAME_OPTIONS``,
-            ``SECURITY_X_XSS_PROTECTION``, ``SECURITY_REFERRER_POLICY``,
-            ``SECURITY_ENABLE_HSTS``, ``SECURITY_HSTS_MAX_AGE``,
-            ``SECURITY_HSTS_INCLUDE_SUBDOMAINS``, ``SECURITY_HSTS_PRELOAD``,
-            ``SECURITY_CONTENT_SECURITY_POLICY`` (full CSP string; empty → built-in default),
-            ``SECURITY_PERMISSIONS_POLICY``,
-            ``SECURITY_CROSS_ORIGIN_OPENER_POLICY``, ``SECURITY_CROSS_ORIGIN_RESOURCE_POLICY``,
-            ``SECURITY_CROSS_ORIGIN_EMBEDDER_POLICY``,
-            ``SECURITY_REMOVE_SERVER_HEADER``.
+            See :class:`constants.security_headers.SecurityHeadersEnvVar` for keys
+            (``SECURITY_*``). Omitted values use :class:`~constants.security_headers.SecurityHeadersConstants`.
         """
-        csp = EnvironmentParser.parse_optional_str("SECURITY_CONTENT_SECURITY_POLICY")
+        csp = EnvironmentParserUtility.parse_optional_str(
+            SecurityHeadersEnvVar.CONTENT_SECURITY_POLICY
+        )
         if csp is None:
             csp = SecurityHeadersConstants.CONTENT_SECURITY_POLICY
 
-        coop = EnvironmentParser.parse_optional_str("SECURITY_CROSS_ORIGIN_OPENER_POLICY")
+        coop = EnvironmentParserUtility.parse_optional_str(
+            SecurityHeadersEnvVar.CROSS_ORIGIN_OPENER_POLICY
+        )
         if coop is None:
             coop = SecurityHeadersConstants.CROSS_ORIGIN_OPENER_POLICY
 
-        corp = EnvironmentParser.parse_optional_str("SECURITY_CROSS_ORIGIN_RESOURCE_POLICY")
+        corp = EnvironmentParserUtility.parse_optional_str(
+            SecurityHeadersEnvVar.CROSS_ORIGIN_RESOURCE_POLICY
+        )
         if corp is None:
             corp = SecurityHeadersConstants.CROSS_ORIGIN_RESOURCE_POLICY
 
         return SecurityHeadersSettingsDTO(
-            x_content_type_options=EnvironmentParser.parse_str(
-                "SECURITY_X_CONTENT_TYPE_OPTIONS",
+            x_content_type_options=EnvironmentParserUtility.parse_str(
+                SecurityHeadersEnvVar.X_CONTENT_TYPE_OPTIONS,
                 SecurityHeadersConstants.X_CONTENT_TYPE_OPTIONS,
             ),
-            x_frame_options=EnvironmentParser.parse_str(
-                "SECURITY_X_FRAME_OPTIONS", SecurityHeadersConstants.X_FRAME_OPTIONS
+            x_frame_options=EnvironmentParserUtility.parse_str(
+                SecurityHeadersEnvVar.X_FRAME_OPTIONS, SecurityHeadersConstants.X_FRAME_OPTIONS
             ),
-            x_xss_protection=EnvironmentParser.parse_str(
-                "SECURITY_X_XSS_PROTECTION", SecurityHeadersConstants.X_XSS_PROTECTION
+            x_xss_protection=EnvironmentParserUtility.parse_str(
+                SecurityHeadersEnvVar.X_XSS_PROTECTION,
+                SecurityHeadersConstants.X_XSS_PROTECTION,
             ),
-            referrer_policy=EnvironmentParser.parse_str(
-                "SECURITY_REFERRER_POLICY", SecurityHeadersConstants.REFERRER_POLICY
+            referrer_policy=EnvironmentParserUtility.parse_str(
+                SecurityHeadersEnvVar.REFERRER_POLICY,
+                SecurityHeadersConstants.REFERRER_POLICY,
             ),
-            enable_hsts=EnvironmentParser.parse_bool("SECURITY_ENABLE_HSTS", True),
-            hsts_max_age=EnvironmentParser.parse_int("SECURITY_HSTS_MAX_AGE", 31_536_000),
-            hsts_include_subdomains=EnvironmentParser.parse_bool("SECURITY_HSTS_INCLUDE_SUBDOMAINS", True),
-            hsts_preload=EnvironmentParser.parse_bool("SECURITY_HSTS_PRELOAD", False),
+            enable_hsts=EnvironmentParserUtility.parse_bool(
+                SecurityHeadersEnvVar.ENABLE_HSTS,
+                SecurityHeadersConstants.DEFAULT_ENABLE_HSTS,
+            ),
+            hsts_max_age=EnvironmentParserUtility.parse_int(
+                SecurityHeadersEnvVar.HSTS_MAX_AGE,
+                SecurityHeadersConstants.DEFAULT_HSTS_MAX_AGE_SECONDS,
+            ),
+            hsts_include_subdomains=EnvironmentParserUtility.parse_bool(
+                SecurityHeadersEnvVar.HSTS_INCLUDE_SUBDOMAINS,
+                SecurityHeadersConstants.DEFAULT_HSTS_INCLUDE_SUBDOMAINS,
+            ),
+            hsts_preload=EnvironmentParserUtility.parse_bool(
+                SecurityHeadersEnvVar.HSTS_PRELOAD,
+                SecurityHeadersConstants.DEFAULT_HSTS_PRELOAD,
+            ),
             content_security_policy=csp,
-            permissions_policy=EnvironmentParser.parse_optional_str("SECURITY_PERMISSIONS_POLICY"),
+            permissions_policy=EnvironmentParserUtility.parse_optional_str(
+                SecurityHeadersEnvVar.PERMISSIONS_POLICY
+            ),
             cross_origin_opener_policy=coop,
             cross_origin_resource_policy=corp,
-            cross_origin_embedder_policy=EnvironmentParser.parse_optional_str(
-                "SECURITY_CROSS_ORIGIN_EMBEDDER_POLICY"
+            cross_origin_embedder_policy=EnvironmentParserUtility.parse_optional_str(
+                SecurityHeadersEnvVar.CROSS_ORIGIN_EMBEDDER_POLICY
             ),
-            remove_server_header=EnvironmentParser.parse_bool("SECURITY_REMOVE_SERVER_HEADER", True),
+            remove_server_header=EnvironmentParserUtility.parse_bool(
+                SecurityHeadersEnvVar.REMOVE_SERVER_HEADER,
+                SecurityHeadersConstants.DEFAULT_REMOVE_SERVER_HEADER,
+            ),
         )
 
     @classmethod
@@ -76,13 +119,4 @@ class SecurityHeadersUtil:
         return cls.load_settings_from_env().to_middleware_config()
 
 
-# Backward compatibility: module-level functions delegate to the class
-load_security_headers_settings_from_env = SecurityHeadersUtil.load_settings_from_env
-get_security_headers_middleware_config = SecurityHeadersUtil.get_middleware_config
-
-
-__all__ = [
-    "SecurityHeadersUtil",
-    "load_security_headers_settings_from_env",
-    "get_security_headers_middleware_config",
-]
+__all__ = ["SecurityHeadersUtility"]

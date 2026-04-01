@@ -4,6 +4,8 @@ Inheritance: layered interfaces under ``controllers.*`` → :class:`IController`
 :class:`abstractions.controller.IController` (framework) → :class:`core.utils.context.ContextMixin`.
 """
 
+from __future__ import annotations
+
 from typing import Any
 
 from abstractions.controller import IController as FrameworkController
@@ -14,10 +16,10 @@ class IController(FrameworkController):
 
     def __init__(
         self,
-        urn: str | None = None,
-        user_urn: str | None = None,
-        api_name: str | None = None,
-        user_id: str | None = None,
+        urn: Optional[str] = None,
+        user_urn: Optional[str] = None,
+        api_name: Optional[str] = None,
+        user_id: Optional[str] = None,
         **kwargs: Any,
     ) -> None:
         """Initialize the application controller base.
@@ -39,7 +41,7 @@ class IController(FrameworkController):
         )
 
     @property
-    def urn(self) -> str | None:
+    def urn(self) -> str:
         """str: Get the Unique Request Number."""
         return self._urn
 
@@ -49,7 +51,7 @@ class IController(FrameworkController):
         self._urn = value
 
     @property
-    def user_urn(self) -> str | None:
+    def user_urn(self) -> str:
         """str: Get the user's unique resource name."""
         return self._user_urn
 
@@ -59,7 +61,7 @@ class IController(FrameworkController):
         self._user_urn = value
 
     @property
-    def api_name(self) -> str | None:
+    def api_name(self) -> str:
         """str: Get the API endpoint name."""
         return self._api_name
 
@@ -69,7 +71,7 @@ class IController(FrameworkController):
         self._api_name = value
 
     @property
-    def user_id(self) -> str | None:
+    def user_id(self) -> str:
         """str: Get the user's database identifier."""
         return self._user_id
 

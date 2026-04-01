@@ -33,7 +33,7 @@ import os
 import sys
 from pathlib import Path
 from urllib.parse import quote
-from typing import Any
+from typing import Any, Optional
 
 import redis
 from dotenv import load_dotenv
@@ -228,7 +228,7 @@ Example:
     >>> value = redis_session.get("key")
 """
 
-redis_url: str | None = None
+redis_url: Optional[str] = None
 if cache_configuration is not None:
     redis_url = getattr(cache_configuration, "redis_url", "") or ""
     if not redis_url:

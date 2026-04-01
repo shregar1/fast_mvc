@@ -7,22 +7,46 @@ from __future__ import annotations
 
 import os
 from collections.abc import Sequence
-from typing import Any
+from typing import Optional
+
+from abstractions.utility import IUtility
 
 
-class EnvironmentParser:
+class EnvironmentParserUtility(IUtility):
     """Parser for environment variables with type-safe conversion and defaults."""
+
+    def __init__(
+        self,
+        urn: Optional[str] = None,
+        user_urn: Optional[str] = None,
+        api_name: Optional[str] = None,
+        user_id: Optional[str] = None,
+    ) -> None:
+        """Initialize the environment parser.
+
+        Args:
+            urn: Unique Request Number for tracing.
+            user_urn: User's unique resource name.
+            api_name: Name of the API endpoint.
+            user_id: Database identifier of the user.
+        """
+        super().__init__(
+            urn=urn,
+            user_urn=user_urn,
+            api_name=api_name,
+            user_id=user_id,
+        )
 
     @staticmethod
     def parse_bool(name: str, default: bool) -> bool:
         """Parse environment variable as boolean.
-        
+
         Values considered True: 'true', '1', 'yes', 'on' (case-insensitive).
-        
+
         Args:
             name: Environment variable name.
             default: Default value if variable is not set.
-            
+
         Returns:
             Boolean value of the environment variable.
         """
@@ -34,11 +58,11 @@ class EnvironmentParser:
     @staticmethod
     def parse_int(name: str, default: int) -> int:
         """Parse environment variable as integer.
-        
+
         Args:
             name: Environment variable name.
             default: Default value if variable is not set or empty.
-            
+
         Returns:
             Integer value of the environment variable.
         """
@@ -50,11 +74,11 @@ class EnvironmentParser:
     @staticmethod
     def parse_str(name: str, default: str) -> str:
         """Parse environment variable as string.
-        
+
         Args:
             name: Environment variable name.
             default: Default value if variable is not set.
-            
+
         Returns:
             String value of the environment variable.
         """
@@ -64,14 +88,14 @@ class EnvironmentParser:
         return raw
 
     @staticmethod
-    def parse_optional_str(name: str) -> str | None:
+    def parse_optional_str(name: str) -> Optional[str]:
         """Parse environment variable as optional string.
-        
+
         Returns None if the variable is not set or is empty/whitespace.
-        
+
         Args:
             name: Environment variable name.
-            
+
         Returns:
             String value or None if not set/empty.
         """
@@ -83,11 +107,11 @@ class EnvironmentParser:
     @staticmethod
     def parse_csv(name: str, default: Sequence[str]) -> list[str]:
         """Parse comma-separated environment variable as list of strings.
-        
+
         Args:
             name: Environment variable name.
             default: Default sequence if variable is not set or empty.
-            
+
         Returns:
             List of stripped, non-empty values from the environment variable.
         """
@@ -100,13 +124,13 @@ class EnvironmentParser:
     @staticmethod
     def get_int_with_logging(name: str, default: int) -> int:
         """Get integer from environment variable with fallback and logging.
-        
+
         Similar to parse_int but logs a warning when the value is invalid.
-        
+
         Args:
             name: Environment variable name.
             default: Default value if variable is not set or invalid.
-            
+
         Returns:
             Integer value of the environment variable.
         """
@@ -130,16 +154,16 @@ class EnvironmentParser:
 
 
 # Backward compatibility: module-level functions delegate to the class
-env_bool = EnvironmentParser.parse_bool
-env_int = EnvironmentParser.parse_int
-env_str = EnvironmentParser.parse_str
-env_optional_str = EnvironmentParser.parse_optional_str
-env_csv = EnvironmentParser.parse_csv
-get_int_env = EnvironmentParser.get_int_with_logging
+env_bool = EnvironmentParserUtility.parse_bool
+env_int = EnvironmentParserUtility.parse_int
+env_str = EnvironmentParserUtility.parse_str
+env_optional_str = EnvironmentParserUtility.parse_optional_str
+env_csv = EnvironmentParserUtility.parse_csv
+get_int_env = EnvironmentParserUtility.get_int_with_logging
 
 
 __all__ = [
-    "EnvironmentParser",
+    "EnvironmentParserUtility",
     "env_bool",
     "env_csv",
     "env_int",

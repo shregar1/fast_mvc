@@ -20,8 +20,8 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import PlainTextResponse, Response
 
-from utilities.auth import AuthUtil
-from utilities.string import StringUtil
+from utilities.auth import AuthUtility
+from utilities.string import StringUtility
 
 
 class DocsAuthConfig:
@@ -31,17 +31,17 @@ class DocsAuthConfig:
     def normalized_openapi_url() -> str:
         """Return the OpenAPI JSON path; keep in sync with ``FastAPI(openapi_url=...)``."""
         raw = os.environ.get("OPENAPI_URL", "/openapi.json").strip() or "/openapi.json"
-        return StringUtil.normalize_path(raw)
+        return StringUtility.normalize_path(raw)
 
     @classmethod
     def resolve_openapi_url_paths(cls) -> frozenset[str]:
         """All URL paths that expose the OpenAPI schema (for auth + logging excludes)."""
         out: set[str] = {cls.normalized_openapi_url()}
-        extra_paths = StringUtil.split_csv(
+        extra_paths = StringUtility.split_csv(
             os.environ.get("DOCS_EXTRA_PROTECTED_PATHS"), default=[]
         )
         for p in extra_paths:
-            out.add(StringUtil.normalize_path(p))
+            out.add(StringUtility.normalize_path(p))
         return frozenset(out)
 
     @classmethod
@@ -107,13 +107,13 @@ class DocsBasicAuthMiddleware(BaseHTTPMiddleware):
 
         expected_user = os.environ["DOCS_USERNAME"].strip()
         expected_pass = os.environ["DOCS_PASSWORD"].strip()
-        parsed = AuthUtil.parse_basic_authorization(request.headers.get("Authorization"))
+        parsed = AuthUtility.parse_basic_authorization(request.headers.get("Authorization"))
         if parsed is None:
             return DocsAuthConfig.unauthorized_response()
         username, password = parsed
         if not (
-            AuthUtil.constant_time_compare(username, expected_user)
-            and AuthUtil.constant_time_compare(password, expected_pass)
+            AuthUtility.constant_time_compare(username, expected_user)
+            and AuthUtility.constant_time_compare(password, expected_pass)
         ):
             return DocsAuthConfig.unauthorized_response()
         return await call_next(request)

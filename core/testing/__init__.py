@@ -1,36 +1,32 @@
-"""Testing Utilities Module.
+"""Test Fixtures and Utilities.
 
-Provides testing helpers for FastMVC applications:
-- Factory pattern for creating test data
-- Mock helpers for external services
-- Test fixtures
-- DataI test utilities
-
-Usage:
-    from core.testing import Factory, mock_external
-
-    @Factory.define
-    class UserFactory:
-        email = Factory.faker("email")
-        name = Factory.faker("name")
-
-    user = await UserFactory.create()
-    users = await UserFactory.create_batch(10)
-
-    @mock_external("stripe.create_charge", return_value={"id": "ch_123"})
-    async def test_payment():
-        pass
+Provides common fixtures and test utilities for FastMVC applications.
 """
 
-from core.testing.factories import Factory, FactoryField
-from core.testing.mocks import MockExternalService, mock_external
-from core.testing.fixtures import DataITestCase, TestClient
+from core.testing.app_factory import TestAppFactory, create_test_app
+from core.testing.async_utils import AsyncTestUtil, run_async
+from core.testing.fixtures import (
+    DataITestCase,
+    AsyncDataITestCase,
+    FixtureRegistry,
+    TestClient,
+    fixtures,
+)
+from core.testing.mocks import mock_external
 
 __all__ = [
-    "Factory",
-    "FactoryField",
-    "mock_external",
-    "MockExternalService",
+    # App Factory
+    "TestAppFactory",
+    "create_test_app",
+    # Async Utils
+    "AsyncTestUtil",
+    "run_async",
+    # Fixtures
     "DataITestCase",
+    "AsyncDataITestCase",
+    "FixtureRegistry",
     "TestClient",
+    "fixtures",
+    # Mocks
+    "mock_external",
 ]

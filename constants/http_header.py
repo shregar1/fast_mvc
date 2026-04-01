@@ -1,6 +1,6 @@
 """Standard HTTP header names and helpers for API responses."""
 
-from typing import ClassVar
+from typing import ClassVar, Optional
 
 
 class HttpHeader:
@@ -15,7 +15,7 @@ class HttpHeader:
     def get_reference_urn_header(
         self,
         *,
-        reference_urn: str | None = None,
+        reference_urn: Optional[str] = None,
     ) -> dict[str, str]:
         """Build response headers including ``x-reference-urn`` when a value is present."""
         if reference_urn is None or reference_urn == "":
@@ -26,8 +26,8 @@ class HttpHeader:
     def correlation_response_headers(
         self,
         *,
-        reference_urn: str | None = None,
-        transaction_urn: str | None = None,
+        reference_urn: Optional[str] = None,
+        transaction_urn: Optional[str] = None,
     ) -> dict[str, str]:
         """Merge optional client reference echo and server transaction URN for API responses."""
         headers: dict[str, str] = {}

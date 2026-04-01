@@ -607,7 +607,7 @@ def success_response_codes(codes: list[int]) -> list[int]:
     return codes if codes else [200]
 
 
-def _openapi_property_type(prop_schema: Any, components: dict[str, Any]) -> str | None:
+def _openapi_property_type(prop_schema: Any, components: dict[str, Any]) -> str:
     """Map a JSON Schema property sub-schema to a simple OpenAPI ``type`` string."""
     if not isinstance(prop_schema, dict):
         return None

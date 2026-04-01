@@ -26,7 +26,7 @@ from datetime import datetime
 from typing import Any
 
 from loguru import logger
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, field_validator
 
 # Optional fast_utilities (requires fast-mvc[platform])
 try:
@@ -35,24 +35,9 @@ except ImportError:
     SecurityValidators = None  # type: ignore
     ValidationUtility = None  # type: ignore
 
+from dtos.config import DtoConfigBuilder, enhanced_config
+
 __all__ = ["EnhancedIModel", "enhanced_config"]
-
-_ENHANCED_DEFAULTS: dict[str, Any] = {
-    "extra": "forbid",
-    "validate_assignment": True,
-    "use_enum_values": True,
-}
-
-
-def enhanced_config(**overrides: Any) -> ConfigDict:
-    """Build a :class:`~pydantic.ConfigDict` by merging *overrides* into the
-    defaults used by :class:`EnhancedIModel`.
-
-    Common overrides: ``title``, ``str_strip_whitespace``, ``populate_by_name``,
-    ``frozen``, ``validate_default``, ``json_schema_extra``, etc.
-    """
-    merged = {**_ENHANCED_DEFAULTS, **overrides}
-    return ConfigDict(**merged)
 
 
 class EnhancedIModel(BaseModel):

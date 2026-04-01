@@ -12,4 +12,4 @@ class ExampleCreateRequestDTO(IRequestExampleDTO):
     """Example create request payload."""
 
     name: str = Field(..., description="Example name")
-    description: str | None = Field(None, description="Example description")
+    description: str = Field(None, description="Example description")

@@ -17,8 +17,8 @@ class UpdateItemRequestDTO(IRequestItemDTO):
     """DTO for updating an existing item."""
 
     reference_urn: str = Field(default_factory=lambda: str(uuid4()))
-    name: str | None = None
-    description: str | None = None
+    name: Optional[str] = None
+    description: Optional[str] = None
 
     def validate(self) -> tuple[bool, list[str]]:
         errors: list[str] = []

@@ -133,34 +133,6 @@ class AsyncDataITestCase:
                 await session.close()
 
 
-def create_test_app(**kwargs: Any) -> FastAPI:
-    """Create a FastAPI app configured for testing.
-
-    Usage:
-        app = create_test_app()
-        client = TestClient(app)
-    """
-    from fastapi import FastAPI
-
-    app = FastAPI(
-        title="Test App",
-        docs_url=None,  # Disable docs in tests
-        redoc_url=None,
-        **kwargs,
-    )
-
-    return app
-
-
-async def run_async(coro: Any) -> Any:
-    """Run async function in sync context.
-
-    Useful for running async tests in synchronous test runners.
-    """
-    loop = asyncio.get_event_loop()
-    return loop.run_until_complete(coro)
-
-
 class FixtureRegistry:
     """Registry for test fixtures.
 
@@ -223,3 +195,12 @@ class FixtureRegistry:
 
 # Global fixture registry
 fixtures = FixtureRegistry()
+
+
+__all__ = [
+    "TestClient",
+    "DataITestCase",
+    "AsyncDataITestCase",
+    "FixtureRegistry",
+    "fixtures",
+]

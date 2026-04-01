@@ -39,6 +39,7 @@ from fastapi.testclient import TestClient
 
 from app import app as fastapi_app
 from models.item import Item
+from tests.utils.item_helpers import ItemTestHelper
 
 # =============================================================================
 # PYTEST CONFIGURATION
@@ -72,48 +73,10 @@ import pytest
 # ITEM API FIXTURES
 # =============================================================================
 
-
-def _item_from_api_json(data: dict) -> Item:
-    return Item.from_dict(
-        {
-            "id": data["id"],
-            "name": data["name"],
-            "description": data["description"],
-            "completed": data["completed"],
-            "created_at": data["created_at"],
-            "updated_at": data["updated_at"],
-        }
-    )
-
-
-def _post_item(
-    client: TestClient,
-    *,
-    name: str,
-    description: str = "",
-    completed: bool = False,
-) -> Item:
-    r = client.post(
-        "/items",
-        json={
-            "reference_urn": str(uuid4()),
-            "name": name,
-            "description": description,
-            "completed": completed,
-        },
-    )
-    assert r.status_code == 201, r.text
-    return _item_from_api_json(r.json())
-
-
-def _clear_app_item_storage() -> None:
-    try:
-        from controllers.apis.v1.item.item_controller import _controller
-
-        repo = _controller._service._repository
-        asyncio.run(repo.clear())
-    except (ImportError, ModuleNotFoundError, AttributeError):
-        pass
+# Backward compatibility: module-level functions delegate to the class
+_item_from_api_json = ItemTestHelper.item_from_api_json
+_post_item = ItemTestHelper.post_item
+_clear_app_item_storage = ItemTestHelper.clear_app_item_storage
 
 
 @pytest.fixture(autouse=True)
@@ -122,9 +85,9 @@ def _reset_item_storage_between_tests(request: pytest.FixtureRequest) -> Generat
     if request.node.get_closest_marker("no_item_reset"):
         yield
         return
-    _clear_app_item_storage()
+    ItemTestHelper.clear_app_item_storage()
     yield
-    _clear_app_item_storage()
+    ItemTestHelper.clear_app_item_storage()
 
 
 @pytest.fixture(scope="session")
@@ -219,7 +182,7 @@ def invalid_item_payloads() -> list[dict]:
 def test_item(item_client: TestClient, create_item_payload: dict) -> Item:
     r = item_client.post("/items", json=create_item_payload)
     assert r.status_code == 201, r.text
-    return _item_from_api_json(r.json())
+    return ItemTestHelper.item_from_api_json(r.json())
 
 
 @pytest.fixture
@@ -227,7 +190,7 @@ def test_items(item_client: TestClient, mock_auth) -> list[Item]:
     names = ["Alpha Search Me", "Beta Other", "Gamma Third"]
     with mock_auth:
         return [
-            _post_item(item_client, name=n, description="d", completed=False)
+            ItemTestHelper.post_item(item_client, name=n, description="d", completed=False)
             for n in names
         ]
 
@@ -235,13 +198,13 @@ def test_items(item_client: TestClient, mock_auth) -> list[Item]:
 @pytest.fixture
 def completed_items(item_client: TestClient, mock_auth) -> list[Item]:
     with mock_auth:
-        return [_post_item(item_client, name="Done Item", completed=True)]
+        return [ItemTestHelper.post_item(item_client, name="Done Item", completed=True)]
 
 
 @pytest.fixture
 def pending_items(item_client: TestClient, mock_auth) -> list[Item]:
     with mock_auth:
-        return [_post_item(item_client, name="Todo Item", completed=False)]
+        return [ItemTestHelper.post_item(item_client, name="Todo Item", completed=False)]
 
 
 @pytest.fixture

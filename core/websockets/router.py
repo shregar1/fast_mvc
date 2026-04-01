@@ -8,12 +8,13 @@ Provides:
 
 from __future__ import annotations
 
-from typing import Any, AsyncGenerator, Dict, List, Tuple
+from typing import Any, Dict, List
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 from fast_channels import InMemoryPresenceBackend, PresenceService
 from services.streams import Tick, OrderEvent, get_market_data_hub
+from core.websockets.utils import WebSocketStreamHelper
 
 
 router = APIRouter(tags=["WebSockets"])
@@ -23,28 +24,6 @@ router = APIRouter(tags=["WebSockets"])
 _room_connections: Dict[str, List[WebSocket]] = {}
 _presence = PresenceService(InMemoryPresenceBackend(ttl_seconds=60))
 _market_hub = get_market_data_hub()
-
-
-async def _stream_frames(
-    ws: WebSocket,
-    gen: AsyncGenerator[Tuple[str, Any], None],
-    snapshot_serializer: callable,
-    update_serializer: callable,
-) -> None:
-    """Helper to stream snapshot + update frames over a WebSocket.
-
-    Expects the generator to yield (frame_type, payload) tuples where
-    frame_type is "snapshot" or "update".
-    """
-    await ws.accept()
-    try:
-        async for frame_type, payload in gen:
-            if frame_type == "snapshot":
-                await ws.send_json(snapshot_serializer(payload))
-            else:
-                await ws.send_json(update_serializer(payload))
-    except WebSocketDisconnect:
-        return
 
 
 @router.websocket("/ws/echo")
@@ -165,7 +144,7 @@ async def websocket_market(ws: WebSocket, symbol: str) -> None:
             },
         }
 
-    await _stream_frames(
+    await WebSocketStreamHelper.stream_frames(
         ws, hub.subscribe_ticks(symbol), snapshot_serializer, update_serializer
     )
 
@@ -227,7 +206,7 @@ async def websocket_orders(ws: WebSocket, tenant_id: str) -> None:
             },
         }
 
-    await _stream_frames(
+    await WebSocketStreamHelper.stream_frames(
         ws, hub.subscribe_orders(tenant_id), snapshot_serializer, update_serializer
     )
 

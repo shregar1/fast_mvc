@@ -6,14 +6,16 @@ context for better debugging and monitoring.
 
 Example:
     >>> class NotFoundError(IError):
-    ...     def __init__(self, resource: str, urn: str = None):
+    ...     def __init__(self, resource: str, urn: Optional[str] = None):
     ...         super().__init__(urn=urn)
     ...         self.resource = resource
     ...         self.message = f"{resource} not found"
 
 """
 
-from typing import Any
+from __future__ import annotations
+
+from typing import Any, Optional
 
 from loguru import logger
 
@@ -52,10 +54,10 @@ class IError(Exception, ContextMixin):
 
     def __init__(
         self,
-        urn: str | None = None,
-        user_urn: str | None = None,
-        api_name: str | None = None,
-        user_id: str | None = None,
+        urn: Optional[str] = None,
+        user_urn: Optional[str] = None,
+        api_name: Optional[str] = None,
+        user_id: Optional[str] = None,
         **kwargs: Any,
     ) -> None:
         """Initialize the error with request context.

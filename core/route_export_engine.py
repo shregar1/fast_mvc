@@ -24,7 +24,7 @@ class RouteExportEngine:
         self,
         app: FastAPI,
         output_file: str = "postman_collection.json",
-        environment_file: str | None = None,
+        environment_file: Optional[str] = None,
     ) -> None:
         self.app = app
         self.output_file = output_file

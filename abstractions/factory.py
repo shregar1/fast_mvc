@@ -14,7 +14,10 @@ Example:
 
 """
 
+from __future__ import annotations
+
 from abc import ABC
+from typing import Optional
 
 from loguru import logger
 
@@ -55,10 +58,10 @@ class IFactory(ABC):
 
     def __init__(
         self,
-        urn: str = None,
-        user_urn: str = None,
-        api_name: str = None,
-        user_id: str = None,
+        urn: Optional[str] = None,
+        user_urn: Optional[str] = None,
+        api_name: Optional[str] = None,
+        user_id: Optional[str] = None,
     ) -> None:
         """Initialize the factory with request context.
 

@@ -12,8 +12,10 @@ Example:
 
 """
 
+from __future__ import annotations
+
 from abc import ABC
-from typing import Any
+from typing import Any, Optional
 
 from core.utils.context import ContextMixin
 
@@ -46,10 +48,10 @@ class IController(ABC, ContextMixin):
 
     def __init__(
         self,
-        urn: str = None,
-        user_urn: str = None,
-        api_name: str = None,
-        user_id: str = None,
+        urn: Optional[str] = None,
+        user_urn: Optional[str] = None,
+        api_name: Optional[str] = None,
+        user_id: Optional[str] = None,
         **kwargs: Any,
     ) -> None:
         """Initialize the controller with request context.

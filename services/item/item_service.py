@@ -1,6 +1,8 @@
 """Item application service."""
 
-from typing import Any, cast
+from __future__ import annotations
+
+from typing import Any, Optional, cast
 
 from abstractions.result import Result, failure, success
 from models.item import Item
@@ -106,8 +108,8 @@ class ItemService(IItemService):
     async def update_item(
         self,
         item_id: str,
-        name: str | None = None,
-        description: str | None = None,
+        name: Optional[str] = None,
+        description: Optional[str] = None,
     ) -> Result[Item, Any]:
         """Update an item.
 

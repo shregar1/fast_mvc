@@ -4,22 +4,23 @@ Validates .env configuration on startup to catch misconfigurations early.
 Fail fast principle - crashes on invalid config rather than running with bad settings.
 
 Usage:
-    from utilities.validator import ConfigValidator
-    validator = ConfigValidator()
+    from utilities.validator import ConfigValidatorUtility
+    validator = ConfigValidatorUtility()
     validator.validate()  # Raises errors.ConfigValidationError on invalid config
 """
 
 import os
 import re
 import sys
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any, Callable, Optional
 
+from abstractions.utility import IUtility
 from errors import ConfigValidationError
 
 __all__ = [
     "ConfigValidationError",
-    "ConfigValidator",
+    "ConfigValidatorUtility",
     "ValidationRule",
     "quick_validate",
     "validate_config_or_exit",
@@ -37,11 +38,11 @@ class ValidationRule:
     secret: bool = False  # If True, value won't be printed in error messages
 
 
-class ConfigValidator:
+class ConfigValidatorUtility(IUtility):
     """Validates application configuration from environment variables.
 
     Example:
-        validator = ConfigValidator()
+        validator = ConfigValidatorUtility()
         validator.add_rule("DATABASE_URL", required=True, validator=validate_dataI_url)
         validator.add_rule("JWT_SECRET", required=True, validator=validate_jwt_secret)
         validator.validate()
@@ -55,8 +56,27 @@ class ConfigValidator:
 
     JWT_SECRET_MIN_LENGTH = 32
 
-    def __init__(self):
-        """Execute __init__ operation."""
+    def __init__(
+        self,
+        urn: Optional[str] = None,
+        user_urn: Optional[str] = None,
+        api_name: Optional[str] = None,
+        user_id: Optional[str] = None,
+    ):
+        """Initialize the config validator.
+
+        Args:
+            urn: Unique Request Number for tracing.
+            user_urn: User's unique resource name.
+            api_name: Name of the API endpoint.
+            user_id: Database identifier of the user.
+        """
+        super().__init__(
+            urn=urn,
+            user_urn=user_urn,
+            api_name=api_name,
+            user_id=user_id,
+        )
         self.rules: list[ValidationRule] = []
         self._add_default_rules()
 
@@ -337,7 +357,7 @@ def validate_config_or_exit():
     """Validate configuration and exit on failure.
     Use this in application startup.
     """
-    validator = ConfigValidator()
+    validator = ConfigValidatorUtility()
 
     try:
         validator.validate(raise_on_error=True)
@@ -354,5 +374,5 @@ def validate_config_or_exit():
 # Convenience function for quick validation
 def quick_validate():
     """Quick validation that raises on error."""
-    validator = ConfigValidator()
+    validator = ConfigValidatorUtility()
     validator.validate(raise_on_error=True)

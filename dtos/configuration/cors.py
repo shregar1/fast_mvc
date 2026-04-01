@@ -20,11 +20,11 @@ class CorsSettingsDTO(IConfigurationDTO):
     """
 
     allow_origins: list[str] = Field(
-        default_factory=lambda: ["*"],
+        default_factory=lambda: list(CorsDefaults.FALLBACK_ALLOW_ORIGINS),
         description="Allowed ``Origin`` values (use ``*`` only for development).",
     )
     allow_credentials: bool = Field(
-        default=True,
+        default=CorsDefaults.DEFAULT_ALLOW_CREDENTIALS,
         description="Whether cookies/auth may be sent cross-origin.",
     )
     allow_methods: list[str] = Field(
@@ -32,19 +32,19 @@ class CorsSettingsDTO(IConfigurationDTO):
         description="HTTP methods permitted in CORS.",
     )
     allow_headers: list[str] = Field(
-        default_factory=lambda: ["*"],
+        default_factory=lambda: list(CorsDefaults.FALLBACK_ALLOW_HEADERS),
         description="Request headers browsers may send (``*`` = any).",
     )
     expose_headers: list[str] = Field(
         default_factory=lambda: list(CorsDefaults.EXPOSE_HEADERS),
         description="Response headers exposed to browser JavaScript.",
     )
-    allow_origin_regex: str | None = Field(
+    allow_origin_regex: str = Field(
         default=None,
         description="Optional regex matched against ``Origin`` (e.g. ``https://.*\\.example\\.com``).",
     )
     max_age: int = Field(
-        default=600,
+        default=CorsDefaults.DEFAULT_MAX_AGE_SECONDS,
         ge=0,
         description="``Access-Control-Max-Age`` for preflight cache (seconds).",
     )

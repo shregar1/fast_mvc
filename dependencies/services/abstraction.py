@@ -3,6 +3,8 @@
 Inheritance: :class:`IServiceDependency` → :class:`abstractions.dependency.IDependency`.
 """
 
+from __future__ import annotations
+
 from abstractions.dependency import IDependency
 
 
@@ -11,10 +13,10 @@ class IServiceDependency(IDependency):
 
     def __init__(
         self,
-        urn: str | None = None,
-        user_urn: str | None = None,
-        api_name: str | None = None,
-        user_id: str | None = None,
+        urn: Optional[str] = None,
+        user_urn: Optional[str] = None,
+        api_name: Optional[str] = None,
+        user_id: Optional[str] = None,
     ) -> None:
         """Initialize the service dependency base.
 

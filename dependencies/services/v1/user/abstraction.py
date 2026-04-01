@@ -1,5 +1,7 @@
 """v1 user service dependency abstraction."""
 
+from __future__ import annotations
+
 from dependencies.services.v1.abstraction import IV1ServiceDependency
 
 
@@ -8,10 +10,10 @@ class IUserServiceDependency(IV1ServiceDependency):
 
     def __init__(
         self,
-        urn: str | None = None,
-        user_urn: str | None = None,
-        api_name: str | None = None,
-        user_id: str | None = None,
+        urn: Optional[str] = None,
+        user_urn: Optional[str] = None,
+        api_name: Optional[str] = None,
+        user_id: Optional[str] = None,
     ) -> None:
         """Initialize the v1 user service dependency base.
 

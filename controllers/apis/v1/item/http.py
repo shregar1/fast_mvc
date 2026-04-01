@@ -26,7 +26,7 @@ class ItemHttpResponseBuilder:
     @staticmethod
     def item_ref_headers(
         *,
-        body_reference: str | None,
+        body_reference: str,
         http_request: Request | None,
     ) -> dict[str, str]:
         """Prefer body ``reference_urn``; else echo ``x-reference-urn`` from the request."""
@@ -67,7 +67,7 @@ class ItemHttpResponseBuilder:
         entity: Item,
         http_request: Request | None,
         *,
-        reference_urn: str | None = None,
+        reference_urn: Optional[str] = None,
         status_code: int = HTTPStatus.OK,
     ) -> JSONResponse:
         """Build JSON response for a single item."""
@@ -125,7 +125,7 @@ class ItemHttpResponseBuilder:
         result: Result[Item, Any],
         http_request: Request | None,
         *,
-        reference_urn: str | None,
+        reference_urn: str,
     ) -> JSONResponse:
         """Raise on failure, then JSON-wrap one item with optional ``reference_urn`` echo."""
         return cls.json_item(
@@ -138,7 +138,7 @@ class ItemHttpResponseBuilder:
         result: Result[Item, Any],
         http_request: Request | None,
         *,
-        reference_urn: str | None,
+        reference_urn: str,
     ) -> JSONResponse:
         """Like :func:`respond_item_with_ref` but with HTTP 201 Created."""
         return cls.json_item(

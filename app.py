@@ -89,8 +89,9 @@ from constants.health import (
 )
 from constants.http_header import HttpHeader
 from core.route_export_engine import RouteExportEngine
-from utilities.cors import CorsConfigUtil
-from utilities.security_headers import get_security_headers_middleware_config
+from utilities.cors import CorsConfigUtility
+from utilities.datetime import DateTimeUtility
+from utilities.security_headers import SecurityHeadersUtility
 
 # Optional example controllers (can be removed for minimal core)
 try:
@@ -765,10 +766,8 @@ async def readiness_probe(request: Request):
         checks["redis"] = HealthMessageUtil.dependency_disconnected_message(e)
         is_ready = False
 
-    from utilities.datetime import DateTimeUtil
-
     status = READINESS_READY if is_ready else READINESS_NOT_READY
-    checked_at = DateTimeUtil.utc_now_iso()
+    checked_at = DateTimeUtility.utc_now_iso()
     data_ready = {
         "status": status,
         "checkedAt": checked_at,
@@ -801,12 +800,12 @@ app.add_middleware(RequestContextMiddleware)
 app.add_middleware(TrustedHostMiddleware, allowed_hosts=["*"])
 
 # CORS Middleware - Cross-Origin Resource Sharing (see utilities.cors)
-app.add_middleware(CORSMiddleware, **CorsConfigUtil.get_middleware_kwargs())
+app.add_middleware(CORSMiddleware, **CorsConfigUtility.get_middleware_kwargs())
 
 # Security Headers Middleware - CSP, HSTS, X-Frame-Options, etc. (see utilities.security_headers)
 app.add_middleware(
     SecurityHeadersMiddleware,
-    config=get_security_headers_middleware_config(),
+    config=SecurityHeadersUtility.get_middleware_config(),
 )
 
 
@@ -905,10 +904,10 @@ async def on_startup():
     - Starting background tasks
     - Logging startup information
     """
-    from utilities.datetime import DateTimeUtil
+    from utilities.datetime import DateTimeUtility
 
     # Track application start time for uptime calculation
-    app.state.start_time = DateTimeUtil.utc_now()
+    app.state.start_time = DateTimeUtility.utc_now()
 
     logger.info("Application startup event triggered")
     logger.info(f"FastMVC API starting on {HOST}:{PORT}")

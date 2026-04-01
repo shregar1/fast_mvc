@@ -11,5 +11,5 @@ from dtos.requests.example.abstraction import IRequestExampleDTO
 class ExampleUpdateRequestDTO(IRequestExampleDTO):
     """Example update request payload."""
 
-    name: str | None = Field(None, description="Updated name")
-    description: str | None = Field(None, description="Updated description")
+    name: str = Field(None, description="Updated name")
+    description: str = Field(None, description="Updated description")
