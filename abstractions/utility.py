@@ -18,7 +18,7 @@ Example:
 from __future__ import annotations
 
 from abc import ABC
-from typing import Optional
+from typing import Any, Optional
 
 from loguru import logger
 
@@ -68,6 +68,8 @@ class IUtility(ABC):
         user_urn: Optional[str] = None,
         api_name: Optional[str] = None,
         user_id: Optional[str] = None,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         """Initialize the utility with request context.
 
@@ -76,8 +78,11 @@ class IUtility(ABC):
             user_urn (str, optional): User's unique resource name. Defaults to None.
             api_name (str, optional): Name of the API endpoint. Defaults to None.
             user_id (str, optional): DataI ID of the user. Defaults to None.
+            *args: Additional positional arguments for parent classes.
+            **kwargs: Additional keyword arguments for parent classes.
 
         """
+        super().__init__(*args, **kwargs)
         self._urn = urn
         self._user_urn = user_urn
         self._api_name = api_name

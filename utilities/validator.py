@@ -70,12 +70,16 @@ class ConfigValidatorUtility(IUtility):
             user_urn: User's unique resource name.
             api_name: Name of the API endpoint.
             user_id: Database identifier of the user.
+            *args: Additional positional arguments for parent classes.
+            *kwargs: Additional keyword arguments for parent classes.
         """
         super().__init__(
             urn=urn,
             user_urn=user_urn,
             api_name=api_name,
             user_id=user_id,
+            *args,
+            **kwargs,
         )
         self.rules: list[ValidationRule] = []
         self._add_default_rules()

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Any, Optional
 
 from abstractions.utility import IUtility
 
@@ -17,6 +17,8 @@ class DateTimeUtility(IUtility):
         user_urn: Optional[str] = None,
         api_name: Optional[str] = None,
         user_id: Optional[str] = None,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         """Initialize the datetime utility.
 
@@ -25,12 +27,16 @@ class DateTimeUtility(IUtility):
             user_urn: User's unique resource name.
             api_name: Name of the API endpoint.
             user_id: Database identifier of the user.
+            *args: Additional positional arguments for parent classes.
+            **kwargs: Additional keyword arguments for parent classes.
         """
         super().__init__(
             urn=urn,
             user_urn=user_urn,
             api_name=api_name,
             user_id=user_id,
+            *args,
+            **kwargs,
         )
 
     @staticmethod

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import Optional
+from typing import Any, Optional
 
 from abstractions.utility import IUtility
 
@@ -17,6 +17,8 @@ class StringUtility(IUtility):
         user_urn: Optional[str] = None,
         api_name: Optional[str] = None,
         user_id: Optional[str] = None,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         """Initialize the string utility.
 
@@ -25,12 +27,16 @@ class StringUtility(IUtility):
             user_urn: User's unique resource name.
             api_name: Name of the API endpoint.
             user_id: Database identifier of the user.
+            *args: Additional positional arguments for parent classes.
+            **kwargs: Additional keyword arguments for parent classes.
         """
         super().__init__(
             urn=urn,
             user_urn=user_urn,
             api_name=api_name,
             user_id=user_id,
+            *args,
+            **kwargs,
         )
 
     @staticmethod
@@ -67,13 +73,4 @@ class StringUtility(IUtility):
         return value
 
 
-# Backward compatibility: module-level functions delegate to the class
-split_csv = StringUtility.split_csv
-normalize_path = StringUtility.normalize_path
-
-
-__all__ = [
-    "StringUtility",
-    "normalize_path",
-    "split_csv",
-]
+__all__ = ["StringUtility"]

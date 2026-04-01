@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import os
 from collections.abc import Sequence
-from typing import Optional
+from typing import Any, Optional
 
 from abstractions.utility import IUtility
 
@@ -21,6 +21,8 @@ class EnvironmentParserUtility(IUtility):
         user_urn: Optional[str] = None,
         api_name: Optional[str] = None,
         user_id: Optional[str] = None,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         """Initialize the environment parser.
 
@@ -29,12 +31,16 @@ class EnvironmentParserUtility(IUtility):
             user_urn: User's unique resource name.
             api_name: Name of the API endpoint.
             user_id: Database identifier of the user.
+            *args: Additional positional arguments for parent classes.
+            **kwargs: Additional keyword arguments for parent classes.
         """
         super().__init__(
             urn=urn,
             user_urn=user_urn,
             api_name=api_name,
             user_id=user_id,
+            *args,
+            **kwargs,
         )
 
     @staticmethod
@@ -88,7 +94,7 @@ class EnvironmentParserUtility(IUtility):
         return raw
 
     @staticmethod
-    def parse_optional_str(name: str) -> Optional[str]:
+    def parse_optional_str(name: str) -> str | None:
         """Parse environment variable as optional string.
 
         Returns None if the variable is not set or is empty/whitespace.

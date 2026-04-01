@@ -5,7 +5,7 @@ from __future__ import annotations
 import base64
 import binascii
 import secrets
-from typing import Tuple
+from typing import Any, Optional, Tuple
 
 from abstractions.utility import IUtility
 
@@ -19,6 +19,8 @@ class AuthUtility(IUtility):
         user_urn: Optional[str] = None,
         api_name: Optional[str] = None,
         user_id: Optional[str] = None,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         """Initialize the auth utility.
 
@@ -27,16 +29,20 @@ class AuthUtility(IUtility):
             user_urn: User's unique resource name.
             api_name: Name of the API endpoint.
             user_id: Database identifier of the user.
+            *args: Additional positional arguments for parent classes.
+            **kwargs: Additional keyword arguments for parent classes.
         """
         super().__init__(
             urn=urn,
             user_urn=user_urn,
             api_name=api_name,
             user_id=user_id,
+            *args,
+            **kwargs,
         )
 
     @staticmethod
-    def parse_basic_authorization(header: str) -> Tuple[str, str] | None:
+    def parse_basic_authorization(header: str | None) -> Tuple[str, str] | None:
         """Parse HTTP Basic Authorization header.
 
         Args:
