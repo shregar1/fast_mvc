@@ -1,32 +1,36 @@
 """DataI Dependency Module.
 
-Re-exports DBDependency from fast_db for backward compatibility.
+Provides ``DBDependency`` for FastAPI ``Depends()`` (same pattern as ``CacheDependency``).
 
 Usage:
     >>> from fastapi import Depends
     >>> from dependencies.db import DBDependency
     >>>
-    >>> async def my_endpoint(session: Session = Depends(DBDependency.derive)):
-    ...     users = session.query(User).all()
+    >>> async def my_endpoint(session = Depends(DBDependency.derive)):
+    ...     ...
 """
 
-from typing import Any, Optional
+from __future__ import annotations
 
-try:
-    from dependencies.db import DatabaseDependency
-except ImportError:
+from typing import Any
 
-    class _DatabaseDependencyFallback:
-        """Fallback DatabaseDependency when fast_database is not installed."""
+from start_utils import db_session
 
-        @staticmethod
-        def derive() -> Any:
-            """Raise informative error about missing dependency."""
+
+class DBDependency:
+    """FastAPI dependency provider for the shared SQLAlchemy session."""
+
+    @staticmethod
+    def derive() -> Any:
+        """Return the application ``db_session`` or raise if DataI is not configured."""
+        if db_session is None:
             raise ImportError(
                 "fast_db is required for database dependencies. "
                 "Install with: pip install fastx-mvc[platform]"
             )
+        return db_session
 
-    DatabaseDependency = _DatabaseDependencyFallback  # type: ignore
 
-__all__ = ["DatabaseDependency"]
+DatabaseDependency = DBDependency
+
+__all__ = ["DBDependency"]
