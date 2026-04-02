@@ -31,11 +31,15 @@ Configuration Files:
 
 import os
 import redis
-import sys
 
 from dotenv import load_dotenv
-from loguru import logger
 from pathlib import Path
+
+load_dotenv()
+from constants.logging_setup import configure_loguru
+
+configure_loguru()
+from loguru import logger
 from typing import Any
 from urllib.parse import quote
 
@@ -59,44 +63,12 @@ from constants.environment import EnvironmentVar
 from constants.route import RouteConstant
 from constants.default import Default
 from utilities.env import EnvironmentParserUtility
-# =============================================================================
-# LOGGER CONFIGURATION
-# =============================================================================
-
-# Remove default logger and add custom formatted one
-logger.remove(0)
-logger.add(
-    sys.stderr,
-    colorize=True,
-    format=(
-        "<green>{time:MMMM-D-YYYY}</green> | <black>{time:HH:mm:ss}</black> | "
-        "<level>{level}</level> | <cyan>{message}</cyan> | "
-        "<magenta>{name}:{function}:{line}</magenta> | "
-        "<yellow>{extra}</yellow>"
-    ),
-)
-"""
-Configured loguru logger with custom format.
-
-Format includes:
-    - Timestamp (date and time)
-    - Log level (colored)
-    - Message
-    - Source location (file:function:line)
-    - Extra context (bound variables)
-
-Example:
-    >>> from start_utils import logger
-    >>> logger.info("User logged in", user_id=123)
-    >>> logger.bind(urn="urn:req:abc").debug("Processing request")
-"""
 
 # =============================================================================
 # LOAD ENVIRONMENT AND CONFIGURATION
 # =============================================================================
 
 logger.info("Loading .env file and environment variables")
-load_dotenv()
 
 # Let packages load config from main repo's config/ (override)
 os.environ.setdefault(

@@ -14,6 +14,7 @@ Environment Variables:
     HOST: Server host address (default: 0.0.0.0)
     PORT: Server port (default: 8000)
     UVICORN_LOG_LEVEL: Uvicorn log level only — default ``error`` (quiet); use ``warning`` or ``info`` for more Uvicorn console output
+    LOG_LEVEL: Application Loguru level (TRACE, DEBUG, INFO, …); default INFO. DEBUG shows DEBUG and above (including INFO lines)
     JWT_AUTH_ENABLED: Enable JWT authentication (default: false)
     RATE_LIMIT_REQUESTS_PER_MINUTE: Rate limit per minute (default: 60)
     RATE_LIMIT_REQUESTS_PER_HOUR: Rate limit per hour (default: 1000)
@@ -54,6 +55,9 @@ import uvicorn  # pyright: ignore[reportMissingImports]
 from dotenv import load_dotenv  # pyright: ignore[reportMissingImports]
 
 load_dotenv()
+from constants.logging_setup import configure_loguru
+
+configure_loguru()
 
 # Import middlewares from fast-middleware package (distribution exposes ``fastmiddleware``)
 from fastmiddleware import (  # pyright: ignore[reportMissingImports]
@@ -72,7 +76,7 @@ from fastmiddleware import (  # pyright: ignore[reportMissingImports]
 from fastapi import APIRouter, FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import HTMLResponse, JSONResponse
-from loguru import logger
+from loguru import logger  # noqa: E402 — after configure_loguru()
 
 from constants.api_status import APIStatus
 from constants.default import Default
