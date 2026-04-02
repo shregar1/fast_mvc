@@ -7,6 +7,7 @@ from typing import Any, Optional
 
 from abstractions.utility import IUtility
 from constants.cors import CorsDefaults, CorsEnvVar
+from constants.default import Default
 from dtos.configuration import CorsSettingsDTO
 from utilities.env import EnvironmentParserUtility
 
@@ -80,10 +81,10 @@ class CorsConfigUtility(IUtility):
         - :data:`CorsEnvVar.MAX_AGE` — preflight cache seconds (default
           :data:`CorsDefaults.DEFAULT_MAX_AGE_SECONDS`).
         """
-        allow_origin_regex = os.getenv(CorsEnvVar.ALLOW_ORIGIN_REGEX)
-        if allow_origin_regex is not None and allow_origin_regex.strip() == "":
-            allow_origin_regex = None
-
+        allow_origin_regex = EnvironmentParserUtility.parse_str(
+            CorsEnvVar.ALLOW_ORIGIN_REGEX,
+            Default.ALLOW_ORIGIN_REGEX
+        )
         return CorsSettingsDTO(
             allow_origins=cls.parse_allow_origins(),
             allow_credentials=EnvironmentParserUtility.parse_bool(

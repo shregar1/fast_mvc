@@ -97,6 +97,9 @@ class Default:
     CHANNEL_BACKEND: Final[str] = "redis"
     """Default channels backend."""
 
+    ALLOW_ORIGIN_REGEX: Final[str] = ""
+    """Default allow origin regex."""
+
     SECURITY_CONFIGURATION: Final[dict[str, Any]] = {
         "rate_limiting": {
             "requests_per_minute": 60,
