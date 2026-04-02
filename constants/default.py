@@ -52,7 +52,28 @@ class Default:
 
     """
 
-    ACCESS_TOKEN_EXPIRE_MINUTES: Final[int] = 1440
+    APP_NAME: Final[str] = "FastMVC"
+    """Default application name."""
+
+    APP_VERSION: Final[str] = "1.0.1"
+    """Default application version."""
+
+    DEBUG: Final[bool] = False
+    """Default debug mode."""
+
+    LOG_LEVEL: Final[str] = "INFO"
+    """Default log level."""
+
+    ALGORITHM: Final[str] = "HS256"
+    """Default JWT algorithm."""
+
+    JWT_AUTH_ENABLED: Final[bool] = False
+    """Default JWT authentication enabled."""
+
+    SECRET_KEY: Final[str] = ""
+    """Default JWT secret key."""
+
+    ACCESS_TOKEN_EXPIRE_MINUTE: Final[int] = 1440
     """Default JWT access token expiry: 24 hours (1440 minutes)."""
 
     REFRESH_TOKEN_EXPIRE_DAYS: Final[int] = 7
@@ -72,6 +93,9 @@ class Default:
 
     RATE_LIMIT_BURST_LIMIT: Final[int] = 10
     """Maximum burst requests allowed."""
+
+    CHANNEL_BACKEND: Final[str] = "redis"
+    """Default channels backend."""
 
     SECURITY_CONFIGURATION: Final[dict[str, Any]] = {
         "rate_limiting": {

@@ -30,31 +30,35 @@ Configuration Files:
 """
 
 import os
+import redis
 import sys
+
+from dotenv import load_dotenv
+from loguru import logger
 from pathlib import Path
 from typing import Any
 from urllib.parse import quote
 
-import redis
-from dotenv import load_dotenv
-from loguru import logger
-
 # Optional fast_platform configuration (requires fast-mvc[platform])
 try:
     from fast_platform import (  # pyright: ignore[reportMissingImports]
-        CacheConfiguration,
-        CacheConfigurationDTO,
-        DBConfiguration,
-        DBConfigurationDTO,
+        CacheConfiguration, CacheConfigurationDTO,
+        DBConfiguration, DBConfigurationDTO,
+        ChannelsConfiguration, ChannelsConfigurationDTO
     )
 except ImportError:
     CacheConfiguration = None  # type: ignore
     CacheConfigurationDTO = None  # type: ignore
     DBConfiguration = None  # type: ignore
     DBConfigurationDTO = None  # type: ignore
+    ChannelsConfiguration = None  # type: ignore
+    ChannelsConfigurationDTO = None  # type: ignore
 
 from constants.default import Default
-
+from constants.environment import EnvironmentVar
+from constants.route import RouteConstant
+from constants.default import Default
+from utilities.env import EnvironmentParserUtility
 # =============================================================================
 # LOGGER CONFIGURATION
 # =============================================================================
@@ -96,7 +100,7 @@ load_dotenv()
 
 # Let packages load config from main repo's config/ (override)
 os.environ.setdefault(
-    "FASTMVC_CONFIG_I",
+    EnvironmentVar.FASTMVC_CONFIG_I,
     str(Path(__file__).resolve().parent / "config"),
 )
 
@@ -113,8 +117,7 @@ if DBConfiguration:
 
 try:
     from fast_channels import (  # pyright: ignore[reportMissingImports]
-        ChannelsConfiguration,
-        ChannelsConfigurationDTO,
+        ChannelsConfiguration
     )
 
     channels_configuration = ChannelsConfiguration().get_config()
@@ -129,60 +132,63 @@ logger.info("Loaded Configurations")
 
 logger.info("Loading environment variables")
 
-APP_NAME: str = os.environ.get("APP_NAME", "FastMVC")
-"""Application name from environment."""
+APP_NAME: str = EnvironmentParserUtility.parse_str(
+    EnvironmentVar.APP_NAME,
+    Default.APP_NAME
+)
+"""Application name (default: FastMVC)."""
 
-SECRET_KEY: str = os.getenv("SECRET_KEY", "")
+SECRET_KEY: str = EnvironmentParserUtility.parse_str(
+    EnvironmentVar.SECRET_KEY,
+    Default.SECRET_KEY
+)
 """JWT signing secret key. MUST be set in production."""
 
-ALGORITHM: str = os.getenv("ALGORITHM", "HS256")
+ALGORITHM: str = EnvironmentParserUtility.parse_str(
+    EnvironmentVar.ALGORITHM,
+    Default.ALGORITHM
+)
 """JWT signing algorithm (default: HS256)."""
 
-ACCESS_TOKEN_EXPIRE_MINUTES: int = int(
-    os.getenv(
-        "ACCESS_TOKEN_EXPIRE_MINUTES",
-        Default.ACCESS_TOKEN_EXPIRE_MINUTES,
-    )
+JWT_AUTH_ENABLED: bool = EnvironmentParserUtility.parse_bool(
+    EnvironmentVar.JWT_AUTH_ENABLED,
+    Default.JWT_AUTH_ENABLED
+)
+"""JWT authentication enabled (default: false)."""
+
+ACCESS_TOKEN_EXPIRE_MINUTES: int = EnvironmentParserUtility.parse_int(
+    EnvironmentVar.ACCESS_TOKEN_EXPIRE_MINUTE,
+    Default.ACCESS_TOKEN_EXPIRE_MINUTE,
 )
 """JWT token expiry in minutes (default: 1440 = 24 hours)."""
 
-REFRESH_TOKEN_EXPIRE_DAYS: int = int(
-    os.getenv(
-        "REFRESH_TOKEN_EXPIRE_DAYS",
-        str(Default.REFRESH_TOKEN_EXPIRE_DAYS),
-    )
+REFRESH_TOKEN_EXPIRE_DAYS: int = EnvironmentParserUtility.parse_int(
+    EnvironmentVar.REFRESH_TOKEN_EXPIRE_DAYS,
+    Default.REFRESH_TOKEN_EXPIRE_DAYS,
 )
 """JWT refresh token expiry in days (default: 7)."""
 
-RATE_LIMIT_REQUESTS_PER_MINUTE: int = int(
-    os.getenv(
-        "RATE_LIMIT_REQUESTS_PER_MINUTE",
-        Default.RATE_LIMIT_REQUESTS_PER_MINUTE,
-    )
+RATE_LIMIT_REQUESTS_PER_MINUTE: int = EnvironmentParserUtility.parse_int(
+    EnvironmentVar.REQUESTS_PER_MINUTE,
+    Default.RATE_LIMIT_REQUESTS_PER_MINUTE,
 )
 """Maximum requests per minute per client (default: 60)."""
 
-RATE_LIMIT_REQUESTS_PER_HOUR: int = int(
-    os.getenv(
-        "RATE_LIMIT_REQUESTS_PER_HOUR",
-        Default.RATE_LIMIT_REQUESTS_PER_HOUR,
-    )
+RATE_LIMIT_REQUESTS_PER_HOUR: int = EnvironmentParserUtility.parse_int(
+    EnvironmentVar.REQUESTS_PER_HOUR,
+    Default.RATE_LIMIT_REQUESTS_PER_HOUR,
 )
 """Maximum requests per hour per client (default: 1000)."""
 
-RATE_LIMIT_WINDOW_SECONDS: int = int(
-    os.getenv(
-        "RATE_LIMIT_WINDOW_SECONDS",
-        Default.RATE_LIMIT_WINDOW_SECONDS,
-    )
+RATE_LIMIT_WINDOW_SECONDS: int = EnvironmentParserUtility.parse_int(
+    EnvironmentVar.WINDOW_SECONDS,
+    Default.RATE_LIMIT_WINDOW_SECONDS,
 )
 """Rate limit window size in seconds (default: 60)."""
 
-RATE_LIMIT_BURST_LIMIT: int = int(
-    os.getenv(
-        "RATE_LIMIT_BURST_LIMIT",
-        Default.RATE_LIMIT_BURST_LIMIT,
-    )
+RATE_LIMIT_BURST_LIMIT: int = EnvironmentParserUtility.parse_int(
+    EnvironmentVar.BURST_LIMIT,
+    Default.RATE_LIMIT_BURST_LIMIT,
 )
 """Maximum burst requests allowed (default: 10)."""
 
@@ -270,12 +276,12 @@ Backed by Redis or Kafka depending on configuration.
 """
 
 CHANNEL_BACKEND: str = (
-    os.getenv("CHANNEL_BACKEND", channels_configuration.backend)
+    EnvironmentParserUtility.parse_str(EnvironmentVar.CHANNEL_BACKEND, channels_configuration.backend)
     if channels_configuration is not None
-    else os.getenv("CHANNEL_BACKEND", "none")
+    else Default.CHANNEL_BACKEND
 )
 
-if CHANNEL_BACKEND == "redis" and redis_session:
+if CHANNEL_BACKEND == Default.CHANNEL_BACKEND and redis_session:
     try:
         import redis.asyncio as aioredis
         from fast_channels import (  # pyright: ignore[reportMissingImports]
@@ -303,18 +309,7 @@ elif CHANNEL_BACKEND == "kafka":
 # ROUTE CONFIGURATION
 # =============================================================================
 
-unprotected_routes: set = {
-    "/",
-    "/health",
-    "/health/live",
-    "/health/ready",
-    "/user/login",
-    "/user/register",
-    "/user/refresh",
-    "/docs",
-    "/redoc",
-    "/openapi.json",
-}
+unprotected_routes: set[str] = RouteConstant.UNPROTECTED_ROUTES
 """
 Set of routes that bypass authentication middleware.
 
@@ -330,7 +325,7 @@ These routes are accessible without a valid JWT token:
     - /redoc: ReDoc documentation
 """
 
-callback_routes: set = set[Any]()
+callback_routes: set = RouteConstant.CALLBACK_ROUTES
 """
 Set of webhook/callback routes.
 

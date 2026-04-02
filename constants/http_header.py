@@ -6,6 +6,9 @@ from typing import ClassVar, Optional
 class HttpHeader:
     """Canonical HTTP header names used by the API and CORS defaults."""
 
+    CACHE_CONTROL: ClassVar[str] = "Cache-Control"
+    CACHE_CONTROL_VALUE_NO_CACHE: ClassVar[str] = "no-cache"
+
     X_REQUEST_ID: ClassVar[str] = "X-Request-ID"
     X_PROCESS_TIME: ClassVar[str] = "X-Process-Time"
     X_REFERENCE_URN: ClassVar[str] = "x-reference-urn"

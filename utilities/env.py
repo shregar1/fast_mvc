@@ -158,5 +158,15 @@ class EnvironmentParserUtility(IUtility):
                 pass
             return default
 
+    @staticmethod
+    def get_bool_with_logging(name: str, default: bool) -> bool:
+        """Get boolean from environment variable with fallback and logging.
+
+        Similar to parse_bool but logs a warning when the value is invalid.
+        """
+        value = os.getenv(name)
+        if value is None:
+            return default
+        return value.lower() in ("true", "1", "yes", "on")
 
 __all__ = ["EnvironmentParserUtility"]

@@ -14,13 +14,10 @@ OpenAPI path helpers (``normalized_openapi_url``, logging excludes, auth configu
 :class:`DocsAuthConfig` in :mod:`middlewares.docs_auth`.
 """
 
-from .authentication import AuthenticationMiddleware, JWTAuthHelper, NoOpAuthMiddleware
 from .docs_auth import DocsAuthConfig, DocsBasicAuthMiddleware
 
+
 __all__ = [
-    "JWTAuthHelper",
-    "NoOpAuthMiddleware",
-    "AuthenticationMiddleware",
     "DocsAuthConfig",
     "DocsBasicAuthMiddleware",
 ]

@@ -13,6 +13,11 @@ Usage:
 Environment Variables:
     HOST: Server host address (default: 0.0.0.0)
     PORT: Server port (default: 8000)
+    JWT_AUTH_ENABLED: Enable JWT authentication (default: false)
+    RATE_LIMIT_REQUESTS_PER_MINUTE: Rate limit per minute (default: 60)
+    RATE_LIMIT_REQUESTS_PER_HOUR: Rate limit per hour (default: 1000)
+    RATE_LIMIT_WINDOW_SECONDS: Rate limit window size in seconds (default: 60)
+    RATE_LIMIT_BURST_LIMIT: Maximum burst requests allowed (default: 10)
     POSTMAN_EXPORT_ENVIRONMENT: Set to 1/true to also write postman_environment.json on boot
     POSTMAN_COLLECTION_NAME: Override Postman collection/env title (default: git repo folder name)
     POSTMAN_BASE_URL: Override default base_url in collection/environment (else HOST:PORT)
@@ -30,19 +35,6 @@ Endpoints:
     POST /user/register - New user registration
     POST /user/logout - Session termination
 
-Example API (if example module is available):
-    GET    /items          - List all items
-    POST   /items          - Create new item
-    GET    /items/{id}     - Get item by ID
-    PATCH  /items/{id}     - Update item
-    DELETE /items/{id}     - Delete item
-    POST   /items/{id}/complete   - Mark as completed
-    POST   /items/{id}/uncomplete - Mark as pending
-    POST   /items/{id}/toggle     - Toggle status
-    GET    /items/search   - Search items
-    GET    /items/completed - List completed items
-    GET    /items/pending  - List pending items
-    GET    /items/statistics - Get item statistics
 """
 
 import os
@@ -68,6 +60,7 @@ from fast_middleware import (  # pyright: ignore[reportMissingImports]
     ResponseTimingMiddleware,
     SecurityHeadersMiddleware,
     TrustedHostMiddleware,
+    JwtBearerAuthMiddleware,
 )
 from fastapi import APIRouter, FastAPI, Request
 from fastapi.exceptions import RequestValidationError
@@ -76,6 +69,7 @@ from loguru import logger
 
 from constants.api_status import APIStatus
 from constants.default import Default
+from constants.environment import EnvironmentVar
 from constants.health import (
     DEPENDENCY_CONNECTED,
     DEPENDENCY_NOT_CONFIGURED,
@@ -88,7 +82,13 @@ from constants.health import (
     READINESS_READY,
 )
 from constants.http_header import HttpHeader
+from constants.response_key import ResponseKey
+from core.exception_handlers import ApplicationExceptionHandlers
 from core.route_export_engine import RouteExportEngine
+from middlewares import (
+    DocsAuthConfig,
+    DocsBasicAuthMiddleware,
+)
 from utilities.cors import CorsConfigUtility
 from utilities.datetime import DateTimeUtility
 from utilities.env import EnvironmentParserUtility
@@ -147,67 +147,60 @@ from dtos.responses.apis.abstraction import IResponseAPIDTO
 
 # Domain errors (requires fast-mvc[platform])
 try:
-    from fast_platform.errors import (  # pyright: ignore[reportMissingImports]
-        BadInputError,
-        ConflictError,
-        ForbiddenError,
-        NotFoundError,
-        RateLimitError,
-        ServiceUnavailableError,
-        UnauthorizedError,
-        UnexpectedResponseError,
-    )
+    import fast_platform.errors as platform_errors  # pyright: ignore[reportMissingImports]
 
     HAS_PLATFORM_ERRORS = True
 except ImportError:
+    platform_errors = None  # type: ignore[assignment]
     HAS_PLATFORM_ERRORS = False
 
-# Custom authentication middleware (app-specific with user repository)
-from middlewares import (
-    AuthenticationMiddleware,
-    DocsAuthConfig,
-    DocsBasicAuthMiddleware,
+
+HOST = os.getenv("HOST", "0.0.0.0")
+PORT = int(os.getenv("PORT", "8000"))
+RATE_LIMIT_REQUESTS_PER_MINUTE: int = EnvironmentParserUtility.get_int_with_logging(
+    EnvironmentVar.REQUESTS_PER_MINUTE,
+    Default.RATE_LIMIT_REQUESTS_PER_MINUTE,
+)
+RATE_LIMIT_REQUESTS_PER_HOUR: int = EnvironmentParserUtility.get_int_with_logging(
+    EnvironmentVar.REQUESTS_PER_HOUR,
+    Default.RATE_LIMIT_REQUESTS_PER_HOUR,
+)
+RATE_LIMIT_WINDOW_SECONDS: int = EnvironmentParserUtility.get_int_with_logging(
+    EnvironmentVar.WINDOW_SECONDS,
+    Default.RATE_LIMIT_WINDOW_SECONDS,
+)
+RATE_LIMIT_BURST_LIMIT: int = EnvironmentParserUtility.get_int_with_logging(
+    EnvironmentVar.BURST_LIMIT,
+    Default.RATE_LIMIT_BURST_LIMIT,
 )
 
-# Configuration validation - fail fast on misconfig
-# Set VALIDATE_CONFIG=false to skip validation
-# Tests skip strict startup validation to avoid env-coupled imports.
-IS_TEST_RUN = os.getenv("PYTEST_CURRENT_TEST") is not None or os.getenv(
-    "TESTING", ""
-).lower() in ("true", "1", "yes", "on")
-try:
-    if not IS_TEST_RUN and os.getenv("VALIDATE_CONFIG", "true").lower() not in (
-        "false",
-        "0",
-        "no",
-        "off",
+IS_TEST_RUN = EnvironmentParserUtility.get_bool_with_logging(
+    EnvironmentVar.IS_TEST_RUN,
+    False,
+) or EnvironmentParserUtility.get_bool_with_logging(
+    EnvironmentVar.TESTING,
+    False,
+)
+"""Test run flag (default: false)."""
+
+JWT_AUTH_ENABLED: bool = EnvironmentParserUtility.get_bool_with_logging(
+    EnvironmentVar.JWT_AUTH_ENABLED,
+    False,
+)
+"""JWT authentication enabled (default: false)."""
+
+if not IS_TEST_RUN and EnvironmentParserUtility.get_bool_with_logging(
+        EnvironmentVar.VALIDATE_CONFIG,
+        True,
     ):
-        from utilities.validator import validate_config_or_exit
-
-        validate_config_or_exit()
-except ImportError:
-    # Config validator is optional
-    pass
-
-
-def _get_int_env(name: str, default: int) -> int:
-    """Execute _get_int_env operation.
-
-    Args:
-        name: The name parameter.
-        default: The default parameter.
-
-    Returns:
-        The result of the operation.
-    """
-    return EnvironmentParserUtility.get_int_with_logging(name, default)
-
+    from utilities.validator import validate_config_or_exit  # pyright: ignore[reportMissingImports]
+    validate_config_or_exit()
 
 # Initialize FastAPI application (openapi_url must match middlewares.docs_auth)
 app = FastAPI(
-    title="FastMVC API",
-    description="Production-grade FastAPI application with MVC architecture. Includes example Item API at /items",
-    version="1.0.1",
+    title=EnvironmentParserUtility.parse_str(EnvironmentVar.APP_NAME, "FastMVC API"),
+    description="Production-grade FastAPI application with MVC architecture.",
+    version=EnvironmentParserUtility.parse_str(EnvironmentVar.APP_VERSION, "1.0.1"),
     docs_url=None,  # Custom docs setup below
     redoc_url=None,
     openapi_url=DocsAuthConfig.normalized_openapi_url(),
@@ -225,40 +218,17 @@ except ImportError:
     app.docs_url = "/docs"
     app.redoc_url = "/redoc"
 
-HOST = os.getenv("HOST", "0.0.0.0")
-PORT = int(os.getenv("PORT", "8000"))
-RATE_LIMIT_REQUESTS_PER_MINUTE: int = int(
-    os.getenv(
-        "RATE_LIMIT_REQUESTS_PER_MINUTE",
-        Default.RATE_LIMIT_REQUESTS_PER_MINUTE,
-    )
-)
-RATE_LIMIT_REQUESTS_PER_HOUR: int = _get_int_env(
-    "RATE_LIMIT_REQUESTS_PER_HOUR",
-    Default.RATE_LIMIT_REQUESTS_PER_HOUR,
-)
-RATE_LIMIT_WINDOW_SECONDS: int = _get_int_env(
-    "RATE_LIMIT_WINDOW_SECONDS",
-    Default.RATE_LIMIT_WINDOW_SECONDS,
-)
-RATE_LIMIT_BURST_LIMIT: int = _get_int_env(
-    "RATE_LIMIT_BURST_LIMIT",
-    Default.RATE_LIMIT_BURST_LIMIT,
-)
-
 # Optional Datadog / OpenTelemetry integration (requires fast-platform)
-if configure_datadog and os.getenv("DATADOG_ENABLED", "").lower() in {
-    "1",
-    "true",
-    "yes",
-}:
+if configure_datadog and EnvironmentParserUtility.get_bool_with_logging(
+    EnvironmentVar.DATADOG_ENABLED,
+    False,
+):
     configure_datadog()
 
-if configure_otel and os.getenv("TELEMETRY_ENABLED", "").lower() in {
-    "1",
-    "true",
-    "yes",
-}:
+if configure_otel and EnvironmentParserUtility.get_bool_with_logging(
+    EnvironmentVar.TELEMETRY_ENABLED,
+    False,
+):
     configure_otel(app)
 
 # Static launch page at GET /
@@ -272,7 +242,9 @@ async def launch_page() -> HTMLResponse:
     if _LAUNCH_HTML.is_file():
         return HTMLResponse(
             _LAUNCH_HTML.read_text(encoding="utf-8"),
-            headers={"Cache-Control": "no-cache"},
+            headers={
+                HttpHeader.CACHE_CONTROL: HttpHeader.CACHE_CONTROL_VALUE_NO_CACHE,
+            },
         )
     return HTMLResponse(
         "<!DOCTYPE html><html><body><p>FastMVC API</p></body></html>",
@@ -323,185 +295,10 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     )
 
 
-def _app_error_response(
-    request: Request, exc, log_level: str = "warning"
-) -> JSONResponse:
-    """Build a JSONResponse for application error types (Unauthorized, Forbidden, etc.)."""
-    urn = getattr(request.state, "urn", None) or ""
-    try:
-        getattr(logger, log_level)(
-            f"{exc.__class__.__name__}: {getattr(exc, 'responseMessage', str(exc))} (key={getattr(exc, 'responseKey', 'unknown')})",
-            urn=urn,
-        )
-    except Exception:
-        pass
-
-    response_dto = IResponseAPIDTO(
-        transactionUrn=urn,
-        status=APIStatus.FAILED,
-        responseMessage=getattr(exc, "responseMessage", str(exc)),
-        responseKey=getattr(exc, "responseKey", "error_unknown"),
-        data={},
-        errors=None,
-    )
-    return JSONResponse(
-        status_code=getattr(exc, "httpStatusCode", HTTPStatus.INTERNAL_SERVER_ERROR),
-        content=response_dto.model_dump(),
-        headers=HttpHeader().get_reference_urn_header(
-            reference_urn=request.headers.get(HttpHeader.X_REFERENCE_URN)
-        ),
-    )
-
-
 if HAS_PLATFORM_ERRORS:
-
-    @app.exception_handler(UnexpectedResponseError)
-    async def unexpectedresponseerror_handler(
-        request: Request, exc: UnexpectedResponseError
-    ):
-        """Execute unexpectedresponseerror_handler operation.
-
-        Args:
-            request: The request parameter.
-            exc: The exc parameter.
-
-        Returns:
-            The result of the operation.
-        """
-        return _app_error_response(request, exc, log_level="error")
-
-    @app.exception_handler(BadInputError)
-    async def badinputerror_handler(request: Request, exc: BadInputError):
-        """Execute badinputerror_handler operation.
-
-        Args:
-            request: The request parameter.
-            exc: The exc parameter.
-
-        Returns:
-            The result of the operation.
-        """
-        return _app_error_response(request, exc, log_level="warning")
-
-    @app.exception_handler(NotFoundError)
-    async def notfounderror_handler(request: Request, exc: NotFoundError):
-        """Execute notfounderror_handler operation.
-
-        Args:
-            request: The request parameter.
-            exc: The exc parameter.
-
-        Returns:
-            The result of the operation.
-        """
-        return _app_error_response(request, exc, log_level="info")
-
-    @app.exception_handler(UnauthorizedError)
-    async def unauthorizederror_handler(request: Request, exc: UnauthorizedError):
-        """Execute unauthorizederror_handler operation.
-
-        Args:
-            request: The request parameter.
-            exc: The exc parameter.
-
-        Returns:
-            The result of the operation.
-        """
-        return _app_error_response(request, exc, log_level="warning")
-
-    @app.exception_handler(ForbiddenError)
-    async def forbiddenerror_handler(request: Request, exc: ForbiddenError):
-        """Execute forbiddenerror_handler operation.
-
-        Args:
-            request: The request parameter.
-            exc: The exc parameter.
-
-        Returns:
-            The result of the operation.
-        """
-        return _app_error_response(request, exc, log_level="warning")
-
-    @app.exception_handler(ConflictError)
-    async def conflicterror_handler(request: Request, exc: ConflictError):
-        """Execute conflicterror_handler operation.
-
-        Args:
-            request: The request parameter.
-            exc: The exc parameter.
-
-        Returns:
-            The result of the operation.
-        """
-        return _app_error_response(request, exc, log_level="warning")
-
-    @app.exception_handler(RateLimitError)
-    async def ratelimiterror_handler(request: Request, exc: RateLimitError):
-        """Execute ratelimiterror_handler operation.
-
-        Args:
-            request: The request parameter.
-            exc: The exc parameter.
-
-        Returns:
-            The result of the operation.
-        """
-        return _app_error_response(request, exc, log_level="info")
-
-    @app.exception_handler(ServiceUnavailableError)
-    async def serviceunavailableerror_handler(
-        request: Request, exc: ServiceUnavailableError
-    ):
-        """Execute serviceunavailableerror_handler operation.
-
-        Args:
-            request: The request parameter.
-            exc: The exc parameter.
-
-        Returns:
-            The result of the operation.
-        """
-        return _app_error_response(request, exc, log_level="error")
-
-
-@app.exception_handler(Exception)
-async def global_exception_handler(request: Request, exc: Exception):
-    """Catch-all handler for unhandled exceptions to avoid leaking internals."""
-    urn = getattr(request.state, "urn", None) or ""
-    logger.exception("Unhandled exception occurred while processing request.", urn=urn)
-    response_dto = IResponseAPIDTO(
-        transactionUrn=urn,
-        status=APIStatus.FAILED,
-        responseMessage="Internal server error.",
-        responseKey="error_internal_server_error",
-        data={},
-        errors=None,
-    )
-    return JSONResponse(
-        status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-        content=response_dto.model_dump(),
-        headers=HttpHeader().get_reference_urn_header(
-            reference_urn=request.headers.get(HttpHeader.X_REFERENCE_URN)
-        ),
-    )
-
-
-def _health_transaction_urn(request: Request) -> str:
-    """Transaction URN for health JSON and ``x-transaction-urn`` (always non-empty ``urn:req:...``).
-
-    Reuses :attr:`request.state.urn` from RequestContext middleware when it is already a
-    non-empty string (normalizes to ``urn:...``). Otherwise assigns a new id on ``request.state``.
-    """
-    existing = getattr(request.state, "urn", None)
-    if isinstance(existing, str):
-        s = existing.strip()
-        if s:
-            request.state.urn = s
-            return s
-
-    urn = str(uuid4())
-    request.state.urn = urn
-    return urn
+    assert platform_errors is not None
+    ApplicationExceptionHandlers.register_platform_handlers(app, platform_errors)
+ApplicationExceptionHandlers.register_global_handler(app)
 
 
 def _health_json_response(
@@ -513,7 +310,7 @@ def _health_json_response(
     data: dict,
 ) -> JSONResponse:
     """Return a :class:`IResponseDTO` envelope for health endpoints."""
-    txn_urn = _health_transaction_urn(request)
+    txn_urn = getattr(request.state, "urn", str(uuid4()))
     ref_header = request.headers.get(HttpHeader.X_REFERENCE_URN, "")
     dto = IResponseAPIDTO(
         transactionUrn=txn_urn,
@@ -663,7 +460,9 @@ async def health_check(request: Request):
     return _health_json_response(
         request,
         http_ok=ok,
-        response_key="success_health" if ok else "error_health_unhealthy",
+        response_key=(
+            ResponseKey.SUCCESS_HEALTH if ok else ResponseKey.ERROR_HEALTH_UNHEALTHY
+        ),
         response_message=(
             "All dependencies report healthy."
             if ok
@@ -698,7 +497,7 @@ async def liveness_probe(request: Request):
     return _health_json_response(
         request,
         http_ok=True,
-        response_key="success_health_live",
+        response_key=ResponseKey.SUCCESS_HEALTH_LIVE,
         response_message="Application process is alive.",
         data={"status": LIVENESS_ALIVE},
     )
@@ -776,7 +575,11 @@ async def readiness_probe(request: Request):
     return _health_json_response(
         request,
         http_ok=is_ready,
-        response_key="success_health_ready" if is_ready else "error_health_not_ready",
+        response_key=(
+            ResponseKey.SUCCESS_HEALTH_READY
+            if is_ready
+            else ResponseKey.ERROR_HEALTH_NOT_READY
+        ),
         response_message=(
             "Application is ready to receive traffic."
             if is_ready
@@ -847,7 +650,8 @@ app.add_middleware(
 )
 
 # Authentication Middleware - JWT validation (custom, app-specific)
-app.add_middleware(AuthenticationMiddleware)
+if JWT_AUTH_ENABLED:
+    app.add_middleware(JwtBearerAuthMiddleware)
 
 # OpenAPI /docs, /redoc, /openapi.json — HTTP Basic when DOCS_USERNAME + DOCS_PASSWORD are set
 app.add_middleware(DocsBasicAuthMiddleware)
