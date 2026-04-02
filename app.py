@@ -206,61 +206,51 @@ if not IS_TEST_RUN and EnvironmentParserUtility.get_bool_with_logging(
 
 def print_startup_banner() -> None:
     """Print a beautiful startup banner with server information (monochrome)."""
-    from constants.banner import (
-        FASTX_BANNER,
-        SERVER_INFO_HEADER,
-        API_DOCS_HEADER,
-        HEALTH_ENDPOINTS_HEADER,
-        ENVIRONMENT_HEADER,
-        FEATURES_HEADER,
-        FEATURE_ENABLED,
-        FEATURE_DISABLED,
-        READY_MESSAGE,
-        LABEL_WIDTH,
-    )
+    from constants.banner import  BannerConfig
 
+    banner_config = BannerConfig()
     # Print banner
-    print(FASTX_BANNER)
+    print(banner_config.get_banner())
 
     # Server info
-    print(SERVER_INFO_HEADER)
-    print(f"   {'Host:':<{LABEL_WIDTH}} {HOST}")
-    print(f"   {'Port:':<{LABEL_WIDTH}} {PORT}")
-    print(f"   {'URL:':<{LABEL_WIDTH}} http://{HOST}:{PORT}")
+    print(banner_config.SERVER_INFO_HEADER)
+    print(f"   {'Host:':<{banner_config.LABEL_WIDTH}} {HOST}")
+    print(f"   {'Port:':<{banner_config.LABEL_WIDTH}} {PORT}")
+    print(f"   {'URL:':<{banner_config.LABEL_WIDTH}} http://{HOST}:{PORT}")
     print()
 
     # API Documentation
-    print(API_DOCS_HEADER)
-    print(f"   {'Swagger UI:':<{LABEL_WIDTH}} http://{HOST}:{PORT}/docs")
-    print(f"   {'ReDoc:':<{LABEL_WIDTH}} http://{HOST}:{PORT}/redoc")
-    print(f"   {'OpenAPI:':<{LABEL_WIDTH}} http://{HOST}:{PORT}/openapi.json")
+    print(banner_config.API_DOCS_HEADER)
+    print(f"   {'Swagger UI:':<{banner_config.LABEL_WIDTH}} http://{HOST}:{PORT}/docs")
+    print(f"   {'ReDoc:':<{banner_config.LABEL_WIDTH}} http://{HOST}:{PORT}/redoc")
+    print(f"   {'OpenAPI:':<{banner_config.LABEL_WIDTH}} http://{HOST}:{PORT}/openapi.json")
     print()
 
     # Health Endpoints
-    print(HEALTH_ENDPOINTS_HEADER)
-    print(f"   {'Live:':<{LABEL_WIDTH}} http://{HOST}:{PORT}/health/live")
-    print(f"   {'Ready:':<{LABEL_WIDTH}} http://{HOST}:{PORT}/health/ready")
-    print(f"   {'Full:':<{LABEL_WIDTH}} http://{HOST}:{PORT}/health")
+    print(banner_config.HEALTH_ENDPOINTS_HEADER)
+    print(f"   {'Live:':<{banner_config.LABEL_WIDTH}} http://{HOST}:{PORT}/health/live")
+    print(f"   {'Ready:':<{banner_config.LABEL_WIDTH}} http://{HOST}:{PORT}/health/ready")
+    print(f"   {'Full:':<{banner_config.LABEL_WIDTH}} http://{HOST}:{PORT}/health")
     print()
 
     # Environment
-    print(ENVIRONMENT_HEADER)
-    print(f"   {'Mode:':<{LABEL_WIDTH}} {EnvironmentParserUtility.parse_str(EnvironmentVar.APP_ENV, 'development')}")
-    print(f"   {'Debug:':<{LABEL_WIDTH}} {EnvironmentParserUtility.parse_bool(EnvironmentVar.DEBUG, False)}")
-    print(f"   {'Workers:':<{LABEL_WIDTH}} {EnvironmentParserUtility.parse_int('WORKERS', 1)}")
+    print(banner_config.ENVIRONMENT_HEADER)
+    print(f"   {'Mode:':<{banner_config.LABEL_WIDTH}} {EnvironmentParserUtility.parse_str(EnvironmentVar.APP_ENV, 'development')}")
+    print(f"   {'Debug:':<{banner_config.LABEL_WIDTH}} {EnvironmentParserUtility.parse_bool(EnvironmentVar.DEBUG, False)}")
+    print(f"   {'Workers:':<{banner_config.LABEL_WIDTH}} {EnvironmentParserUtility.parse_int('WORKERS', 1)}")
     print()
 
     # Features
     jwt_enabled = EnvironmentParserUtility.parse_bool(EnvironmentVar.JWT_AUTH_ENABLED, False)
 
-    print(FEATURES_HEADER)
-    print(f"   {FEATURE_ENABLED if jwt_enabled else FEATURE_DISABLED} JWT Auth")
-    print(f"   {FEATURE_ENABLED} Request Tracing (URN)")
-    print(f"   {FEATURE_ENABLED} Auto-generated API Docs")
-    print(f"   {FEATURE_ENABLED} Middleware Stack")
+    print(banner_config.FEATURES_HEADER)
+    print(f"   {banner_config.FEATURE_ENABLED if jwt_enabled else banner_config.FEATURE_DISABLED} JWT Auth")
+    print(f"   {banner_config.FEATURE_ENABLED} Request Tracing (URN)")
+    print(f"   {banner_config.FEATURE_ENABLED} Auto-generated API Docs")
+    print(f"   {banner_config.FEATURE_ENABLED} Middleware Stack")
     print()
 
-    print(READY_MESSAGE)
+    print(banner_config.READY_MESSAGE)
     print()
 
 
