@@ -28,8 +28,13 @@
                 ],
                 "url": {
                   "raw": "{{base_url}}/health/live",
-                  "host": ["{{base_url}}"],
-                  "path": ["health", "live"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "health",
+                    "live"
+                  ]
                 },
                 "description": "Liveness Probe\n\noperationId: `liveness_probe_health_live_get`"
               },
@@ -37,7 +42,7 @@
                 {
                   "listen": "prerequest",
                   "script": {
-                    "id": "d6356a03-f1ea-4685-9ba5-f9554034d389",
+                    "id": "f3cffc1e-89b2-4db5-b54e-3366987ac60b",
                     "type": "text/javascript",
                     "exec": [
                       "// FastX \u2014 auto-generated prerequest (imported with collection)",
@@ -57,7 +62,7 @@
                 {
                   "listen": "test",
                   "script": {
-                    "id": "f2033c07-6fd5-4638-b938-218c0c203a76",
+                    "id": "3d572184-67e4-4b5e-a5ef-11d7eef9f80a",
                     "type": "text/javascript",
                     "exec": [
                       "// FastX \u2014 exhaustive auto-generated tests (Collection Runner)",
@@ -309,8 +314,13 @@
                 ],
                 "url": {
                   "raw": "{{base_url}}/health/ready",
-                  "host": ["{{base_url}}"],
-                  "path": ["health", "ready"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "health",
+                    "ready"
+                  ]
                 },
                 "description": "Readiness Probe\n\noperationId: `readiness_probe_health_ready_get`"
               },
@@ -318,7 +328,7 @@
                 {
                   "listen": "prerequest",
                   "script": {
-                    "id": "d2fddc6d-6ec9-41fa-ba69-91d44e8a5b1c",
+                    "id": "aa5ef9af-fe11-4fab-af26-76bbf9f0b416",
                     "type": "text/javascript",
                     "exec": [
                       "// FastX \u2014 auto-generated prerequest (imported with collection)",
@@ -338,7 +348,7 @@
                 {
                   "listen": "test",
                   "script": {
-                    "id": "3261aefd-33e1-424a-a602-153c8b961930",
+                    "id": "0d81ca05-30ee-4136-81ac-13fa20817d3e",
                     "type": "text/javascript",
                     "exec": [
                       "// FastX \u2014 exhaustive auto-generated tests (Collection Runner)",
@@ -587,8 +597,12 @@
             ],
             "url": {
               "raw": "{{base_url}}/health",
-              "host": ["{{base_url}}"],
-              "path": ["health"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health"
+              ]
             },
             "description": "Health Check\n\noperationId: `health_check_health_get`"
           },
@@ -596,7 +610,7 @@
             {
               "listen": "prerequest",
               "script": {
-                "id": "176a7b51-ce17-44fd-9200-fae3e2a208a2",
+                "id": "e7b15420-10f3-4294-bf8c-1abbfd63323d",
                 "type": "text/javascript",
                 "exec": [
                   "// FastX \u2014 auto-generated prerequest (imported with collection)",
@@ -616,7 +630,7 @@
             {
               "listen": "test",
               "script": {
-                "id": "5c6b20a8-da00-4ca8-9b61-e4af02b06d60",
+                "id": "b6217ed0-337d-47aa-8dfc-7a996f40c2f6",
                 "type": "text/javascript",
                 "exec": [
                   "// FastX \u2014 exhaustive auto-generated tests (Collection Runner)",
@@ -904,7 +918,7 @@
   "variable": [
     {
       "key": "base_url",
-      "value": "http://0.0.0.0:8000"
+      "value": "http://0.0.0.0:8004"
     },
     {
       "key": "reference_urn",

@@ -474,11 +474,14 @@ def _merge_html_response(base: HTMLResponse, *extra_parts: str) -> HTMLResponse:
     text = body.decode("utf-8") if isinstance(body, (bytes, bytearray)) else str(body)
     for part in extra_parts:
         text += part
+    # Base response may include Content-Length for the *original* body; after merge the
+    # body is longer, which breaks h11 ("Too much data for declared Content-Length").
+    headers = {k: v for k, v in base.headers.items() if k.lower() != "content-length"}
     return HTMLResponse(
         content=text,
         status_code=base.status_code,
         media_type=base.media_type,
-        headers=dict(base.headers),
+        headers=headers,
     )
 
 
