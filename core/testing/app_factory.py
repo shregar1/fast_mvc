@@ -28,11 +28,4 @@ class TestAppFactory:
         return app
 
 
-# Backward compatibility
-create_test_app = TestAppFactory.create_app
-
-
-__all__ = [
-    "TestAppFactory",
-    "create_test_app",
-]
+__all__ = ["TestAppFactory"]

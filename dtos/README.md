@@ -76,16 +76,16 @@ The `dtos` module contains Pydantic models for data validation, serialization, a
 
 ## Components
 
-### I Models
+### Base models
 
-#### EnhancedIModel (`I.py`)
+#### ApplicationBaseModel (`base.py`)
 
-Security-enhanced I model for request DTOs.
+Pydantic base model for DTOs with optional sanitization and security checks.
 
 ```python
-from dtos.I import EnhancedIModel
+from dtos.base import ApplicationBaseModel
 
-class MyRequestDTO(EnhancedIModel):
+class MyRequestDTO(ApplicationBaseModel):
     username: str
     email: str
 
@@ -250,7 +250,7 @@ class SecurityConfigurationDTO(IModel):
 dtos/
 ├── __init__.py
 ├── README.md
-├── I.py                      # EnhancedIModel
+├── base.py                   # ApplicationBaseModel
 ├── configurations/
 │   ├── __init__.py
 │   ├── cache.py                 # Cache configuration DTO
@@ -283,7 +283,7 @@ The password validation in request DTOs enforces:
 
 ## Best Practices
 
-1. **Inherit from appropriate I**: Use EnhancedIModel for request DTOs
+1. **Inherit from appropriate I**: Use `ApplicationBaseModel` when you need sanitization/security helpers; otherwise use `IRequestDTO` and the request hierarchy
 2. **Add field validators**: Custom validation for business rules
 3. **Use type hints**: Pydantic uses them for validation
 4. **Document fields**: Add docstrings for API documentation
@@ -293,7 +293,7 @@ The password validation in request DTOs enforces:
 ## Adding New DTOs
 
 1. Create the DTO file in the appropriate directory
-2. Inherit from IRequestDTO/EnhancedIModel for requests
+2. Inherit from `IRequestDTO` / `ApplicationBaseModel` for requests as appropriate
 3. Add field validators as needed
 4. Add comprehensive docstrings
 5. Update this README

@@ -91,6 +91,7 @@ from constants.http_header import HttpHeader
 from core.route_export_engine import RouteExportEngine
 from utilities.cors import CorsConfigUtility
 from utilities.datetime import DateTimeUtility
+from utilities.env import EnvironmentParserUtility
 from utilities.security_headers import SecurityHeadersUtility
 
 # Optional example controllers (can be removed for minimal core)
@@ -199,9 +200,7 @@ def _get_int_env(name: str, default: int) -> int:
     Returns:
         The result of the operation.
     """
-    from utilities.env import get_int_env
-
-    return get_int_env(name, default)
+    return EnvironmentParserUtility.get_int_with_logging(name, default)
 
 
 # Initialize FastAPI application (openapi_url must match middlewares.docs_auth)
@@ -515,7 +514,7 @@ def _health_json_response(
 ) -> JSONResponse:
     """Return a :class:`IResponseDTO` envelope for health endpoints."""
     txn_urn = _health_transaction_urn(request)
-    ref_header = request.headers.get(HttpHeader.X_REFERENCE_URN)
+    ref_header = request.headers.get(HttpHeader.X_REFERENCE_URN, "")
     dto = IResponseAPIDTO(
         transactionUrn=txn_urn,
         status=APIStatus.SUCCESS if http_ok else APIStatus.FAILED,

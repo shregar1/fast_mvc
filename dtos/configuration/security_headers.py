@@ -92,14 +92,14 @@ class SecurityHeadersSettingsDTO(IConfigurationDTO):
         default=SecurityHeadersDefaults.HSTS_PRELOAD,
         description="Enable HSTS preload list submission semantics.",
     )
-    content_security_policy: str = Field(
+    content_security_policy: str | None = Field(
         default=SecurityHeadersDefaults.CONTENT_SECURITY_POLICY,
         description=(
             "Full ``Content-Security-Policy`` header value. "
             "When omitted at load time, :class:`~constants.security_headers.SecurityHeadersConstants` is used."
         ),
     )
-    permissions_policy: str = Field(
+    permissions_policy: str | None = Field(
         default=SecurityHeadersDefaults.PERMISSIONS_POLICY,
         description="Optional ``Permissions-Policy`` header value.",
     )
@@ -111,7 +111,7 @@ class SecurityHeadersSettingsDTO(IConfigurationDTO):
         default=SecurityHeadersDefaults.CROSS_ORIGIN_RESOURCE_POLICY,
         description="``Cross-Origin-Resource-Policy`` (CORP).",
     )
-    cross_origin_embedder_policy: str = Field(
+    cross_origin_embedder_policy: str | None = Field(
         default=SecurityHeadersDefaults.CROSS_ORIGIN_EMBEDDER_POLICY,
         description="Optional ``Cross-Origin-Embedder-Policy`` (COEP).",
     )

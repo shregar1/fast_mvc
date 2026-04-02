@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, AsyncGenerator, Tuple
+from typing import Any, AsyncGenerator, Tuple, Callable
 
 from fastapi import WebSocket, WebSocketDisconnect
 
@@ -14,8 +14,8 @@ class WebSocketStreamHelper:
     async def stream_frames(
         ws: WebSocket,
         gen: AsyncGenerator[Tuple[str, Any], None],
-        snapshot_serializer: callable,
-        update_serializer: callable,
+        snapshot_serializer: Callable[[Any], Any],
+        update_serializer: Callable[[Any], Any],
     ) -> None:
         """Helper to stream snapshot + update frames over a WebSocket.
 
@@ -33,11 +33,4 @@ class WebSocketStreamHelper:
             return
 
 
-# Backward compatibility
-_stream_frames = WebSocketStreamHelper.stream_frames
-
-
-__all__ = [
-    "WebSocketStreamHelper",
-    "_stream_frames",
-]
+__all__ = ["WebSocketStreamHelper"]

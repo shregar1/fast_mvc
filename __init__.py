@@ -10,7 +10,7 @@ Basic Usage:
     app.run()
 
 Sample Item API (included):
-    # Item CRUD lives under the normal package layout (entities, services, …).
+    # Item CRUD lives under the normal package layout (models, services, …).
 
     from fast_mvc import item_router  # FastAPI router
 

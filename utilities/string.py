@@ -40,7 +40,7 @@ class StringUtility(IUtility):
         )
 
     @staticmethod
-    def split_csv(value: str, default: Sequence[str]) -> list[str]:
+    def split_csv(value: str | None, default: Sequence[str]) -> list[str]:
         """Split a comma-separated string into a list of stripped, non-empty values.
 
         Args:

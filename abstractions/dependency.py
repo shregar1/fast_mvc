@@ -15,7 +15,7 @@ Example:
 from __future__ import annotations
 
 from abc import ABC
-from typing import Any, Optional
+from typing import Any
 
 from loguru import logger
 
@@ -35,10 +35,10 @@ class IDependency(ABC):
         - Rate limiting
 
     Attributes:
-        urn (str): Unique Request Number for request tracing.
-        user_urn (str): User's unique resource name.
-        api_name (str): Name of the API endpoint using this dependency.
-        user_id (str): DataI identifier of the authenticated user.
+        urn (str | None): Unique Request Number for request tracing.
+        user_urn (str | None): User's unique resource name.
+        api_name (str | None): Name of the API endpoint using this dependency.
+        user_id (str | None): DataI identifier of the authenticated user.
         logger: Structured logger bound with request context.
 
     Example:
@@ -54,10 +54,10 @@ class IDependency(ABC):
 
     def __init__(
         self,
-        urn: Optional[str] = None,
-        user_urn: Optional[str] = None,
-        api_name: Optional[str] = None,
-        user_id: Optional[str] = None,
+        urn: str | None = None,
+        user_urn: str | None = None,
+        api_name: str | None = None,
+        user_id: str | None = None,
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -82,32 +82,32 @@ class IDependency(ABC):
         )
 
     @property
-    def urn(self) -> str:
-        """str: Get the Unique Request Number."""
+    def urn(self) -> str | None | None:
+        """str | None: Get the Unique Request Number."""
         return self._urn
 
     @urn.setter
-    def urn(self, value: str) -> None:
+    def urn(self, value: str | None) -> None:
         """Set the Unique Request Number."""
         self._urn = value
 
     @property
-    def user_urn(self) -> str:
-        """str: Get the user's unique resource name."""
+    def user_urn(self) -> str | None:
+        """str | None: Get the user's unique resource name."""
         return self._user_urn
 
     @user_urn.setter
-    def user_urn(self, value: str) -> None:
+    def user_urn(self, value: str | None) -> None:
         """Set the user's unique resource name."""
         self._user_urn = value
 
     @property
-    def api_name(self) -> str:
-        """str: Get the API endpoint name."""
+    def api_name(self) -> str | None:
+        """str | None: Get the API endpoint name."""
         return self._api_name
 
     @api_name.setter
-    def api_name(self, value: str) -> None:
+    def api_name(self, value: str | None) -> None:
         """Set the API endpoint name."""
         self._api_name = value
 
@@ -122,11 +122,11 @@ class IDependency(ABC):
         self._logger = value
 
     @property
-    def user_id(self) -> str:
-        """str: Get the user's database identifier."""
+    def user_id(self) -> str | None:
+        """str | None: Get the user's database identifier."""
         return self._user_id
 
     @user_id.setter
-    def user_id(self, value: str) -> None:
+    def user_id(self, value: str | None) -> None:
         """Set the user's database identifier."""
         self._user_id = value

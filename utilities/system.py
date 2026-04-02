@@ -35,7 +35,7 @@ class SystemUtility(IUtility):
         )
 
     @staticmethod
-    def git_repository_folder_name() -> str:
+    def git_repository_folder_name() -> Optional[str]:
         """Return the git work tree root directory name, or None if unavailable.
 
         Attempts to find the git repository root by running git commands
@@ -76,11 +76,6 @@ class SystemUtility(IUtility):
         return None
 
 
-# Backward compatibility: module-level functions delegate to the class
-git_repository_folder_name = SystemUtility.git_repository_folder_name
-
-
 __all__ = [
     "SystemUtility",
-    "git_repository_folder_name",
 ]

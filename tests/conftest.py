@@ -73,12 +73,6 @@ import pytest
 # ITEM API FIXTURES
 # =============================================================================
 
-# Backward compatibility: module-level functions delegate to the class
-_item_from_api_json = ItemTestHelper.item_from_api_json
-_post_item = ItemTestHelper.post_item
-_clear_app_item_storage = ItemTestHelper.clear_app_item_storage
-
-
 @pytest.fixture(autouse=True)
 def _reset_item_storage_between_tests(request: pytest.FixtureRequest) -> Generator[None]:
     """Keep in-memory item store isolated per test."""

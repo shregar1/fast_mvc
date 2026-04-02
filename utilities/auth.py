@@ -79,13 +79,4 @@ class AuthUtility(IUtility):
         return secrets.compare_digest(got.encode("utf-8"), expected.encode("utf-8"))
 
 
-# Backward compatibility: module-level functions delegate to the class
-parse_basic_authorization = AuthUtility.parse_basic_authorization
-constant_time_compare = AuthUtility.constant_time_compare
-
-
-__all__ = [
-    "AuthUtility",
-    "constant_time_compare",
-    "parse_basic_authorization",
-]
+__all__ = ["AuthUtility"]

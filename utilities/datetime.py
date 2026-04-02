@@ -58,13 +58,4 @@ class DateTimeUtility(IUtility):
         return datetime.now(timezone.utc).isoformat()
 
 
-# Backward compatibility: module-level functions delegate to the class
-utc_now = DateTimeUtility.utc_now
-utc_now_iso = DateTimeUtility.utc_now_iso
-
-
-__all__ = [
-    "DateTimeUtility",
-    "utc_now",
-    "utc_now_iso",
-]
+__all__ = ["DateTimeUtility"]

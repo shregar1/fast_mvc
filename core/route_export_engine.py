@@ -5,7 +5,8 @@ from __future__ import annotations
 import json
 import os
 import uuid
-from typing import Any
+from pathlib import Path
+from typing import Any, Optional
 
 from fastapi import APIRouter, FastAPI
 from fastapi.routing import APIRoute
@@ -14,7 +15,7 @@ from core.postman_test_script_engine import (
     PostmanTestScriptEngine,
     enrich_operation_spec_for_tests,
 )
-from utilities.system import git_repository_folder_name
+from utilities.system import SystemUtility
 
 
 class RouteExportEngine:
@@ -47,7 +48,7 @@ class RouteExportEngine:
         override = os.getenv("POSTMAN_COLLECTION_NAME", "").strip()
         if override:
             return override
-        git_name = git_repository_folder_name()
+        git_name = SystemUtility.git_repository_folder_name()
         if git_name:
             return git_name
         return str(self.app.title)
@@ -155,7 +156,7 @@ class RouteExportEngine:
             examples.append("\n".join(parts))
         return examples
 
-    def export_postman_collection(self) -> tuple[Path, Path | None]:
+    def export_postman_collection(self) -> tuple[Path, Optional[Path]]:
         """Write Postman collection JSON; optionally a separate environment file.
 
         Postman cannot attach an Environment from inside a Collection JSON. For **one import**,

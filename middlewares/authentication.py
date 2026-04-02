@@ -8,6 +8,7 @@ Without the platform package, it will pass through all requests (development mod
 
 from http import HTTPStatus
 from functools import partial
+from typing import Any
 
 from fastapi import Request
 from fastapi.responses import JSONResponse
@@ -16,22 +17,7 @@ from constants.api_status import APIStatus
 from constants.http_header import HttpHeader
 from dtos.responses.apis import IResponseAPIDTO
 
-# Optional dependencies (requires fast-mvc[platform])
-try:
-    from fast_middleware.sec.jwt_bearer_auth import JWTBearerAuthMiddleware
-except ImportError:
-    JWTBearerAuthMiddleware = None  # type: ignore
-
-# JWT Utility dependency
-try:
-    from fast_platform.core.utils import JWTUtility
-except ImportError:
-    JWTUtility = None  # type: ignore
-
-try:
-    from fast_database.persistence.repositories.user import UserRepository
-except ImportError:
-    UserRepository = None  # type: ignore
+from fast_database.persistence.repositories.user import UserRepository
 
 from start_utils import (
     ALGORITHM,
@@ -66,11 +52,11 @@ class JWTAuthHelper:
     @staticmethod
     def load_user(user_data: dict, urn: str):
         """Load user from database.
-        
+
         Args:
             user_data: Dictionary containing user information (e.g., user_id).
             urn: The URN for logging/context.
-            
+
         Returns:
             The user object if found, None otherwise.
         """
@@ -164,12 +150,6 @@ if JWTBearerAuthMiddleware:
     )
 else:
     AuthenticationMiddleware = NoOpAuthMiddleware
-
-
-# Backward compatibility: module-level functions delegate to the class
-_decode_token = JWTAuthHelper.decode_token
-_load_user = JWTAuthHelper.load_user
-_on_authenticated = JWTAuthHelper.on_authenticated
 
 
 __all__ = [

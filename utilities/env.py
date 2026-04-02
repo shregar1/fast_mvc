@@ -159,21 +159,4 @@ class EnvironmentParserUtility(IUtility):
             return default
 
 
-# Backward compatibility: module-level functions delegate to the class
-env_bool = EnvironmentParserUtility.parse_bool
-env_int = EnvironmentParserUtility.parse_int
-env_str = EnvironmentParserUtility.parse_str
-env_optional_str = EnvironmentParserUtility.parse_optional_str
-env_csv = EnvironmentParserUtility.parse_csv
-get_int_env = EnvironmentParserUtility.get_int_with_logging
-
-
-__all__ = [
-    "EnvironmentParserUtility",
-    "env_bool",
-    "env_csv",
-    "env_int",
-    "env_optional_str",
-    "env_str",
-    "get_int_env",
-]
+__all__ = ["EnvironmentParserUtility"]

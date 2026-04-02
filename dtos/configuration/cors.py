@@ -39,7 +39,7 @@ class CorsSettingsDTO(IConfigurationDTO):
         default_factory=lambda: list(CorsDefaults.EXPOSE_HEADERS),
         description="Response headers exposed to browser JavaScript.",
     )
-    allow_origin_regex: str = Field(
+    allow_origin_regex: str | None = Field(
         default=None,
         description="Optional regex matched against ``Origin`` (e.g. ``https://.*\\.example\\.com``).",
     )

@@ -11,7 +11,7 @@ from typing import Any
 
 from dtos.requests.apis.v1.user.fetch import FetchUserRequestDTO
 
-from factories.apis.v1.example.common import new_reference_urn
+from factories.common import ReferenceUrnFactory
 
 
 class ExampleFetchRequestFactory:
@@ -32,7 +32,7 @@ class ExampleFetchRequestFactory:
     def build(cls, **overrides: Any) -> dict[str, Any]:
         """Return a dict suitable for ``FetchUserRequestDTO(**payload)``."""
         base: dict[str, Any] = {
-            "reference_urn": new_reference_urn(),
+            "reference_urn": ReferenceUrnFactory.new_reference_urn(),
             "name": cls.DEFAULT_NAME,
             "description": cls.DEFAULT_DESCRIPTION,
         }

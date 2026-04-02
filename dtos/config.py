@@ -19,7 +19,7 @@ class DtoConfigBuilder:
     @classmethod
     def build_config(cls, **overrides: Any) -> ConfigDict:
         """Build a :class:`~pydantic.ConfigDict` by merging *overrides* into the
-        defaults used by :class:`EnhancedIModel`.
+        defaults used by :class:`~dtos.base.ApplicationBaseModel`.
 
         Common overrides: ``title``, ``str_strip_whitespace``, ``populate_by_name``,
         ``frozen``, ``validate_default``, ``json_schema_extra``, etc.
@@ -28,11 +28,4 @@ class DtoConfigBuilder:
         return ConfigDict(**merged)
 
 
-# Backward compatibility
-enhanced_config = DtoConfigBuilder.build_config
-
-
-__all__ = [
-    "DtoConfigBuilder",
-    "enhanced_config",
-]
+__all__ = ["DtoConfigBuilder"]

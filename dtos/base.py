@@ -1,23 +1,27 @@
-"""Enhanced I Model Module.
+"""Pydantic base model for DTOs with optional sanitization and security checks.
 
-Provides :class:`EnhancedIModel` (Pydantic v2) plus :func:`enhanced_config` so
-subclasses can extend defaults with any :class:`~pydantic.ConfigDict` options
+Provides :class:`ApplicationBaseModel` (Pydantic v2); use
+:class:`~dtos.config.DtoConfigBuilder` to merge defaults with any
+:class:`~pydantic.ConfigDict` options
 (``title``, ``str_strip_whitespace``, ``populate_by_name``, ``frozen``, …).
 
 Serialization ``include`` / ``exclude`` are not global model settings in Pydantic v2;
 pass them to :meth:`~pydantic.BaseModel.model_dump` / :meth:`~pydantic.BaseModel.model_dump_json`.
 
-Subclass :class:`EnhancedIModel`, call :func:`enhanced_config` with extra keys, or add
-``model_validator`` / ``computed_field`` / ``Field`` for richer schemas.
+Subclass :class:`ApplicationBaseModel`, call :meth:`~dtos.config.DtoConfigBuilder.build_config`
+with extra keys, or add ``model_validator`` / ``computed_field`` / ``Field`` for richer schemas.
 
 Usage:
-    >>> from dtos.I import EnhancedIModel, enhanced_config
+    >>> from dtos.base import ApplicationBaseModel
+    >>> from dtos.config import DtoConfigBuilder
     >>>
-    >>> class MyRequestDTO(EnhancedIModel):
+    >>> class MyRequestDTO(ApplicationBaseModel):
     ...     name: str
     >>>
-    >>> class StrictDTO(EnhancedIModel):
-    ...     model_config = enhanced_config(title="StrictDTO", str_strip_whitespace=True)
+    >>> class StrictDTO(ApplicationBaseModel):
+    ...     model_config = DtoConfigBuilder.build_config(
+    ...         title="StrictDTO", str_strip_whitespace=True
+    ...     )
 """
 
 from __future__ import annotations
@@ -30,31 +34,34 @@ from pydantic import BaseModel, field_validator
 
 # Optional fast_utilities (requires fast-mvc[platform])
 try:
-    from fast_utilities.validation import SecurityValidators, ValidationUtility
+    from fast_utilities.validation import (  # pyright: ignore[reportMissingImports]
+        SecurityValidators,
+        ValidationUtility,
+    )
 except ImportError:
     SecurityValidators = None  # type: ignore
     ValidationUtility = None  # type: ignore
 
-from dtos.config import DtoConfigBuilder, enhanced_config
+from dtos.config import DtoConfigBuilder
 
-__all__ = ["EnhancedIModel", "enhanced_config"]
+__all__ = ["ApplicationBaseModel"]
 
 
-class EnhancedIModel(BaseModel):
-    """Pydantic v2 Interface for request DTOs: sanitization, security checks, strict extras.
+class ApplicationBaseModel(BaseModel):
+    """Pydantic v2 base for DTOs: optional string sanitization, security scan, strict defaults.
 
-    Subclasses may set ``model_config = enhanced_config(...)`` to add options
+    Subclasses may set ``model_config = DtoConfigBuilder.build_config(...)`` to add options
     without re-specifying defaults.
     """
 
-    model_config = enhanced_config()
+    model_config = DtoConfigBuilder.build_config()
 
     @field_validator("*", mode="before")
     @classmethod
     def sanitize_strings(cls, v: Any) -> Any:
         """Trim and normalize string inputs before field validation."""
         if ValidationUtility:
-            logger.debug("Sanitizing string inputs in EnhancedIModel")
+            logger.debug("Sanitizing string inputs in {}", cls.__qualname__)
             if isinstance(v, str):
                 return ValidationUtility.sanitize_string(v)
         return v
@@ -69,7 +76,7 @@ class EnhancedIModel(BaseModel):
         if not SecurityValidators:
             return {"is_valid": True, "issues": []}
 
-        logger.debug("Performing security validation on EnhancedIModel")
+        logger.debug("Performing security validation on {}", self.__class__.__qualname__)
         issues: list[str] = []
 
         for field_name, field_value in self.model_dump().items():

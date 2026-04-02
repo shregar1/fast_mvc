@@ -32,8 +32,8 @@ Configuration Files:
 import os
 import sys
 from pathlib import Path
+from typing import Any
 from urllib.parse import quote
-from typing import Any, Optional
 
 import redis
 from dotenv import load_dotenv
@@ -41,7 +41,7 @@ from loguru import logger
 
 # Optional fast_platform configuration (requires fast-mvc[platform])
 try:
-    from fast_platform import (
+    from fast_platform import (  # pyright: ignore[reportMissingImports]
         CacheConfiguration,
         CacheConfigurationDTO,
         DBConfiguration,
@@ -112,7 +112,10 @@ if DBConfiguration:
     db_configuration = DBConfiguration().get_config()
 
 try:
-    from fast_channels import ChannelsConfiguration, ChannelsConfigurationDTO
+    from fast_channels import (  # pyright: ignore[reportMissingImports]
+        ChannelsConfiguration,
+        ChannelsConfigurationDTO,
+    )
 
     channels_configuration = ChannelsConfiguration().get_config()
 except ImportError:
@@ -129,7 +132,7 @@ logger.info("Loading environment variables")
 APP_NAME: str = os.environ.get("APP_NAME", "FastMVC")
 """Application name from environment."""
 
-SECRET_KEY: str = os.getenv("SECRET_KEY")
+SECRET_KEY: str = os.getenv("SECRET_KEY", "")
 """JWT signing secret key. MUST be set in production."""
 
 ALGORITHM: str = os.getenv("ALGORITHM", "HS256")
@@ -190,7 +193,7 @@ logger.info("Loaded environment variables")
 # =============================================================================
 
 try:
-    from fast_db import create_and_set_session
+    from fast_db import create_and_set_session  # pyright: ignore[reportMissingImports]
 
     db_session = create_and_set_session(db_configuration)
 except ImportError:
@@ -215,7 +218,7 @@ else:
 # REDIS SESSION
 # =============================================================================
 
-redis_session: redis.Redis = None
+redis_session: redis.Redis | None = None
 """
 Redis cache connection.
 
@@ -228,11 +231,10 @@ Example:
     >>> value = redis_session.get("key")
 """
 
-redis_url: Optional[str] = None
+redis_url: str | None = None
 if cache_configuration is not None:
     redis_url = getattr(cache_configuration, "redis_url", "") or ""
     if not redis_url:
-        # Backward compatibility with older cache DTO schema.
         host = (
             getattr(cache_configuration, "host", None) or os.getenv("REDIS_HOST", "localhost")
         )
@@ -276,8 +278,9 @@ CHANNEL_BACKEND: str = (
 if CHANNEL_BACKEND == "redis" and redis_session:
     try:
         import redis.asyncio as aioredis
-
-        from fast_channels import RedisChannelBackend
+        from fast_channels import (  # pyright: ignore[reportMissingImports]
+            RedisChannelBackend,
+        )
 
         channel_redis_url = redis_url
         if not channel_redis_url:

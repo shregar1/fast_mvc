@@ -6,7 +6,7 @@ from typing import Any
 
 from dtos.requests.example.update import ExampleUpdateRequestDTO
 
-from factories.apis.v1.example.common import new_reference_urn
+from factories.common import ReferenceUrnFactory
 
 
 class ExampleUpdateRequestFactory:
@@ -14,7 +14,7 @@ class ExampleUpdateRequestFactory:
 
     @classmethod
     def build(cls, **overrides: Any) -> dict[str, Any]:
-        base: dict[str, Any] = {"reference_urn": new_reference_urn()}
+        base: dict[str, Any] = {"reference_urn": ReferenceUrnFactory.new_reference_urn()}
         return {**base, **overrides}
 
     @classmethod

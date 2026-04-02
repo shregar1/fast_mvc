@@ -89,7 +89,7 @@ class IFactory(ABC):
         )
 
     @property
-    def urn(self) -> str:
+    def urn(self) -> str | None:
         """str: Get the Unique Request Number."""
         return self._urn
 
@@ -99,7 +99,7 @@ class IFactory(ABC):
         self._urn = value
 
     @property
-    def user_urn(self) -> str:
+    def user_urn(self) -> str | None:
         """str: Get the user's unique resource name."""
         return self._user_urn
 
@@ -109,7 +109,7 @@ class IFactory(ABC):
         self._user_urn = value
 
     @property
-    def api_name(self) -> str:
+    def api_name(self) -> str | None:
         """str: Get the API endpoint name."""
         return self._api_name
 
@@ -129,7 +129,7 @@ class IFactory(ABC):
         self._logger = value
 
     @property
-    def user_id(self) -> str:
+    def user_id(self) -> str | None:
         """str: Get the user's database identifier."""
         return self._user_id
 

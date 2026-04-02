@@ -46,7 +46,7 @@ Top-level **`factories/`** (not under `tests/`) provides **DTO-aligned builders*
 
 ## How it fits in the stack
 
-Tests mirror the **production** structure: they import from `services`, `repositories`, `entities`, etc., and may use **`tests/factories/apis/v1/item`**, **`tests/conftest.py`**, or **`core/testing`** factories and mocks.
+Tests mirror the **production** structure: they import from `services`, `repositories`, `models`, etc., and may use **`tests/factories/apis/v1/item`**, **`tests/conftest.py`**, or **`core/testing`** factories and mocks.
 
 ## Related files
 

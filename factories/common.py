@@ -14,11 +14,4 @@ class ReferenceUrnFactory:
         return str(uuid.uuid4())
 
 
-# Backward compatibility: module-level functions delegate to the class
-new_reference_urn = ReferenceUrnFactory.new_reference_urn
-
-
-__all__ = [
-    "ReferenceUrnFactory",
-    "new_reference_urn",
-]
+__all__ = ["ReferenceUrnFactory"]

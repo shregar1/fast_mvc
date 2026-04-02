@@ -38,10 +38,10 @@ class IUtility(ABC):
         - File handling utilities
 
     Attributes:
-        urn (str): Unique Request Number for tracing.
-        user_urn (str): User's unique resource name.
-        api_name (str): Name of the API endpoint.
-        user_id (str): DataI identifier of the user.
+        urn (str | None): Unique Request Number for tracing.
+        user_urn (str | None): User's unique resource name.
+        api_name (str | None): Name of the API endpoint.
+        user_id (str | None): DataI identifier of the user.
         logger: Structured logger bound with utility context.
 
     Note:
@@ -95,7 +95,7 @@ class IUtility(ABC):
         )
 
     @property
-    def urn(self) -> str:
+    def urn(self) -> str | None | None:
         """str: Get the Unique Request Number."""
         return self._urn
 
@@ -105,7 +105,7 @@ class IUtility(ABC):
         self._urn = value
 
     @property
-    def user_urn(self) -> str:
+    def user_urn(self) -> str | None:
         """str: Get the user's unique resource name."""
         return self._user_urn
 
@@ -115,7 +115,7 @@ class IUtility(ABC):
         self._user_urn = value
 
     @property
-    def api_name(self) -> str:
+    def api_name(self) -> str | None:
         """str: Get the API endpoint name."""
         return self._api_name
 
@@ -135,11 +135,11 @@ class IUtility(ABC):
         self._logger = value
 
     @property
-    def user_id(self) -> str:
-        """str: Get the user's database identifier."""
+    def user_id(self) -> str | None:
+        """str | None: Get the user's database identifier."""
         return self._user_id
 
     @user_id.setter
-    def user_id(self, value: str) -> None:
+    def user_id(self, value: str | None) -> None:
         """Set the user's database identifier."""
         self._user_id = value

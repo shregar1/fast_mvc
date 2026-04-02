@@ -19,11 +19,4 @@ class AsyncTestUtil:
         return loop.run_until_complete(coro)
 
 
-# Backward compatibility
-run_async = AsyncTestUtil.run_async
-
-
-__all__ = [
-    "AsyncTestUtil",
-    "run_async",
-]
+__all__ = ["AsyncTestUtil"]

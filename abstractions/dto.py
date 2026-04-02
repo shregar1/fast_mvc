@@ -13,6 +13,6 @@ class IDTO(ABC):
     """Root marker for all Data Transfer Objects in :mod:`dtos`.
 
     Concrete models combine :class:`IDTO` with :class:`pydantic.BaseModel` or
-    :class:`dtos.I.EnhancedIModel` — for example :class:`dtos.configuration.abstraction.IConfigurationDTO`
+    :class:`dtos.base.ApplicationBaseModel` — for example :class:`dtos.configuration.abstraction.IConfigurationDTO`
     or :class:`dtos.requests.abstraction.IRequestDTO` for HTTP requests.
     """

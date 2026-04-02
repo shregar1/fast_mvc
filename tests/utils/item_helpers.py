@@ -60,15 +60,6 @@ class ItemTestHelper:
             pass
 
 
-# Backward compatibility: module-level functions delegate to the class
-_item_from_api_json = ItemTestHelper.item_from_api_json
-_post_item = ItemTestHelper.post_item
-_clear_app_item_storage = ItemTestHelper.clear_app_item_storage
-
-
 __all__ = [
     "ItemTestHelper",
-    "_item_from_api_json",
-    "_post_item",
-    "_clear_app_item_storage",
 ]
