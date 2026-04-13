@@ -26,9 +26,11 @@ __all__ = [
     "Default",
     "InputValidationDefault",
     "JwtDefault",
+    "PostmanDefault",
     "RateLimitDefault",
     "RateLimitingDefault",
     "SecurityHeadersDefault",
+    "TimeoutDefault",
 ]
 
 
@@ -62,6 +64,25 @@ class ApplicationDefault:
     GRPC_PORT: Final[int] = 50051
     """gRPC listen port when `GRPC_ENABLED=true`."""
 
+    HOST: Final[str] = "0.0.0.0"
+    PORT: Final[int] = 8000
+    REDIS_HOST: Final[str] = "localhost"
+    REDIS_PORT: Final[int] = 6379
+    ENCODING_UTF8: Final[str] = "utf-8"
+    BOOLEAN_TRUE_VALUES: Final[tuple[str, ...]] = ("true", "1", "yes", "on")
+    BOOLEAN_FALSE_VALUES: Final[tuple[str, ...]] = ("false", "0", "no", "off")
+    VALID_ENVIRONMENTS: Final[tuple[str, ...]] = (
+        "development",
+        "dev",
+        "staging",
+        "stage",
+        "production",
+        "prod",
+        "test",
+        "testing",
+    )
+    DATABASE_URL_SQLITE: Final[str] = "sqlite:///./app.db"
+
 
 class JwtDefault:
     """JWT signing and token lifetime defaults."""
@@ -83,6 +104,9 @@ class JwtDefault:
 
     REFRESH_TOKEN_EXPIRE_DAYS: Final[int] = 7
     """Default JWT refresh token expiry: 7 days."""
+
+    ACCESS_TOKEN_EXPIRE_MINUTES_SHORT: Final[int] = 30
+    """Short-lived access token expiry in minutes."""
 
 
 class RateLimitDefault:
@@ -125,6 +149,18 @@ class AuthenticationDefault:
     SESSION_TIMEOUT_MINUTES: Final[int] = 60
     """Idle session timeout in minutes."""
 
+    EMAIL_TOKEN_EXPIRY_MINUTES: Final[int] = 60
+    """Email token expiry in minutes."""
+
+    MFA_TOKEN_EXPIRY_MINUTES: Final[int] = 10
+    """MFA token expiry in minutes."""
+
+    MFA_TIME_STEP_SECONDS: Final[int] = 30
+    """MFA TOTP time step in seconds."""
+
+    AUTHENTICATION_REQUIRED_MESSAGE: Final[str] = "Authentication required"
+    """Default authentication required message."""
+
     AUTHENTICATION_CONFIGURATION: Final[dict[str, Any]] = {
         "jwt_expiry_minutes": SECURITY_JWT_EXPIRY_MINUTES,
         "refresh_token_expiry_days": JwtDefault.REFRESH_TOKEN_EXPIRE_DAYS,
@@ -135,6 +171,20 @@ class AuthenticationDefault:
         "session_timeout_minutes": SESSION_TIMEOUT_MINUTES,
     }
     # Defaults for ``SECURITY_CONFIGURATION["authentication"]``.
+
+
+class PostmanDefault:
+    """Postman collection generation defaults."""
+
+    SCRIPT_TYPE_JAVASCRIPT: Final[str] = "text/javascript"
+    """Postman script type for JavaScript."""
+
+
+class TimeoutDefault:
+    """Timeout defaults for various operations."""
+
+    DEFAULT_TIMEOUT_SECONDS: Final[int] = 30
+    """Default timeout in seconds for async operations."""
 
 
 class RateLimitingDefault:
@@ -264,6 +314,7 @@ class Default(
     SecurityHeadersDefault,
     InputValidationDefault,
     CorsSectionDefault,
+    TimeoutDefault,
 ):
     """Aggregated defaults for FastX (inherits domain classes above).
 

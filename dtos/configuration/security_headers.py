@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Final
 
-from fastmiddleware import SecurityHeadersConfig  # pyright: ignore[reportMissingImports]
+from fast_middleware import SecurityHeadersConfig  # pyright: ignore[reportMissingImports]
 from pydantic import Field
 
 from constants.security_headers import SecurityHeadersConstants, SecurityHeadersEnvVar

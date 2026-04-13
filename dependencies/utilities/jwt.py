@@ -17,10 +17,7 @@ Usage:
 
 from collections.abc import Callable
 from start_utils import ALGORITHM, SECRET_KEY, logger
-try:
-    from fast_platform.core.utils import JWTUtility
-except ImportError:
-    JWTUtility = None  # type: ignore
+from utilities.jwt import JWTUtility
 
 
 class JWTUtilityDependency:

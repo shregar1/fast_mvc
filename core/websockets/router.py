@@ -14,6 +14,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 from fast_channels import InMemoryPresenceBackend, PresenceService
 from services.streams import Tick, OrderEvent, get_market_data_hub
+from constants.default import Default
 from core.websockets.utils import WebSocketStreamHelper
 
 
@@ -22,7 +23,9 @@ router = APIRouter(tags=["WebSockets"])
 # In-memory connections per room. For production you can replace this with
 # a more robust hub or use one of the Channels backends (Pusher/Ably/etc.).
 _room_connections: Dict[str, List[WebSocket]] = {}
-_presence = PresenceService(InMemoryPresenceBackend(ttl_seconds=60))
+_presence = PresenceService(
+    InMemoryPresenceBackend(ttl_seconds=Default.RATE_LIMIT_WINDOW_SECONDS)
+)
 _market_hub = get_market_data_hub()
 
 

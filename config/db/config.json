@@ -1,8 +1,8 @@
 {
-    "user_name": "",
-    "password": "",
-    "host": "",
+    "user_name": "postgres",
+    "password": "postgres",
+    "host": "localhost",
     "port": 5432,
-    "database": "",
+    "database": "fastx",
     "connection_string": "postgresql+psycopg2://{user_name}:{password}@{host}:{port}/{database}"
 }

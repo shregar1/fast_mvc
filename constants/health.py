@@ -24,6 +24,12 @@ LIVENESS_ALIVE: Final[str] = "alive"
 # --- DB probe ---
 HEALTH_CHECK_SQL_PING: Final[str] = "SELECT 1"
 
+HEALTHY_MESSAGE: Final[str] = "All dependencies report healthy."
+UNHEALTHY_MESSAGE: Final[str] = "One or more dependencies are unhealthy."
+LIVENESS_MESSAGE: Final[str] = "Application process is alive."
+READY_MESSAGE: Final[str] = "Application is ready to receive traffic."
+NOT_READY_MESSAGE: Final[str] = "Application is not ready to receive traffic."
+
 
 class HealthMessageUtil:
     """Utility class for health check message formatting."""
@@ -45,4 +51,9 @@ __all__ = [
     "READINESS_NOT_READY",
     "LIVENESS_ALIVE",
     "HEALTH_CHECK_SQL_PING",
+    "HEALTHY_MESSAGE",
+    "UNHEALTHY_MESSAGE",
+    "LIVENESS_MESSAGE",
+    "READY_MESSAGE",
+    "NOT_READY_MESSAGE",
 ]

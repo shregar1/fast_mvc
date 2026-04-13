@@ -7,7 +7,10 @@ from abstractions.utility import IUtility
 from utilities.auth import AuthUtility
 from utilities.cors import CorsConfigUtility
 from utilities.datetime import DateTimeUtility
+from utilities.dictionary import DictionaryUtility
 from utilities.env import EnvironmentParserUtility
+from utilities.jwt import JWTUtility
+from utilities.request_utils import get_client_ip
 from utilities.security_headers import SecurityHeadersUtility
 from utilities.string import StringUtility
 from utilities.system import SystemUtility
@@ -21,8 +24,11 @@ __all__ = [
     "ConfigValidatorUtility",
     "CorsConfigUtility",
     "DateTimeUtility",
+    "DictionaryUtility",
     "EnvironmentParserUtility",
+    "JWTUtility",
     "SecurityHeadersUtility",
     "StringUtility",
     "SystemUtility",
+    "get_client_ip",
 ]

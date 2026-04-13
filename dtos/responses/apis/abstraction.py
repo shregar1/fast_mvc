@@ -84,7 +84,7 @@ class IResponseAPIDTO(IResponseDTO):
 
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=False)
 
-    transactionUrn: str
+    transactionUrn: str | None = ""
     """Unique identifier for request tracing and correlation."""
 
     status: str

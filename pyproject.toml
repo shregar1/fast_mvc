@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 # PyPI: pip install fastx-mvc  (wheels: fastx_mvc-*.whl)
 name = "fastx-mvc"
-version = "1.5.0"
+version = "1.6.0"
 description = "Production-grade MVC Framework for FastAPI - Generate projects, entities, and migrations with a single command"
 readme = "README.md"
 license = {text = "MIT"}
@@ -87,9 +87,10 @@ dependencies = [
     "httpx>=0.24.0,<1.0.0",
     "cachetools>=5.0.0,<6.0.0",
     "mako>=1.2.0,<2.0.0",
-    "fast-middleware>=0.6.2,<2.0.0",
+    "fast-middleware>=1.5.0,<2.0.0",
+    "fast-database>=1.5.0,<2.0.0",
     "cryptography>=41.0.0,<44.0.0",
-    "fast-platform>=0.13.0,<2.0.0",
+    "fast-platform>=1.5.0,<2.0.0",
 ]
 
 [project.optional-dependencies]
@@ -129,9 +130,9 @@ secrets = ["fast-platform[secrets]>=0.13.0"]
 vectors = ["fast-platform[vectors]>=0.13.0"]
 tenancy = ["fast-platform[tenancy]>=0.13.0"]
 # External packages
-dashboards = ["fast_dashboards>=0.1.0"]
-admin = ["fast_admin>=0.1.0"]
-feature-flags = ["fast_feature_flags>=0.1.0"]
+dashboards = ["fast-dashboards>=1.5.0"]
+admin = ["fast-admin>=0.1.0"]
+feature-flags = ["fast-feature-flags>=0.1.0"]
 # Legacy aliases for backward compatibility
 channels = ["fast-platform[notifications]>=0.13.0"]
 kafka = ["fast-platform[messaging]>=0.13.0"]
@@ -162,8 +163,8 @@ py-modules = ["app", "start_utils"]
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["fast_mvc*", "fastx*", "abstractions*", "controllers*", "core*", "dependencies*", "dtos*", "errors*", "middlewares*", "migrations*", "models*", "repositories*", "services*", "testing*", "utilities*", "constants*", "config*"]
-exclude = ["tests*", "docs*", "scripts*", "dist*", "htmlcov*"]
+include = ["fast_mvc*", "fastx*", "abstractions*", "controllers*", "core*", "dependencies*", "dtos*", "errors*", "middlewares*", "migrations*", "models*", "repositories*", "services*", "utilities*", "constants*", "config*"]
+exclude = ["tests*", "tests.*", "tests/**", "docs*", "scripts*", "dist*", "htmlcov*", "factories*"]
 
 [tool.setuptools.package-data]
 "*" = [
@@ -192,6 +193,8 @@ asyncio_mode = "auto"
 source = ["."]
 omit = [
     "tests/*",
+    "tests/framework/*",
+    "factories/*",
     "htmlcov/*",
     "venv/*",
     ".venv/*",

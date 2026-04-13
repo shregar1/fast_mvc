@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from constants.default import Default
+from constants.response_key import ResponseKey
 from fastapi import HTTPException, Request, status
 
 
@@ -25,7 +27,7 @@ class AuthDependency:
         if user is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Authentication required",
+                detail=Default.AUTHENTICATION_REQUIRED_MESSAGE,
             )
         return user
 

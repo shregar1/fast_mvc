@@ -1,4 +1,4 @@
-"""Tests for JWT authentication middleware wiring (``fastmiddleware``)."""
+"""Tests for JWT authentication middleware wiring (``fast_middleware``)."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
 
-from fastmiddleware import (  # pyright: ignore[reportMissingImports]
+from fast_middleware import (  # pyright: ignore[reportMissingImports]
     AuthConfig,
     AuthenticationMiddleware,
     JWTAuthBackend,

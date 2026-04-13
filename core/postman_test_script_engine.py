@@ -6,6 +6,7 @@ import json
 import os
 import re
 import uuid
+from constants.default import Default, PostmanDefault
 from typing import Any
 
 
@@ -22,7 +23,7 @@ class PostmanTestScriptEngine:
                 "listen": "prerequest",
                 "script": {
                     "id": PostmanTestScriptEngine._new_script_id(),
-                    "type": "text/javascript",
+                    "type": PostmanDefault.SCRIPT_TYPE_JAVASCRIPT,
                     "exec": prereq,
                 },
             },
@@ -30,7 +31,7 @@ class PostmanTestScriptEngine:
                 "listen": "test",
                 "script": {
                     "id": PostmanTestScriptEngine._new_script_id(),
-                    "type": "text/javascript",
+                    "type": PostmanDefault.SCRIPT_TYPE_JAVASCRIPT,
                     "exec": tests,
                 },
             },
@@ -274,7 +275,7 @@ class PostmanTestScriptEngine:
     def _negative_request_variation_tests(spec: dict[str, Any]) -> list[str]:
         """Extra ``pm.sendRequest`` checks: null/empty/malformed body, auth, query, path."""
         flag = os.getenv("POSTMAN_NEGATIVE_TESTS", "true").strip().lower()
-        if flag in ("0", "false", "no", "off"):
+        if flag in Default.BOOLEAN_FALSE_VALUES:
             return []
 
         method = str(spec.get("method") or "GET").upper()
@@ -570,14 +571,14 @@ class PostmanTestScriptEngine:
             {
                 "listen": "prerequest",
                 "script": {
-                    "type": "text/javascript",
+                    "type": PostmanDefault.SCRIPT_TYPE_JAVASCRIPT,
                     "exec": prereq,
                 },
             },
             {
                 "listen": "test",
                 "script": {
-                    "type": "text/javascript",
+                    "type": PostmanDefault.SCRIPT_TYPE_JAVASCRIPT,
                     "exec": coll_test,
                 },
             },

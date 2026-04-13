@@ -16,6 +16,7 @@ from dataclasses import dataclass
 from typing import Any, Callable, Optional
 
 from abstractions.utility import IUtility
+from constants.default import Default
 from errors import ConfigValidationError
 
 __all__ = [
@@ -86,7 +87,7 @@ class ConfigValidatorUtility(IUtility):
             "DATABASE_URL",
             required=False,
             validator=self.validate_dataI_url,
-            default="sqlite:///./app.db",
+            default=Default.DATABASE_URL_SQLITE,
         )
 
         # JWT
@@ -113,9 +114,9 @@ class ConfigValidatorUtility(IUtility):
         self.add_rule("DEBUG", required=False, default="false")
 
         # Server
-        self.add_rule("HOST", required=False, default="0.0.0.0")
+        self.add_rule("HOST", required=False, default=Default.HOST)
         self.add_rule(
-            "PORT", required=False, validator=self.validate_port, default="8000"
+            "PORT", required=False, validator=self.validate_port, default=str(Default.PORT)
         )
 
         # Security
@@ -228,19 +229,7 @@ class ConfigValidatorUtility(IUtility):
             )
 
         # Check for common weak secrets
-        weak_secrets = [
-            "secret",
-            "password",
-            "123456",
-            "jwt",
-            "token",
-            "your-secret-key",
-            "change-me",
-            "default",
-            "test",
-        ]
-
-        if value.lower() in weak_secrets:
+        if value.lower() in Default.INPUT_VALIDATION_WEAK_PASSWORDS:
             return False, "JWT secret is too common/weak"
 
         # Check entropy (should have mix of characters)
@@ -300,18 +289,7 @@ class ConfigValidatorUtility(IUtility):
     @classmethod
     def validate_app_env(cls, value: str) -> tuple[bool, str]:
         """Validate application environment."""
-        valid_envs = [
-            "development",
-            "dev",
-            "staging",
-            "stage",
-            "production",
-            "prod",
-            "test",
-            "testing",
-        ]
-
-        if value.lower() not in valid_envs:
+        if value.lower() not in Default.VALID_ENVIRONMENTS:
             return (
                 False,
                 f"Invalid environment. Must be one of: {', '.join(valid_envs)}",

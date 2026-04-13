@@ -21,14 +21,21 @@ from loguru import logger
 
 from constants.default import Default
 from constants.environment import EnvironmentVar
+from constants.http_header import HttpHeader
 from utilities.env import EnvironmentParserUtility
+
+
+GRPC_ERROR_MISSING_BEARER_TOKEN = "Missing Bearer token"
+GRPC_ERROR_INVALID_TOKEN = "Invalid token"
+GRPC_SHUTDOWN_GRACE_SECONDS = 5
+GRPC_STATUS_ERROR = "ERROR"
 
 
 def _extract_bearer_token(metadata: Iterable[tuple[str, Any]]) -> Optional[str]:
     for k, v in metadata:
-        if str(k).lower() == "authorization" and v is not None:
+        if str(k).lower() == HttpHeader.AUTHORIZATION.lower() and v is not None:
             s = str(v)
-            if s.lower().startswith("bearer "):
+            if s.lower().startswith(HttpHeader.AUTHORIZATION_BEARER_PREFIX.lower()):
                 return s.split(" ", 1)[1].strip()
     return None
 
@@ -87,12 +94,12 @@ async def start_grpc_health_server() -> Any:
                 if not token:
                     await context.abort(
                         grpc_mod.StatusCode.UNAUTHENTICATED,
-                        "Missing Bearer token",
+                        GRPC_ERROR_MISSING_BEARER_TOKEN,
                     )
                     return health_pb2.HealthResponse(
-                        status="ERROR",
+                        status=GRPC_STATUS_ERROR,
                         timestamp_unix_ms=0,
-                        details="Missing Bearer token",
+                        details=GRPC_ERROR_MISSING_BEARER_TOKEN,
                     )
 
                 try:
@@ -101,12 +108,12 @@ async def start_grpc_health_server() -> Any:
                 except Exception:
                     await context.abort(
                         grpc_mod.StatusCode.UNAUTHENTICATED,
-                        "Invalid token",
+                        GRPC_ERROR_INVALID_TOKEN,
                     )
                     return health_pb2.HealthResponse(
-                        status="ERROR",
+                        status=GRPC_STATUS_ERROR,
                         timestamp_unix_ms=0,
-                        details="Invalid token",
+                        details=GRPC_ERROR_INVALID_TOKEN,
                     )
 
             return health_pb2.HealthResponse(
@@ -124,11 +131,11 @@ async def start_grpc_health_server() -> Any:
                 if not token:
                     await context.abort(
                         grpc_mod.StatusCode.UNAUTHENTICATED,
-                        "Missing Bearer token",
+                        GRPC_ERROR_MISSING_BEARER_TOKEN,
                     )
                     return user_pb2.FetchUserResponse(
                         id="",
-                        message="Missing Bearer token",
+                        message=GRPC_ERROR_MISSING_BEARER_TOKEN,
                         status="",
                     )
 
@@ -138,11 +145,11 @@ async def start_grpc_health_server() -> Any:
                 except Exception:
                     await context.abort(
                         grpc_mod.StatusCode.UNAUTHENTICATED,
-                        "Invalid token",
+                        GRPC_ERROR_INVALID_TOKEN,
                     )
                     return user_pb2.FetchUserResponse(
                         id="",
-                        message="Invalid token",
+                        message=GRPC_ERROR_INVALID_TOKEN,
                         status="",
                     )
 
@@ -181,7 +188,7 @@ async def start_grpc_health_server() -> Any:
     return server
 
 
-async def stop_grpc_server(server: Any, grace_seconds: int = 5) -> None:
+async def stop_grpc_server(server: Any, grace_seconds: int = GRPC_SHUTDOWN_GRACE_SECONDS) -> None:
     """Gracefully stop the aio gRPC server."""
     if server is None:
         return

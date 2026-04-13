@@ -1,6 +1,7 @@
-"""DataI Dependency Module.
+"""Database Dependency Module.
 
-Provides ``DBDependency`` for FastAPI ``Depends()`` (same pattern as ``CacheDependency``).
+Provides ``DBDependency`` for FastAPI ``Depends()``.
+Yields a fresh SQLAlchemy session per request and ensures cleanup.
 
 Usage:
     >>> from fastapi import Depends
@@ -12,23 +13,28 @@ Usage:
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Generator
 
-from start_utils import db_session
+from start_utils import db_session_factory
 
 
 class DBDependency:
-    """FastAPI dependency provider for the shared SQLAlchemy session."""
+    """FastAPI dependency provider for SQLAlchemy sessions."""
 
     @staticmethod
-    def derive() -> Any:
-        """Return the application ``db_session`` or raise if DataI is not configured."""
-        if db_session is None:
-            raise ImportError(
-                "fast_db is required for database dependencies. "
-                "Install with: pip install fastx-mvc[platform]"
-            )
-        return db_session
+    def derive() -> Generator[Any, None, None]:
+        """Yield a fresh session per request; close always."""
+        if db_session_factory is None:
+            yield None
+            return
+        session = db_session_factory()
+        try:
+            yield session
+        except Exception:
+            session.rollback()
+            raise
+        finally:
+            session.close()
 
 
 DatabaseDependency = DBDependency

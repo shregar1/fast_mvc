@@ -14,6 +14,16 @@ class HttpHeader:
     X_REFERENCE_URN: ClassVar[str] = "x-reference-urn"
     X_TRANSACTION_URN: ClassVar[str] = "x-transaction-urn"
 
+    AUTHORIZATION: ClassVar[str] = "Authorization"
+    CONTENT_TYPE: ClassVar[str] = "Content-Type"
+    CONTENT_TYPE_JSON: ClassVar[str] = "application/json"
+    WWW_AUTHENTICATE: ClassVar[str] = "WWW-Authenticate"
+    AUTHORIZATION_BEARER_PREFIX: ClassVar[str] = "Bearer "
+    AUTHORIZATION_BASIC_PREFIX: ClassVar[str] = "Basic "
+    AUTHORIZATION_BEARER_PREFIX_LENGTH: ClassVar[int] = 7
+    AUTHORIZATION_BASIC_PREFIX_LENGTH: ClassVar[int] = 6
+    ENCODING_UTF8: ClassVar[str] = "utf-8"
+    ACCEPT: ClassVar[str] = "Accept"
 
     def get_reference_urn_header(
         self,

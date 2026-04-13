@@ -18,7 +18,7 @@ Usage:
 from collections.abc import Callable
 
 from start_utils import logger
-from fast_utilities.dictionary import DictionaryUtility
+from utilities.dictionary import DictionaryUtility
 
 
 class DictionaryUtilityDependency:

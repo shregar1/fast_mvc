@@ -5,7 +5,7 @@ Leaf module under ``dtos/requests/item/`` — filename is ``update.py`` (context
 
 from __future__ import annotations
 
-from typing import Self
+from typing import Optional, Self
 from uuid import uuid4
 
 from pydantic import Field

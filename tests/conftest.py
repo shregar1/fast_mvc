@@ -29,6 +29,15 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
+# Monorepo: local ``fast_platform`` (and optional packages) for imports like ``fast_platform.errors``
+_REPO_ROOT = PROJECT_ROOT.parent
+for _extra in (
+    _REPO_ROOT / "fast_platform" / "src",
+    _REPO_ROOT / "fast_dashboards" / "src",
+):
+    if _extra.is_dir():
+        sys.path.insert(0, str(_extra))
+
 import asyncio
 import contextlib
 from collections.abc import AsyncIterator, Generator

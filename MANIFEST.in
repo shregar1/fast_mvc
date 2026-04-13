@@ -15,25 +15,23 @@ include .coveragerc
 include Dockerfile
 include docker-compose.yml
 
-# Include all JSON configuration files (application package lives under src/)
-recursive-include src/config *.json
+# Include all JSON configuration files
+recursive-include config *.json
 
 # Include migration files (if present at repo root)
 recursive-include migrations *.py *.mako
 include migrations/versions/.gitkeep
 
-# Include all README files in subdirectories under src/
-recursive-include src/abstractions *.md *.py
-recursive-include src/constants *.md *.py
-recursive-include src/controllers *.md *.py
-recursive-include src/dependencies *.md *.py
-recursive-include src/dtos *.md *.py
-recursive-include src/fast_cli *.md *.py
-recursive-include src/middlewares *.md *.py
-recursive-include src/repositories *.md *.py
-recursive-include src/services *.md *.py
-recursive-include src/tests *.md *.py
-recursive-include src/utilities *.md *.py
+# Include source packages
+recursive-include abstractions *.md *.py
+recursive-include constants *.md *.py
+recursive-include controllers *.md *.py
+recursive-include dependencies *.md *.py
+recursive-include dtos *.md *.py
+recursive-include middlewares *.md *.py
+recursive-include repositories *.md *.py
+recursive-include services *.md *.py
+recursive-include utilities *.md *.py
 
 # Include type hints
 global-include py.typed
@@ -47,7 +45,9 @@ global-exclude *.egg-info
 global-exclude .git
 global-exclude .gitignore
 
-# Exclude test artifacts
+# Exclude tests and test artifacts
+prune tests
+prune factories
 prune htmlcov
 prune .pytest_cache
 prune .coverage

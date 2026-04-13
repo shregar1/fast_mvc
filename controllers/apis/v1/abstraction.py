@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Optional
 
 from controllers.apis.abstraction import IAPIController
 
@@ -35,3 +35,7 @@ class IAPIV1Controller(IAPIController):
             user_id=user_id,
             **kwargs,
         )
+
+
+# Backward-compatible alias used by auth/user controllers.
+IV1APIController = IAPIV1Controller

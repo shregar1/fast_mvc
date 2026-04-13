@@ -13,6 +13,9 @@ class RouteConstant:
     USER_LOGIN: Final[str] = "/user/login"
     USER_REGISTER: Final[str] = "/user/register"
     USER_REFRESH: Final[str] = "/user/refresh"
+    USER_FORGOT_PASSWORD: Final[str] = "/user/forgot-password"
+    USER_RESET_PASSWORD: Final[str] = "/user/reset-password"
+    USER_VERIFY_EMAIL: Final[str] = "/user/verify-email"
     DOCS: Final[str] = "/docs"
     REDOC: Final[str] = "/redoc"
     OPENAPI_JSON: Final[str] = "/openapi.json"
@@ -26,6 +29,9 @@ class RouteConstant:
         USER_LOGIN,
         USER_REGISTER,
         USER_REFRESH,
+        USER_FORGOT_PASSWORD,
+        USER_RESET_PASSWORD,
+        USER_VERIFY_EMAIL,
         DOCS,
         REDOC,
         OPENAPI_JSON,

@@ -7,6 +7,7 @@ import binascii
 import secrets
 from typing import Any, Optional, Tuple
 
+from constants.http_header import HttpHeader
 from abstractions.utility import IUtility
 
 
@@ -51,11 +52,13 @@ class AuthUtility(IUtility):
         Returns:
             Tuple of (username, password) if valid, None otherwise.
         """
-        if not header or not header.startswith("Basic "):
+        if not header or not header.startswith(HttpHeader.AUTHORIZATION_BASIC_PREFIX):
             return None
         try:
-            raw = base64.b64decode(header[6:].strip())
-            decoded = raw.decode("utf-8")
+            raw = base64.b64decode(
+                header[HttpHeader.AUTHORIZATION_BASIC_PREFIX_LENGTH:].strip()
+            )
+            decoded = raw.decode(HttpHeader.ENCODING_UTF8)
         except (binascii.Error, UnicodeDecodeError, ValueError):
             return None
         if ":" not in decoded:
@@ -76,7 +79,9 @@ class AuthUtility(IUtility):
         """
         if len(got) != len(expected):
             return False
-        return secrets.compare_digest(got.encode("utf-8"), expected.encode("utf-8"))
+        return secrets.compare_digest(
+            got.encode(HttpHeader.ENCODING_UTF8), expected.encode(HttpHeader.ENCODING_UTF8)
+        )
 
 
 __all__ = ["AuthUtility"]

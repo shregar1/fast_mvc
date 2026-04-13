@@ -9,6 +9,7 @@ import os
 from collections.abc import Sequence
 from typing import Any, Optional
 
+from constants.default import Default
 from abstractions.utility import IUtility
 
 
@@ -59,7 +60,7 @@ class EnvironmentParserUtility(IUtility):
         raw = os.getenv(name)
         if raw is None:
             return default
-        return raw.lower() in ("true", "1", "yes", "on")
+        return raw.lower() in Default.BOOLEAN_TRUE_VALUES
 
     @staticmethod
     def parse_int(name: str, default: int) -> int:
@@ -167,6 +168,6 @@ class EnvironmentParserUtility(IUtility):
         value = os.getenv(name)
         if value is None:
             return default
-        return value.lower() in ("true", "1", "yes", "on")
+        return value.lower() in Default.BOOLEAN_TRUE_VALUES
 
 __all__ = ["EnvironmentParserUtility"]

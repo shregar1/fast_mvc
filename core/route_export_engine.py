@@ -16,6 +16,8 @@ from core.postman_test_script_engine import (
     enrich_operation_spec_for_tests,
 )
 from constants.environment import EnvironmentVar
+from constants.http_header import HttpHeader
+from constants.default import Default, PostmanDefault
 from utilities.system import SystemUtility
 
 
@@ -55,7 +57,7 @@ class RouteExportEngine:
     def _also_export_postman_environment_file(self) -> bool:
         """When true, also write ``postman_environment.json`` (see ``POSTMAN_EXPORT_ENVIRONMENT``)."""
         v = os.getenv("POSTMAN_EXPORT_ENVIRONMENT", "").strip().lower()
-        return v in ("1", "true", "yes", "on")
+        return v in Default.BOOLEAN_TRUE_VALUES
 
     def _postman_project_display_name(self) -> str:
         """Label for Postman collection/environment.
@@ -168,14 +170,14 @@ class RouteExportEngine:
             parts = [
                 f"# {display_name}",
                 f"curl -X {method} '{{{{base_url}}}}{path_with_values}{query_string}'",
-                "-H 'accept: application/json'",
+                f"-H 'accept: {HttpHeader.CONTENT_TYPE_JSON}'",
                 "-H 'x-reference-urn: {{reference_urn}}'",
             ]
             if operation.get("needs_bearer"):
-                parts.append("-H 'Authorization: Bearer {{token}}'")
+                parts.append(f"-H '{HttpHeader.AUTHORIZATION}: {HttpHeader.AUTHORIZATION_BEARER_PREFIX}{{token}}'")
             json_body = operation["json_body"]
             if json_body is not None:
-                parts.append("-H 'Content-Type: application/json'")
+                parts.append(f"-H '{HttpHeader.CONTENT_TYPE}: {HttpHeader.CONTENT_TYPE_JSON}'")
                 parts.append(f"-d '{json.dumps(json_body)}'")
             examples.append("\n".join(parts))
         return examples
@@ -198,7 +200,7 @@ class RouteExportEngine:
                 "request": {
                     "method": method,
                     "header": [
-                        {"key": "Accept", "value": "application/json"},
+                        {"key": HttpHeader.ACCEPT, "value": HttpHeader.CONTENT_TYPE_JSON},
                         {
                             "key": "x-reference-urn",
                             "value": "{{reference_urn}}",
@@ -226,15 +228,15 @@ class RouteExportEngine:
             if operation.get("needs_bearer"):
                 item["request"]["header"].append(
                     {
-                        "key": "Authorization",
-                        "value": "Bearer {{token}}",
+                        "key": HttpHeader.AUTHORIZATION,
+                        "value": f"{HttpHeader.AUTHORIZATION_BEARER_PREFIX}{{token}}",
                         "type": "text",
                     }
                 )
             json_body = operation["json_body"]
             if json_body is not None:
                 item["request"]["header"].append(
-                    {"key": "Content-Type", "value": "application/json"}
+                    {"key": HttpHeader.CONTENT_TYPE, "value": HttpHeader.CONTENT_TYPE_JSON}
                 )
                 item["request"]["body"] = {
                     "mode": "raw",
@@ -264,14 +266,14 @@ class RouteExportEngine:
 
         output_path = Path(self.output_file)
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        output_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+        output_path.write_text(json.dumps(payload, indent=2), encoding=Default.ENCODING_UTF8)
         if not also_env:
             return output_path, None
         env_path = Path(self.environment_file)
         env_path.parent.mkdir(parents=True, exist_ok=True)
         env_path.write_text(
             json.dumps(self._build_postman_environment(), indent=2),
-            encoding="utf-8",
+            encoding=Default.ENCODING_UTF8,
         )
         return output_path, env_path
 

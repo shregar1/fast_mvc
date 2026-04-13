@@ -14,13 +14,14 @@ from typing import Any, Optional
 from fastapi import FastAPI
 from fastapi.openapi.docs import get_redoc_html, get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
+from constants.default import Default
 from fastapi.responses import HTMLResponse
 
 
 def _public_base_url() -> str:
     """Build a browser-friendly base URL from ``HOST`` / ``PORT`` (same as ``app.py`` / uvicorn)."""
-    host = (os.getenv("HOST") or "0.0.0.0").strip()
-    port = (os.getenv("PORT") or "8000").strip()
+    host = (os.getenv("HOST") or Default.HOST).strip()
+    port = (os.getenv("PORT") or str(Default.PORT)).strip()
     if host in ("0.0.0.0", "::", "[::]", ""):
         display_host = "localhost"
     else:

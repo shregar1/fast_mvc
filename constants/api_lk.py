@@ -83,6 +83,21 @@ class APILK:
     REFRESH: Final[str] = "REFRESH"
     """Logical key for token refresh operations."""
 
+    SUBSCRIPTION: Final[str] = "SUBSCRIPTION"
+    """Logical key for user subscription operations."""
+
+    # Auth sub-routes
+    AUTH_VERIFY_MFA: Final[str] = "AUTH_VERIFY_MFA"
+    AUTH_VERIFY_EMAIL: Final[str] = "AUTH_VERIFY_EMAIL"
+    AUTH_SEND_VERIFICATION_EMAIL: Final[str] = "AUTH_SEND_VERIFICATION_EMAIL"
+
+    # MFA sub-routes
+    MFA_SETUP: Final[str] = "MFA_SETUP"
+    MFA_SETUP_QR_CODE: Final[str] = "MFA_SETUP_QR_CODE"
+    MFA_VERIFY: Final[str] = "MFA_VERIFY"
+    MFA_DISABLE: Final[str] = "MFA_DISABLE"
+    MFA_STATUS: Final[str] = "MFA_STATUS"
+
     class PRODUCT:
         """Route definitions for ``apis/product/...``."""
 

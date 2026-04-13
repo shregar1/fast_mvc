@@ -15,11 +15,14 @@ from __future__ import annotations
 
 import os
 from collections.abc import Awaitable, Callable
+from http import HTTPStatus
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import PlainTextResponse, Response
 
+from constants.default import Default
+from constants.http_header import HttpHeader
 from utilities.auth import AuthUtility
 from utilities.string import StringUtility
 
@@ -70,8 +73,10 @@ class DocsAuthConfig:
         """Return 401 Unauthorized response for documentation routes."""
         return PlainTextResponse(
             "Authentication required for API documentation.",
-            status_code=401,
-            headers={"WWW-Authenticate": 'Basic realm="FastX API Documentation"'},
+            status_code=HTTPStatus.UNAUTHORIZED,
+            headers={
+                HttpHeader.WWW_AUTHENTICATE: f'Basic realm="{Default.APP_NAME} API Documentation"'
+            },
         )
 
     @classmethod
@@ -107,7 +112,9 @@ class DocsBasicAuthMiddleware(BaseHTTPMiddleware):
 
         expected_user = os.environ["DOCS_USERNAME"].strip()
         expected_pass = os.environ["DOCS_PASSWORD"].strip()
-        parsed = AuthUtility.parse_basic_authorization(request.headers.get("Authorization"))
+        parsed = AuthUtility.parse_basic_authorization(
+            request.headers.get(HttpHeader.AUTHORIZATION)
+        )
         if parsed is None:
             return DocsAuthConfig.unauthorized_response()
         username, password = parsed

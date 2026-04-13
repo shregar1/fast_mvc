@@ -21,6 +21,8 @@ import asyncio
 import time
 import logging
 
+from constants.default import Default
+
 T = TypeVar("T")
 TResult = TypeVar("TResult")
 
@@ -215,11 +217,11 @@ def retry(
     return decorator
 
 
-def cache(ttl_seconds: Optional[int] = None) -> Callable:
+def cache(ttl_seconds: Optional[int] = Default.RATE_LIMIT_WINDOW_SECONDS) -> Callable:
     """Simple in-memory caching decorator.
 
     Usage:
-        @cache(ttl_seconds=60)
+        @cache(ttl_seconds=Default.RATE_LIMIT_WINDOW_SECONDS)
         def get_user(user_id: str) -> User:
             return database.get_user(user_id)
     """
@@ -468,7 +470,7 @@ def rate_limit(calls: int, period: float) -> Callable:
     """Rate limit function calls.
 
     Usage:
-        @rate_limit(calls=10, period=60)  # 10 calls per minute
+        @rate_limit(calls=10, period=Default.RATE_LIMIT_WINDOW_SECONDS)  # 10 calls per minute
         def api_call():
             return make_request()
     """

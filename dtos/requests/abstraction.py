@@ -13,12 +13,12 @@ Usage:
 
 import uuid
 
-from pydantic import field_validator
+from pydantic import BaseModel, field_validator
 
 from abstractions.dto import IDTO
 
 
-class IRequestDTO(IDTO):
+class IRequestDTO(BaseModel, IDTO):
     """Abstract base for all request DTOs.
 
     Inherits :class:`abstractions.dto.IDTO`.

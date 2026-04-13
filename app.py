@@ -59,8 +59,8 @@ from constants.logging_setup import configure_loguru
 
 configure_loguru()
 
-# Import middlewares from fast-middleware package (distribution exposes ``fastmiddleware``)
-from fastmiddleware import (  # pyright: ignore[reportMissingImports]
+# Import middlewares from fast-middleware package
+from fast_middleware import (  # pyright: ignore[reportMissingImports]
     AuthConfig,
     AuthenticationMiddleware,
     CORSMiddleware,
@@ -91,6 +91,11 @@ from constants.health import (
     LIVENESS_ALIVE,
     READINESS_NOT_READY,
     READINESS_READY,
+    HEALTHY_MESSAGE,
+    UNHEALTHY_MESSAGE,
+    LIVENESS_MESSAGE,
+    READY_MESSAGE,
+    NOT_READY_MESSAGE,
 )
 from constants.http_header import HttpHeader
 from constants.route import RouteConstant
@@ -155,6 +160,8 @@ except ImportError:
 # Flags for optional routers (used by tests and docs)
 DASHBOARD_ROUTER_ENABLED = DashboardRouter is not None
 
+UVICORN_LOG_LEVELS = {"critical", "error", "warning", "info", "debug", "trace"}
+
 from dtos.responses.apis.abstraction import IResponseAPIDTO
 
 # Domain errors (requires fastx-mvc[platform])
@@ -167,8 +174,8 @@ except ImportError:
     HAS_PLATFORM_ERRORS = False
 
 
-HOST = os.getenv("HOST", "0.0.0.0")
-PORT = int(os.getenv("PORT", "8000"))
+HOST = os.getenv("HOST", Default.HOST)
+PORT = int(os.getenv("PORT", str(Default.PORT)))
 RATE_LIMIT_REQUESTS_PER_MINUTE: int = EnvironmentParserUtility.get_int_with_logging(
     EnvironmentVar.REQUESTS_PER_MINUTE,
     Default.RATE_LIMIT_REQUESTS_PER_MINUTE,
@@ -333,6 +340,28 @@ if configure_otel and EnvironmentParserUtility.get_bool_with_logging(
 ):
     configure_otel(app)
 
+# ---------------------------------------------------------------------------
+# Map request.state.request_id → request.state.urn so controllers can use
+# ``request.state.urn`` uniformly.  RequestContextMiddleware (from
+# fast-middleware) sets ``request_id``; our controllers expect ``urn``.
+# ---------------------------------------------------------------------------
+@app.middleware("http")
+async def _set_urn_on_state(request: Request, call_next):
+    rid = getattr(request.state, "request_id", None)
+    if rid and not getattr(request.state, "urn", None):
+        request.state.urn = rid
+    if not hasattr(request.state, "urn"):
+        request.state.urn = str(uuid4())
+
+    auth = getattr(request.state, "auth", None)
+    if isinstance(auth, dict):
+        for key, value in auth.items():
+            if not hasattr(request.state, key):
+                setattr(request.state, key, value)
+
+    return await call_next(request)
+
+
 # Static launch page at GET /
 _STATIC_DIR = Path(__file__).resolve().parent / "static"
 _LAUNCH_HTML = _STATIC_DIR / "launch.html"
@@ -343,7 +372,7 @@ async def launch_page() -> HTMLResponse:
     """Serve the landing page at the application root (same host/port as the API)."""
     if _LAUNCH_HTML.is_file():
         return HTMLResponse(
-            _LAUNCH_HTML.read_text(encoding="utf-8"),
+            _LAUNCH_HTML.read_text(encoding=Default.ENCODING_UTF8),
             headers={
                 HttpHeader.CACHE_CONTROL: HttpHeader.CACHE_CONTROL_VALUE_NO_CACHE,
             },
@@ -372,7 +401,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         {
             "transactionUrn": "urn:req:abc123",
             "responseMessage": "Bad or missing input.",
-            "responseKey": "error_bad_input",
+            "responseKey": ResponseKey.ERROR_BAD_INPUT,
             "errors": [{"loc": [...], "msg": "...", "type": "..."}]
         }
 
@@ -545,7 +574,7 @@ async def health_check(request: Request):
     # Log health check result
     logger.info(
         f"Health check: status={health_status['status']}, "
-        f"database={db_status}, redis={redis_status}"
+        f"database={db_status}, {Default.CHANNEL_BACKEND}={redis_status}"
     )
 
     ok = health_status["status"] == HEALTH_STATUS_HEALTHY
@@ -554,7 +583,7 @@ async def health_check(request: Request):
         "version": health_status["version"],
         "timestamp": health_status["timestamp"],
         "database": db_status,
-        "redis": redis_status,
+        Default.CHANNEL_BACKEND: redis_status,
     }
     if "uptime_seconds" in health_status:
         data_payload["uptimeSeconds"] = health_status["uptime_seconds"]
@@ -566,9 +595,9 @@ async def health_check(request: Request):
             ResponseKey.SUCCESS_HEALTH if ok else ResponseKey.ERROR_HEALTH_UNHEALTHY
         ),
         response_message=(
-            "All dependencies report healthy."
+            HEALTHY_MESSAGE
             if ok
-            else "One or more dependencies are unhealthy."
+            else UNHEALTHY_MESSAGE
         ),
         data=data_payload,
     )
@@ -600,7 +629,7 @@ async def liveness_probe(request: Request):
         request,
         http_ok=True,
         response_key=ResponseKey.SUCCESS_HEALTH_LIVE,
-        response_message="Application process is alive.",
+        response_message=LIVENESS_MESSAGE,
         data={"status": LIVENESS_ALIVE},
     )
 
@@ -635,7 +664,7 @@ async def readiness_probe(request: Request):
         503: Application is not ready (dependencies unavailable)
 
     """
-    checks = {}
+    checks: dict[str, str] = {}
     is_ready = True
 
     # Check database
@@ -659,11 +688,11 @@ async def readiness_probe(request: Request):
 
         if redis_session is not None and hasattr(redis_session, "ping"):
             redis_session.ping()
-            checks["redis"] = DEPENDENCY_CONNECTED
+            checks[Default.CHANNEL_BACKEND] = DEPENDENCY_CONNECTED
         else:
-            checks["redis"] = DEPENDENCY_NOT_CONFIGURED
+            checks[Default.CHANNEL_BACKEND] = DEPENDENCY_NOT_CONFIGURED
     except Exception as e:
-        checks["redis"] = HealthMessageUtil.dependency_disconnected_message(e)
+        checks[Default.CHANNEL_BACKEND] = HealthMessageUtil.dependency_disconnected_message(e)
         is_ready = False
 
     status = READINESS_READY if is_ready else READINESS_NOT_READY
@@ -683,9 +712,9 @@ async def readiness_probe(request: Request):
             else ResponseKey.ERROR_HEALTH_NOT_READY
         ),
         response_message=(
-            "Application is ready to receive traffic."
+            READY_MESSAGE
             if is_ready
-            else "Application is not ready to receive traffic."
+            else NOT_READY_MESSAGE
         ),
         data=data_ready,
     )
@@ -818,7 +847,7 @@ logger.info("Initialized routers")
 def _uvicorn_log_level() -> str:
     """Uvicorn console verbosity; does not affect application ``loguru`` logging."""
     raw = (os.getenv(EnvironmentVar.UVICORN_LOG_LEVEL) or "error").strip().lower()
-    allowed = {"critical", "error", "warning", "info", "debug", "trace"}
+    allowed = UVICORN_LOG_LEVELS
     return raw if raw in allowed else "error"
 
 

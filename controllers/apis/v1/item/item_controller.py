@@ -4,6 +4,7 @@ Demonstrates FastX controller patterns with FastAPI routes.
 """
 
 from http import HTTPStatus
+from typing import Any
 
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse

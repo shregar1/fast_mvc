@@ -48,13 +48,18 @@ try:
     from fast_platform import (  # pyright: ignore[reportMissingImports]
         CacheConfiguration, CacheConfigurationDTO,
         DBConfiguration, DBConfigurationDTO,
-        ChannelsConfiguration, ChannelsConfigurationDTO
     )
 except ImportError:
     CacheConfiguration = None  # type: ignore
     CacheConfigurationDTO = None  # type: ignore
     DBConfiguration = None  # type: ignore
     DBConfigurationDTO = None  # type: ignore
+
+try:
+    from fast_platform import (  # pyright: ignore[reportMissingImports]
+        ChannelsConfiguration, ChannelsConfigurationDTO,
+    )
+except ImportError:
     ChannelsConfiguration = None  # type: ignore
     ChannelsConfigurationDTO = None  # type: ignore
 
@@ -170,27 +175,44 @@ logger.info("Loaded environment variables")
 # DATABASE SESSION
 # =============================================================================
 
+db_session = None  # type: ignore
+db_session_factory = None  # type: ignore
 try:
     from fast_db import create_and_set_session  # pyright: ignore[reportMissingImports]
 
     db_session = create_and_set_session(db_configuration)
 except ImportError:
     create_and_set_session = None  # type: ignore
-    db_session = None  # type: ignore
-"""
-SQLAlchemy database session (from fast_db).
+    # Fallback: create session directly from db_configuration
+    if db_configuration and getattr(db_configuration, "host", ""):
+        try:
+            from sqlalchemy import create_engine
+            from sqlalchemy.orm import sessionmaker
 
-Initialized at startup if database configuration is complete.
-Used throughout the application for database operations.
+            _conn_str = db_configuration.connection_string.format(
+                user_name=db_configuration.user_name,
+                password=db_configuration.password,
+                host=db_configuration.host,
+                port=db_configuration.port,
+                database=db_configuration.database,
+            )
+            _engine = create_engine(
+                _conn_str,
+                pool_size=db_configuration.pool_size,
+                max_overflow=db_configuration.max_overflow,
+                pool_pre_ping=db_configuration.pool_pre_ping,
+            )
+            _SessionLocal = sessionmaker(bind=_engine)
+            db_session_factory = _SessionLocal
+            db_session = _SessionLocal()
+        except Exception as _db_err:
+            logger.error("Failed to create DB session: %s", _db_err)
+            db_session = None  # type: ignore
 
-Example:
-    >>> from start_utils import db_session
-    >>> user = db_session.query(User).filter_by(id=1).first()
-"""
 if db_session:
     logger.info("Initialized PostgreSQL database connection")
 else:
-    logger.info("DataI session not initialized (fast_db not available)")
+    logger.info("Database session not initialized")
 
 # =============================================================================
 # REDIS SESSION
@@ -214,10 +236,10 @@ if cache_configuration is not None:
     redis_url = getattr(cache_configuration, "redis_url", "") or ""
     if not redis_url:
         host = (
-            getattr(cache_configuration, "host", None) or os.getenv("REDIS_HOST", "localhost")
+            getattr(cache_configuration, "host", None) or os.getenv("REDIS_HOST", Default.REDIS_HOST)
         )
         port = (
-            getattr(cache_configuration, "port", None) or os.getenv("REDIS_PORT", "6379")
+            getattr(cache_configuration, "port", None) or os.getenv("REDIS_PORT", str(Default.REDIS_PORT))
         )
         password = getattr(cache_configuration, "password", None) or os.getenv(
             "REDIS_PASSWORD", ""
@@ -262,8 +284,8 @@ if CHANNEL_BACKEND == Default.CHANNEL_BACKEND and redis_session:
 
         channel_redis_url = redis_url
         if not channel_redis_url:
-            host = os.getenv("REDIS_HOST", "localhost")
-            port = os.getenv("REDIS_PORT", "6379")
+            host = os.getenv("REDIS_HOST", Default.REDIS_HOST)
+            port = os.getenv("REDIS_PORT", str(Default.REDIS_PORT))
             password = os.getenv("REDIS_PASSWORD", "")
             auth = f":{quote(password)}@" if password else ""
             channel_redis_url = f"redis://{auth}{host}:{port}/0"

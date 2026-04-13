@@ -21,7 +21,7 @@ class IResponseDTO(BaseModel, IDTO):
 
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=False)
 
-    transactionUrn: str
+    transactionUrn: str | None = ""
     """Unique identifier for request tracing and correlation."""
 
     status: str
@@ -52,7 +52,7 @@ class IResponseDTO(BaseModel, IDTO):
         description="Server time (UTC) when this response envelope was generated.",
     )
 
-    reference_urn: str = Field(
+    reference_urn: str | None = Field(
         default=None,
         description=(
             "Echo of the client correlation id when provided "
