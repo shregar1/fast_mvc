@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 # PyPI: pip install fastx-mvc  (wheels: fastx_mvc-*.whl)
 name = "fastx-mvc"
-version = "1.6.0"
+version = "1.6.1"
 description = "Production-grade MVC Framework for FastAPI - Generate projects, entities, and migrations with a single command"
 readme = "README.md"
 license = {text = "MIT"}
