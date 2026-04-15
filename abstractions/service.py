@@ -19,12 +19,15 @@ Example:
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from typing import Any
 
 from pydantic import BaseModel
 from core.utils.context import ContextMixin
+
+if TYPE_CHECKING:
+    from dtos.responses.base import BaseResponseDTO
 
 
 class IService(ABC, ContextMixin):
@@ -95,30 +98,33 @@ class IService(ABC, ContextMixin):
         )
 
     @abstractmethod
-    def run(self, request_dto: BaseModel) -> dict:
-        """Execute the service's main business logic.
+    async def run(self, request_dto: BaseModel | None = None) -> "BaseResponseDTO":
+        """Execute the service's main business logic (async).
 
         This is the primary entry point for the service. Subclasses must
-        implement this method to define their specific business operations.
+        implement this coroutine to define their specific business operations.
 
         Args:
-            request_dto (BaseModel): Pydantic model containing request data.
+            request_dto (BaseModel | None): Pydantic model containing request
+                data. Optional so services that take no request payload
+                (e.g., status/read endpoints) can override with a zero-arg
+                signature.
 
         Returns:
-            dict: Result of the business operation, typically containing
-                status information and any relevant data.
+            BaseResponseDTO: Structured response envelope containing status,
+                message, key, and any relevant data.
 
         Raises:
             IError: For business logic errors (subclass-specific).
             ValidationError: If request data validation fails.
 
         Example:
-            >>> def run(self, request_dto: UserDTO) -> dict:
+            >>> async def run(self, request_dto: UserDTO) -> BaseResponseDTO:
             ...     user = self.user_repo.find_by_email(request_dto.email)
             ...     if user:
             ...         raise BadInputError("Email already exists")
             ...     new_user = self.user_repo.create(request_dto)
-            ...     return {"user_id": new_user.id, "status": "created"}
+            ...     return BaseResponseDTO(...)
 
         """
         pass

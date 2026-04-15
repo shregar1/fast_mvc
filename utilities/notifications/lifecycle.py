@@ -7,32 +7,48 @@ return silently (fire-and-forget semantics).
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Any, Optional
 
 from constants.default import Default
 from fast_platform.errors import ServiceUnavailableError
 from start_utils import logger
 
 
-async def send_welcome_email(email: str) -> None:
-    """Send a welcome / onboarding email after registration."""
+async def _send(
+    *,
+    email: str,
+    template: str,
+    subject: str,
+    kind: str,
+    fail_key: str = "error_notification_send_failed",
+    **template_vars: Any,
+) -> None:
+    """Shared send envelope: import provider, dispatch, translate errors."""
     try:
         from fast_platform.notifications import send_email  # type: ignore
 
-        await send_email(
-            to=email,
-            template="welcome",
-            subject="Welcome!",
-        )
+        await send_email(to=email, template=template, subject=subject, **template_vars)
     except ImportError:
-        logger.warning("Notification provider not available – skipping welcome email to %s", email)
+        logger.warning(
+            "Notification provider not available – skipping %s email to %s", kind, email
+        )
         return
     except Exception as err:
-        logger.exception("welcome email send failed for %s", email)
+        logger.exception("%s email send failed for %s", kind, email)
         raise ServiceUnavailableError(
             responseMessage="Failed to send notification email.",
-            responseKey="error_notification_send_failed",
+            responseKey=fail_key,
         ) from err
+
+
+async def send_welcome_email(email: str) -> None:
+    """Send a welcome / onboarding email after registration."""
+    await _send(
+        email=email,
+        template="welcome",
+        subject="Welcome!",
+        kind="welcome",
+    )
 
 
 async def send_password_reset_email(
@@ -42,24 +58,13 @@ async def send_password_reset_email(
     expires_minutes: int = Default.EMAIL_TOKEN_EXPIRY_MINUTES,
 ) -> None:
     """Send a password-reset link email."""
-    try:
-        from fast_platform.notifications import send_email  # type: ignore
-
-        await send_email(
-            to=email,
-            template="password_reset",
-            subject="Reset your password",
-            context={"reset_link": reset_link, "expires_minutes": expires_minutes},
-        )
-    except ImportError:
-        logger.warning("Notification provider not available – skipping reset email to %s", email)
-        return
-    except Exception as err:
-        logger.exception("password reset email send failed for %s", email)
-        raise ServiceUnavailableError(
-            responseMessage="Failed to send notification email.",
-            responseKey="error_notification_send_failed",
-        ) from err
+    await _send(
+        email=email,
+        template="password_reset",
+        subject="Reset your password",
+        kind="password reset",
+        context={"reset_link": reset_link, "expires_minutes": expires_minutes},
+    )
 
 
 async def send_verification_email(
@@ -69,24 +74,13 @@ async def send_verification_email(
     expires_minutes: int = Default.EMAIL_TOKEN_EXPIRY_MINUTES,
 ) -> None:
     """Send an email-verification link."""
-    try:
-        from fast_platform.notifications import send_email  # type: ignore
-
-        await send_email(
-            to=email,
-            template="email_verification",
-            subject="Verify your email",
-            context={"verify_link": verify_link, "expires_minutes": expires_minutes},
-        )
-    except ImportError:
-        logger.warning("Notification provider not available – skipping verification email to %s", email)
-        return
-    except Exception as err:
-        logger.exception("verification email send failed for %s", email)
-        raise ServiceUnavailableError(
-            responseMessage="Failed to send notification email.",
-            responseKey="error_notification_send_failed",
-        ) from err
+    await _send(
+        email=email,
+        template="email_verification",
+        subject="Verify your email",
+        kind="verification",
+        context={"verify_link": verify_link, "expires_minutes": expires_minutes},
+    )
 
 
 # Alias used by controllers/auth/user/account/send_verification_email.py

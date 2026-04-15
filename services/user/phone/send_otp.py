@@ -19,9 +19,10 @@ class PhoneSendOtpService:
         urn: Optional[str] = None,
         user_urn: Optional[str] = None,
         api_name: Optional[str] = None,
-        user_id: Any = None,
+        user_id: int | None = None,
         session: Any = None,
         redis_client: Any = None,
+        phone_otp_service: PhoneOtpService | None = None,
     ) -> None:
         self._urn = urn or ""
         self._user_urn = user_urn
@@ -29,6 +30,7 @@ class PhoneSendOtpService:
         self._user_id = user_id
         self._session = session
         self._redis = redis_client
+        self._phone_otp_service = phone_otp_service
         self._logger = logger.bind(urn=self._urn, api_name=self._api_name)
 
     async def run(self, phone: str, purpose: str) -> BaseResponseDTO:
@@ -37,13 +39,12 @@ class PhoneSendOtpService:
                 responseMessage="OTP service is temporarily unavailable.",
                 responseKey="error_service_unavailable",
             )
-        otp_service = PhoneOtpService(
-            redis_client=self._redis,
-            urn=self._urn,
-            user_urn=self._user_urn,
-            api_name=self._api_name,
-        )
-        await otp_service.create_and_send_otp(phone, purpose)
+        if self._phone_otp_service is None:
+            raise ServiceUnavailableError(
+                responseMessage="OTP service is temporarily unavailable.",
+                responseKey="error_service_unavailable",
+            )
+        await self._phone_otp_service.create_and_send_otp(phone, purpose)
         return BaseResponseDTO(
             transactionUrn=self._urn,
             status=APIStatus.SUCCESS,

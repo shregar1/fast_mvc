@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
-import os
 from typing import Optional
 
-import bcrypt
 import jwt
 from sqlalchemy.orm import Session
 
@@ -15,16 +13,7 @@ from fast_platform.errors import BadInputError
 from repositories.user.user_repository import UserRepository
 from start_utils import ALGORITHM, SECRET_KEY, logger
 from structured_log import log_event
-
-
-def _hash_password(password: str) -> str:
-    salt = os.getenv("BCRYPT_SALT")
-    if not salt:
-        return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
-    try:
-        return bcrypt.hashpw(password.encode("utf-8"), salt.encode("utf-8")).decode("utf-8")
-    except ValueError:
-        return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+from utilities.security import hash_password
 
 
 class ResetPasswordService:
@@ -75,7 +64,7 @@ class ResetPasswordService:
                 responseKey="error_invalid_reset_token",
             )
 
-        repo.update_password(user, _hash_password(new_password))
+        repo.update_password(user, hash_password(new_password))
 
         log_event("reset_password.success", urn=self._urn, email=email)
 

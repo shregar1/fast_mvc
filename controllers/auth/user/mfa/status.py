@@ -11,8 +11,10 @@ from sqlalchemy.orm import Session
 from constants.api_lk import APILK
 from controllers.apis.v1.abstraction import IV1APIController
 from dependencies.db import DBDependency
+from dependencies.repositiories.user import UserRepositoryDependency
 from dependencies.services.user.mfa.status import MFAStatusServiceDependency
 from dependencies.utilities.dictionary import DictionaryUtilityDependency
+from repositories.user.user_repository import UserRepository
 
 
 class MFAStatusController(IV1APIController):
@@ -23,6 +25,7 @@ class MFAStatusController(IV1APIController):
         self,
         request: Request,
         session: Session = Depends(DBDependency.derive),
+        user_repository_factory: Callable = Depends(UserRepositoryDependency.derive),
         service_factory: Callable = Depends(MFAStatusServiceDependency.derive),
         dictionary_utility: Callable = Depends(DictionaryUtilityDependency.derive),
     ) -> JSONResponse:
@@ -33,12 +36,19 @@ class MFAStatusController(IV1APIController):
         )
 
         try:
-            service = service_factory(
+            user_repository: UserRepository = user_repository_factory(
                 urn=self.urn,
                 user_urn=self.user_urn,
                 api_name=self.api_name,
                 user_id=self.user_id,
                 session=session,
+            )
+            service = service_factory(
+                urn=self.urn,
+                user_urn=self.user_urn,
+                api_name=self.api_name,
+                user_id=self.user_id,
+                user_repository=user_repository,
             )
             response_dto = await service.run()
             http_status = HTTPStatus.OK
