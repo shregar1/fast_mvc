@@ -22,7 +22,7 @@ class JWTUtility:
         urn: Optional[str] = None,
         user_urn: Optional[str] = None,
         api_name: Optional[str] = None,
-        user_id: Optional[str] = None,
+        user_id: Optional[int] = None,
     ) -> None:
         self._secret_key = secret_key
         self._algorithm = algorithm

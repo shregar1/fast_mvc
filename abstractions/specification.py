@@ -67,13 +67,22 @@ class ISpecification(ABC, Generic[T]):
 class AndSpecification(ISpecification[T]):
     """Composite AND specification."""
 
-    def __init__(self, left: ISpecification[T], right: ISpecification[T]):
+    def __init__(
+        self,
+        left: ISpecification[T],
+        right: ISpecification[T],
+        *args: Any,
+        **kwargs: Any,
+    ):
         """Execute __init__ operation.
 
         Args:
             left: The left parameter.
             right: The right parameter.
+            *args: Additional positional arguments forwarded to parent.
+            **kwargs: Additional keyword arguments forwarded to parent.
         """
+        super().__init__(*args, **kwargs)
         self._left = left
         self._right = right
 
@@ -94,13 +103,22 @@ class AndSpecification(ISpecification[T]):
 class OrSpecification(ISpecification[T]):
     """Composite OR specification."""
 
-    def __init__(self, left: ISpecification[T], right: ISpecification[T]):
+    def __init__(
+        self,
+        left: ISpecification[T],
+        right: ISpecification[T],
+        *args: Any,
+        **kwargs: Any,
+    ):
         """Execute __init__ operation.
 
         Args:
             left: The left parameter.
             right: The right parameter.
+            *args: Additional positional arguments forwarded to parent.
+            **kwargs: Additional keyword arguments forwarded to parent.
         """
+        super().__init__(*args, **kwargs)
         self._left = left
         self._right = right
 
@@ -119,12 +137,15 @@ class OrSpecification(ISpecification[T]):
 class NotSpecification(ISpecification[T]):
     """Negated specification."""
 
-    def __init__(self, spec: ISpecification[T]):
+    def __init__(self, spec: ISpecification[T], *args: Any, **kwargs: Any):
         """Execute __init__ operation.
 
         Args:
             spec: The spec parameter.
+            *args: Additional positional arguments forwarded to parent.
+            **kwargs: Additional keyword arguments forwarded to parent.
         """
+        super().__init__(*args, **kwargs)
         self._spec = spec
 
     def is_satisfied_by(self, entity: T) -> bool:
@@ -146,12 +167,15 @@ class LambdaSpecification(ISpecification[T]):
         is_adult = LambdaSpecification(lambda user: user.age >= 18)
     """
 
-    def __init__(self, predicate: Callable[[T], bool]):
+    def __init__(self, predicate: Callable[[T], bool], *args: Any, **kwargs: Any):
         """Execute __init__ operation.
 
         Args:
             predicate: The predicate parameter.
+            *args: Additional positional arguments forwarded to parent.
+            **kwargs: Additional keyword arguments forwarded to parent.
         """
+        super().__init__(*args, **kwargs)
         self._predicate = predicate
 
     def is_satisfied_by(self, entity: T) -> bool:
@@ -250,13 +274,16 @@ class QuerySpecification(Generic[T]):
 class FilterBuilder(Generic[T]):
     """Fluent filter builder."""
 
-    def __init__(self, spec: QuerySpecification[T], field: str):
+    def __init__(self, spec: QuerySpecification[T], field: str, *args: Any, **kwargs: Any):
         """Execute __init__ operation.
 
         Args:
             spec: The spec parameter.
             field: The field parameter.
+            *args: Additional positional arguments forwarded to parent.
+            **kwargs: Additional keyword arguments forwarded to parent.
         """
+        super().__init__(*args, **kwargs)
         self._spec = spec
         self._field = field
 

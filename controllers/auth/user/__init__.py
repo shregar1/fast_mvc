@@ -22,58 +22,25 @@ Usage:
 
 
 from fastapi import APIRouter
-from fastapi import Depends, Request
-from fastapi.responses import JSONResponse
-from sqlalchemy.orm import Session
 
 from constants.api_lk import APILK
-from controllers.user.abstraction import IUserController
-from controllers.user.auth import router as user_auth_router
-from controllers.user.auth.verify_email import VerifyEmailController as AuthVerifyEmailController
-from controllers.user.mfa import router as user_mfa_router
+from controllers.auth.user.account import router as user_auth_router
+from controllers.auth.user.account.verify_email import VerifyEmailController as AuthVerifyEmailController
+from controllers.auth.user.mfa import router as user_mfa_router
 from controllers.apis.v1.me import router as me_router
-from controllers.user.forgot_password import forgot_password
-from controllers.user.login import UserLoginController
-from controllers.user.logout import UserLogoutController
-from controllers.user.phone.send_otp import PhoneSendOtpController
-from controllers.user.phone.verify_otp import PhoneVerifyOtpController
-from controllers.user.refresh_token import UserRefreshTokenController
-from controllers.user.register import UserRegistrationController
-from controllers.user.subscription import UserSubscriptionController
-from controllers.user.reset_password import reset_password
+from controllers.auth.user.forgot_password import ForgotPasswordController
+from controllers.auth.user.login import UserLoginController
+from controllers.auth.user.logout import UserLogoutController
+from controllers.auth.user.phone.send_otp import PhoneSendOtpController
+from controllers.auth.user.phone.verify_otp import PhoneVerifyOtpController
+from controllers.auth.user.refresh_token import UserRefreshTokenController
+from controllers.auth.user.register import UserRegistrationController
+from controllers.auth.user.reset_password import ResetPasswordController
+from controllers.auth.user.subscription import UserSubscriptionController
 from start_utils import logger
-from dependencies.db import DBDependency
-from dtos.requests.user.forgot_password import ForgotPasswordRequestDTO
-from dtos.requests.user.reset_password import ResetPasswordRequestDTO
 
 router = APIRouter(prefix="/user")
 """User router with /user prefix. Handles authentication operations."""
-
-
-class ForgotPasswordController(IUserController):
-    def __init__(self, urn: str | None = None) -> None:
-        super().__init__(urn=urn, api_name="USER_FORGOT_PASSWORD")
-
-    async def post(
-        self,
-        request: Request,
-        body: ForgotPasswordRequestDTO,
-        session: Session = Depends(DBDependency.derive),
-    ) -> JSONResponse:
-        return await forgot_password(request=request, body=body, session=session)
-
-
-class ResetPasswordController(IUserController):
-    def __init__(self, urn: str | None = None) -> None:
-        super().__init__(urn=urn, api_name="USER_RESET_PASSWORD")
-
-    async def post(
-        self,
-        request: Request,
-        body: ResetPasswordRequestDTO,
-        session: Session = Depends(DBDependency.derive),
-    ) -> JSONResponse:
-        return await reset_password(request=request, body=body, session=session)
 
 
 # Register login route

@@ -57,7 +57,7 @@ class IDependency(ABC):
         urn: str | None = None,
         user_urn: str | None = None,
         api_name: str | None = None,
-        user_id: str | None = None,
+        user_id: int | None = None,
         *args: Any,
         **kwargs: Any,
     ) -> None:

@@ -15,9 +15,10 @@ class UserSubscriptionService(IUserService):
     def __init__(
         self,
         subscription_repository: Any = None,
+        *args: Any,
         **kwargs: Any,
     ) -> None:
-        super().__init__(**kwargs)
+        super().__init__(*args, **kwargs)
         self.subscription_repository = subscription_repository
 
     async def run(self, request_dto: Any = None) -> BaseResponseDTO:

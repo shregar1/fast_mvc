@@ -200,6 +200,8 @@ omit = [
     ".venv/*",
     "build/*",
     "dist/*",
+    "docs/*",
+    "site/*",
     "*.egg-info/*",
 ]
 
@@ -229,6 +231,8 @@ exclude = '''
     | buck-out
     | build
     | dist
+    | docs
+    | site
     | migrations
 )/
 '''
@@ -236,7 +240,7 @@ exclude = '''
 [tool.isort]
 profile = "black"
 line_length = 88
-skip = [".venv", "venv", "build", "dist", "migrations"]
+skip = [".venv", "venv", "build", "dist", "docs", "site", "migrations"]
 
 [tool.ruff]
 line-length = 88
@@ -247,6 +251,8 @@ exclude = [
     "venv",
     "build",
     "dist",
+    "docs",
+    "site",
     "migrations",
     "htmlcov",
     "__pycache__",
@@ -288,6 +294,8 @@ exclude = [
     ".venv",
     "build",
     "dist",
+    "docs",
+    "site",
     "migrations",
 ]
 

@@ -2,7 +2,7 @@
 
 
 
-from controllers.user.phone.send_otp import PhoneSendOtpController
-from controllers.user.phone.verify_otp import PhoneVerifyOtpController
+from controllers.auth.user.phone.send_otp import PhoneSendOtpController
+from controllers.auth.user.phone.verify_otp import PhoneVerifyOtpController
 
 __all__ = ["PhoneSendOtpController", "PhoneVerifyOtpController"]

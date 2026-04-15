@@ -1,11 +1,11 @@
 from fastapi import APIRouter
 
 from constants.api_lk import APILK
-from controllers.user.mfa.disable import MFADisableController
-from controllers.user.mfa.qr_code import MFASetupQrCodeController
-from controllers.user.mfa.setup import MFASetupController
-from controllers.user.mfa.status import MFAStatusController
-from controllers.user.mfa.verify import MFAVerifyController
+from controllers.auth.user.mfa.disable import MFADisableController
+from controllers.auth.user.mfa.qr_code import MFASetupQrCodeController
+from controllers.auth.user.mfa.setup import MFASetupController
+from controllers.auth.user.mfa.status import MFAStatusController
+from controllers.auth.user.mfa.verify import MFAVerifyController
 
 __all__ = [
     "MFASetupController",

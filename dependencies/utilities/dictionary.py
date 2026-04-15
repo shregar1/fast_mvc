@@ -79,7 +79,7 @@ class DictionaryUtilityDependency:
             urn: str,
             user_urn: str,
             api_name: str,
-            user_id: str,
+            user_id: int,
         ) -> DictionaryUtility:
             """Create a DictionaryUtility instance with request context.
 

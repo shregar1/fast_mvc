@@ -14,6 +14,8 @@ Example:
     ...         return await self.invoke_with_exception_handling(request, _run)
 """
 
+from typing import Any
+
 from start_utils import logger
 
 from controllers.apis.json_api_controller import JSONAPIController
@@ -34,9 +36,18 @@ class IUserController(JSONAPIController):
         user_urn: str | None = None,
         api_name: str | None = None,
         user_id: int | None = None,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         logger.debug("Initializing IUserController")
-        super().__init__(urn=urn, user_urn=user_urn, api_name=api_name, user_id=user_id)
+        super().__init__(
+            urn=urn,
+            user_urn=user_urn,
+            api_name=api_name,
+            user_id=user_id,
+            *args,
+            **kwargs,
+        )
 
 
 __all__ = ["IUserController", "JSONAPIController"]

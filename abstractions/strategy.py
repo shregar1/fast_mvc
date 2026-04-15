@@ -161,8 +161,14 @@ class ConditionalStrategy(IStrategy[TInput, TOutput]):
         result = strategy.execute(order)  # Selects appropriate strategy
     """
 
-    def __init__(self):
-        """Execute __init__ operation."""
+    def __init__(self, *args: Any, **kwargs: Any):
+        """Execute __init__ operation.
+
+        Args:
+            *args: Additional positional arguments forwarded to parent.
+            **kwargs: Additional keyword arguments forwarded to parent.
+        """
+        super().__init__(*args, **kwargs)
         self._conditions: list = []
         self._default: Optional[IStrategy[TInput, TOutput]] = None
 
@@ -208,12 +214,15 @@ class CompositeStrategy(IStrategy[TInput, list]):
         results = composite.execute(order)  # [tax, shipping, discount]
     """
 
-    def __init__(self, strategies: list):
+    def __init__(self, strategies: list, *args: Any, **kwargs: Any):
         """Execute __init__ operation.
 
         Args:
             strategies: The strategies parameter.
+            *args: Additional positional arguments forwarded to parent.
+            **kwargs: Additional keyword arguments forwarded to parent.
         """
+        super().__init__(*args, **kwargs)
         self._strategies = strategies
 
     def execute(self, input: TInput) -> list:
@@ -238,13 +247,18 @@ class FallbackStrategy(IStrategy[TInput, TOutput]):
         self,
         strategies: list,
         error_handler: Optional[Callable[[Exception], None]] = None,
+        *args: Any,
+        **kwargs: Any,
     ):
         """Execute __init__ operation.
 
         Args:
             strategies: The strategies parameter.
             error_handler: The error_handler parameter.
+            *args: Additional positional arguments forwarded to parent.
+            **kwargs: Additional keyword arguments forwarded to parent.
         """
+        super().__init__(*args, **kwargs)
         self._strategies = strategies
         self._error_handler = error_handler
 
@@ -272,12 +286,15 @@ class LambdaStrategy(IStrategy[TInput, TOutput]):
         result = strategy.execute(5)  # 10
     """
 
-    def __init__(self, func: Callable[[TInput], TOutput]):
+    def __init__(self, func: Callable[[TInput], TOutput], *args: Any, **kwargs: Any):
         """Execute __init__ operation.
 
         Args:
             func: The func parameter.
+            *args: Additional positional arguments forwarded to parent.
+            **kwargs: Additional keyword arguments forwarded to parent.
         """
+        super().__init__(*args, **kwargs)
         self._func = func
 
     def execute(self, input: TInput) -> TOutput:

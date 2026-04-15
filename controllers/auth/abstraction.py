@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Optional
 
-from controllers.abstraction import IController
+from abstractions.controller import IController
 
 
 class IAuthController(IController):
@@ -15,7 +15,8 @@ class IAuthController(IController):
         urn: Optional[str] = None,
         user_urn: Optional[str] = None,
         api_name: Optional[str] = None,
-        user_id: Optional[str] = None,
+        user_id: Optional[int] = None,
+        *args: Any,
         **kwargs: Any,
     ) -> None:
         """Initialize the auth controller base.
@@ -25,6 +26,7 @@ class IAuthController(IController):
             user_urn: User's URN. Defaults to None.
             api_name: API name. Defaults to None.
             user_id: User's database ID. Defaults to None.
+            *args: Forwarded to :class:`IController`.
             **kwargs: Forwarded to :class:`IController`.
 
         """
@@ -33,5 +35,6 @@ class IAuthController(IController):
             user_urn=user_urn,
             api_name=api_name,
             user_id=user_id,
+            *args,
             **kwargs,
         )

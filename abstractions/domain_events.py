@@ -35,13 +35,13 @@ class IDomainEvent:
     Usage:
         @dataclass
         class UserCreatedEvent(IDomainEvent):
-            user_id: str
+            user_id: int
             email: str
 
         @dataclass
         class OrderPlacedEvent(IDomainEvent):
             order_id: str
-            user_id: str
+            user_id: int
             total_amount: float
     """
 
@@ -223,7 +223,7 @@ class AggregateRoot:
 
     Usage:
         class User(AggregateRoot):
-            def __init__(self, user_id: str):
+            def __init__(self, user_id: int):
                 super().__init__()
                 self.user_id = user_id
                 self.email = None

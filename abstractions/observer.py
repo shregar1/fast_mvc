@@ -94,8 +94,9 @@ class Subject(ISubject[T]):
         subject.notify(UserCreatedEvent(user_id="123"))
     """
 
-    def __init__(self):
+    def __init__(self, *args: Any, **kwargs: Any):
         """Execute __init__ operation."""
+        super().__init__(*args, **kwargs)
         self._observers: Set[IObserver[T]] = set()
 
     def attach(self, observer: IObserver[T]) -> None:
@@ -122,8 +123,9 @@ class AsyncSubject(Generic[T]):
         await subject.notify(event)
     """
 
-    def __init__(self):
+    def __init__(self, *args: Any, **kwargs: Any):
         """Execute __init__ operation."""
+        super().__init__(*args, **kwargs)
         self._observers: Set[IAsyncObserver[T]] = set()
 
     def attach(self, observer: IAsyncObserver[T]) -> None:
@@ -162,8 +164,9 @@ class WeakSubject(ISubject[T]):
     Observers are automatically removed when garbage collected.
     """
 
-    def __init__(self):
+    def __init__(self, *args: Any, **kwargs: Any):
         """Execute __init__ operation."""
+        super().__init__(*args, **kwargs)
         self._observers: WeakSet = WeakSet()
 
     def attach(self, observer: IObserver[T]) -> None:
@@ -323,12 +326,15 @@ class LambdaObserver(IObserver[T]):
         subject.attach(observer)
     """
 
-    def __init__(self, callback: Callable[[T], None]):
+    def __init__(self, callback: Callable[[T], None], *args: Any, **kwargs: Any):
         """Execute __init__ operation.
 
         Args:
             callback: The callback parameter.
+            *args: Additional positional arguments forwarded to parent.
+            **kwargs: Additional keyword arguments forwarded to parent.
         """
+        super().__init__(*args, **kwargs)
         self._callback = callback
 
     def update(self, event: T) -> None:
@@ -357,13 +363,18 @@ class FilteredObserver(IObserver[T]):
         self,
         predicate: Callable[[T], bool],
         handler: Callable[[T], None],
+        *args: Any,
+        **kwargs: Any,
     ):
         """Execute __init__ operation.
 
         Args:
             predicate: The predicate parameter.
             handler: The handler parameter.
+            *args: Additional positional arguments forwarded to parent.
+            **kwargs: Additional keyword arguments forwarded to parent.
         """
+        super().__init__(*args, **kwargs)
         self._predicate = predicate
         self._handler = handler
 
@@ -394,13 +405,18 @@ class BufferedObserver(IObserver[T]):
         self,
         batch_size: int,
         handler: Callable[[List[T]], None],
+        *args: Any,
+        **kwargs: Any,
     ):
         """Execute __init__ operation.
 
         Args:
             batch_size: The batch_size parameter.
             handler: The handler parameter.
+            *args: Additional positional arguments forwarded to parent.
+            **kwargs: Additional keyword arguments forwarded to parent.
         """
+        super().__init__(*args, **kwargs)
         self._batch_size = batch_size
         self._handler = handler
         self._buffer: List[T] = []

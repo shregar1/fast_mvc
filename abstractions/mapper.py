@@ -97,12 +97,15 @@ class LambdaMapper(IMapper[TSource, TDestination]):
         ))
     """
 
-    def __init__(self, map_func: Callable[[TSource], TDestination]):
+    def __init__(self, map_func: Callable[[TSource], TDestination], *args: Any, **kwargs: Any):
         """Execute __init__ operation.
 
         Args:
             map_func: The map_func parameter.
+            *args: Additional positional arguments forwarded to parent.
+            **kwargs: Additional keyword arguments forwarded to parent.
         """
+        super().__init__(*args, **kwargs)
         self._map_func = map_func
 
     def map(self, source: TSource) -> TDestination:
@@ -128,12 +131,15 @@ class CompositeMapper(IMapper[TSource, TDestination]):
         ])
     """
 
-    def __init__(self, mappers: List[IMapper]):
+    def __init__(self, mappers: List[IMapper], *args: Any, **kwargs: Any):
         """Execute __init__ operation.
 
         Args:
             mappers: The mappers parameter.
+            *args: Additional positional arguments forwarded to parent.
+            **kwargs: Additional keyword arguments forwarded to parent.
         """
+        super().__init__(*args, **kwargs)
         self._mappers = mappers
 
     def map(self, source: TSource) -> TDestination:

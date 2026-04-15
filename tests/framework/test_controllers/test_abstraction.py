@@ -7,7 +7,7 @@ from unittest.mock import patch, MagicMock, AsyncMock
 
 import pytest
 
-from controllers.abstraction import IController
+from abstractions.controller import IController
 
 
 class ConcreteController(IController):

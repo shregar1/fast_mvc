@@ -32,7 +32,7 @@ class IEntity(ABC, Generic[TId]):
 
     Usage:
         class User(IEntity[str]):
-            def __init__(self, user_id: str, email: str):
+            def __init__(self, user_id: int, email: str):
                 self._id = user_id
                 self.email = email
 
@@ -210,7 +210,7 @@ class DomainEvent:
     Usage:
         @dataclass
         class UserCreated(DomainEvent):
-            user_id: str
+            user_id: int
             email: str
 
         @dataclass
@@ -278,12 +278,12 @@ class AuditableEntity(Entity):
     created_by: Optional[str] = field(default=None)
     updated_by: Optional[str] = field(default=None)
 
-    def set_creator(self, user_id: str) -> None:
+    def set_creator(self, user_id: int) -> None:
         """Set the creator."""
         self.created_by = user_id
         self.updated_by = user_id
 
-    def set_modifier(self, user_id: str) -> None:
+    def set_modifier(self, user_id: int) -> None:
         """Set the last modifier."""
         self.updated_by = user_id
         self.touch()

@@ -15,8 +15,9 @@ class UserRepository(IUserRepository):
         urn: Optional[str] = None,
         user_urn: Optional[str] = None,
         api_name: Optional[str] = None,
-        user_id: Optional[str] = None,
+        user_id: Optional[int] = None,
         session: Any = None,
+        *args: Any,
         **kwargs: Any,
     ) -> None:
         super().__init__(
@@ -25,6 +26,7 @@ class UserRepository(IUserRepository):
             api_name=api_name,
             user_id=user_id,
             session=session,
+            *args,
             **kwargs,
         )
         self.session = session

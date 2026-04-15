@@ -1,12 +1,12 @@
 """Create-example API controller (v1)."""
 
-from fastapi import Request
+from collections.abc import Callable
+
+from fastapi import Depends, Request
 
 from constants.api_status import APIStatus
 from controllers.apis.v1.example.abstraction import IExampleAPIController
-from dependencies.repositories.example.example_repository_dependency import (
-    ExampleRepositoryDependency,
-)
+from dependencies.repositories.example import ExampleRepositoryDependency
 from dependencies.services.v1.example.example_service_dependency import (
     ExampleServiceDependency,
 )
@@ -26,7 +26,13 @@ class ExampleCreateController(IExampleAPIController):
         payload: dict,
         headers: dict,
         api_name: str,
-        user_id: str,
+        user_id: int,
+        example_repository_factory: Callable = Depends(
+            ExampleRepositoryDependency.derive
+        ),
+        example_service_factory: Callable = Depends(
+            ExampleServiceDependency.derive
+        ),
     ) -> IResponseDTO:
         """Handle a POST request to create an example item."""
         await self.validate_request(
@@ -42,8 +48,16 @@ class ExampleCreateController(IExampleAPIController):
 
         request_dto = ExampleCreateRequestDTO(**payload)
 
-        repository = ExampleRepositoryDependency.derive(request)
-        service = ExampleServiceDependency.derive(request, repository=repository)
+        repository = example_repository_factory(
+            urn=urn, user_urn=user_urn, api_name=api_name, user_id=user_id,
+        )
+        service = example_service_factory(
+            urn=urn,
+            user_urn=user_urn,
+            api_name=api_name,
+            user_id=user_id,
+            example_repo=repository,
+        )
 
         result = service.run(request_dto)
 

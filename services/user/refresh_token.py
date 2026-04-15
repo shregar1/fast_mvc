@@ -20,9 +20,10 @@ class UserRefreshTokenService(IUserService):
         user_repository: Any = None,
         jwt_utility: Any = None,
         refresh_token_repository: Any = None,
+        *args: Any,
         **kwargs: Any,
     ) -> None:
-        super().__init__(**kwargs)
+        super().__init__(*args, **kwargs)
         self.user_repository = user_repository
         self.jwt_utility = jwt_utility
         self.refresh_token_repository = refresh_token_repository

@@ -18,6 +18,7 @@ class IService(FrameworkService):
         user_urn: Optional[str] = None,
         api_name: Optional[str] = None,
         user_id: Optional[int] = None,
+        *args: Any,
         **kwargs: Any,
     ) -> None:
         """Initialize the application service base.
@@ -27,6 +28,7 @@ class IService(FrameworkService):
             user_urn: User's URN. Defaults to None.
             api_name: API name. Defaults to None.
             user_id: User's database ID. Defaults to None.
+            *args: Forwarded to the framework service.
             **kwargs: Forwarded to the framework service (e.g. ``logger``).
 
         """
@@ -35,6 +37,7 @@ class IService(FrameworkService):
             user_urn=user_urn,
             api_name=api_name,
             user_id=user_id,
+            *args,
             **kwargs,
         )
 

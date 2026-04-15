@@ -70,12 +70,15 @@ class IDecorator(IComponent[T]):
                 return result
     """
 
-    def __init__(self, wrapped: IComponent[T]):
+    def __init__(self, wrapped: IComponent[T], *args: Any, **kwargs: Any):
         """Execute __init__ operation.
 
         Args:
             wrapped: The wrapped parameter.
+            *args: Additional positional arguments forwarded to parent.
+            **kwargs: Additional keyword arguments forwarded to parent.
         """
+        super().__init__(*args, **kwargs)
         self._wrapped = wrapped
 
     def execute(self) -> T:
@@ -222,7 +225,7 @@ def cache(ttl_seconds: Optional[int] = Default.RATE_LIMIT_WINDOW_SECONDS) -> Cal
 
     Usage:
         @cache(ttl_seconds=Default.RATE_LIMIT_WINDOW_SECONDS)
-        def get_user(user_id: str) -> User:
+        def get_user(user_id: int) -> User:
             return database.get_user(user_id)
     """
 
@@ -337,7 +340,7 @@ def validate_args(**validators: Callable[[Any], bool]) -> Callable:
             user_id=lambda x: isinstance(x, str) and len(x) > 0,
             amount=lambda x: isinstance(x, (int, float)) and x > 0
         )
-        def transfer(user_id: str, amount: float):
+        def transfer(user_id: int, amount: float):
             return process_transfer(user_id, amount)
     """
 

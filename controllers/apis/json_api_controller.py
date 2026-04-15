@@ -1,4 +1,9 @@
-"""JSON API Controller base with structured error handling."""
+"""JSON API Controller base with structured error handling.
+
+Inherits the common property surface (urn, user_urn, api_name, user_id,
+logger, dictionary_utility, jwt_utility) and :meth:`handle_exception`
+from the app-level :class:`abstractions.controller.IController`.
+"""
 
 from __future__ import annotations
 
@@ -8,17 +13,18 @@ from typing import Any
 
 from fastapi.responses import JSONResponse
 
-from abstractions.controller import IController
 from constants.api_status import APIStatus
+from abstractions.controller import IController
 from dtos.responses.base import BaseResponseDTO
-from start_utils import logger
 
 
 class JSONAPIController(IController):
     """Base controller that wraps handler execution in a JSON error envelope.
 
     Sub-classes override ``post`` / ``get`` etc. and can call
-    :meth:`invoke_with_exception_handling` to get uniform error wrapping.
+    :meth:`invoke_with_exception_handling` for uniform error wrapping,
+    or :meth:`handle_exception` (from the root abstraction) for
+    structured error-to-envelope translation.
     """
 
     def __init__(
@@ -27,17 +33,19 @@ class JSONAPIController(IController):
         user_urn: str | None = None,
         api_name: str | None = None,
         user_id: int | None = None,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
-        super().__init__(urn=urn, user_urn=user_urn, api_name=api_name, user_id=user_id)
-        self._logger = logger
-
-    @property
-    def logger(self):
-        return self._logger
-
-    @logger.setter
-    def logger(self, value) -> None:
-        self._logger = value
+        super().__init__(
+            urn=urn,
+            user_urn=user_urn,
+            api_name=api_name,
+            user_id=user_id,
+            *args,
+            **kwargs,
+        )
+        self._dictionary_utility = None
+        self._jwt_utility = None
 
     async def invoke_with_exception_handling(
         self,

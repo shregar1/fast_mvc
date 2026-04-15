@@ -56,7 +56,7 @@ async def websocket_room(ws: WebSocket, room_id: str) -> None:
     await ws.accept()
     connections = _room_connections.setdefault(room_id, [])
     connections.append(ws)
-    user_id: str = "anonymous"
+    user_id: int = "anonymous"
 
     try:
         # First message is expected to carry user identity

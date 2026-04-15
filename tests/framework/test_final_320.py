@@ -426,7 +426,7 @@ class TestLayerAbstractions:
 
     def test_import_controllers_abstraction(self):
         """Test importing controllers.abstraction."""
-        from controllers.abstraction import IController
+        from abstractions.controller import IController
         assert IController is not None
 
     def test_import_repositories_abstraction(self):

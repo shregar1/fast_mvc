@@ -1,81 +1,68 @@
-"""
-POST /user/forgot-password – Request a password-reset email.
+"""POST /user/forgot-password – Request a password-reset email.
 
-Public (unauthenticated) endpoint. If the email is registered, a JWT reset
-link is sent. Always returns the same success response to prevent email
-enumeration.
+Public (unauthenticated) endpoint. Always returns the same success response
+to prevent email enumeration.
 """
 
-import os
-from datetime import datetime, timedelta
+from collections.abc import Callable
 from http import HTTPStatus
+from typing import Any
 
-import jwt
 from fastapi import Depends, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
-from constants.api_status import APIStatus
-from constants.default import Default
-from structured_log import log_event
+from controllers.auth.user.abstraction import IUserController
 from dependencies.db import DBDependency
+from dependencies.services.user.forgot_password import ForgotPasswordServiceDependency
+from dependencies.utilities.dictionary import DictionaryUtilityDependency
 from dtos.requests.user.forgot_password import ForgotPasswordRequestDTO
-from dtos.responses.base import BaseResponseDTO
-from repositories.user.user_repository import UserRepository
-from utilities.notifications.lifecycle import send_password_reset_email
-from start_utils import ALGORITHM, SECRET_KEY
 
 
-async def forgot_password(
-    request: Request,
-    body: ForgotPasswordRequestDTO,
-    session: Session = Depends(DBDependency.derive),
-) -> JSONResponse:
-    urn = getattr(request.state, "urn", "") or ""
+class ForgotPasswordController(IUserController):
+    def __init__(self, urn: str | None = None, *args: Any, **kwargs: Any) -> None:
+        super().__init__(urn=urn, api_name="USER_FORGOT_PASSWORD", *args, **kwargs)
 
-    repo = UserRepository(
-        urn=urn,
-        user_urn=None,
-        api_name="forgot_password",
-        session=session,
-        user_id=None,
-    )
-    user = repo.retrieve_record_by_email(body.email, is_deleted=False)
-
-    if user:
-        expires_minutes = Default.EMAIL_TOKEN_EXPIRY_MINUTES
-        exp = datetime.utcnow() + timedelta(minutes=expires_minutes)
-        token = jwt.encode(
-            {"email": body.email, "exp": exp, "purpose": "password_reset"},
-            SECRET_KEY,
-            algorithm=ALGORITHM,
+    async def post(
+        self,
+        request: Request,
+        body: ForgotPasswordRequestDTO,
+        session: Session = Depends(DBDependency.derive),
+        service_factory: Callable = Depends(ForgotPasswordServiceDependency.derive),
+        dictionary_utility: Callable = Depends(DictionaryUtilityDependency.derive),
+    ) -> JSONResponse:
+        self.bind_request_context(
+            request,
+            dictionary_utility_factory=dictionary_utility,
         )
-        if hasattr(token, "decode"):
-            token = token.decode(Default.ENCODING_UTF8)
 
-        base_url = os.getenv(
-            "APP_URL", os.getenv("FRONTEND_URL", "https://app.example.com")
-        ).rstrip("/")
-        reset_link = f"{base_url}/reset-password?token={token}"
-
+        http_status = HTTPStatus.OK
         try:
-            await send_password_reset_email(
-                body.email,
-                reset_link,
-                expires_minutes=expires_minutes,
+            service = service_factory(
+                urn=self.urn,
+                user_urn=self.user_urn,
+                api_name=self.api_name,
+                user_id=self.user_id,
+                session=session,
             )
-        except Exception:
-            pass
+            response_dto = await service.run(email=body.email)
+        except Exception as err:
+            response_dto, http_status = self.handle_exception(
+                err,
+                request,
+                event_name="forgot_password",
+                session=session,
+                force_http_ok=True,
+                fallback_message="If that email is registered, you will receive a reset link.",
+                fallback_key="success_password_reset_request",
+            )
 
-        log_event("forgot_password.email_sent", urn=urn, email=body.email)
+        content = (
+            self.dictionary_utility.convert_dict_keys_to_camel_case(response_dto.model_dump())
+            if self.dictionary_utility is not None
+            else response_dto.model_dump()
+        )
+        return JSONResponse(status_code=http_status, content=content)
 
-    return JSONResponse(
-        status_code=HTTPStatus.OK,
-        content=BaseResponseDTO(
-            transactionUrn=urn,
-            status=APIStatus.SUCCESS,
-            responseMessage="If that email is registered, you will receive a reset link.",
-            responseKey="success_password_reset_request",
-            data={},
-        ).model_dump(),
-    )
+
+__all__ = ["ForgotPasswordController"]

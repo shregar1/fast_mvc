@@ -98,6 +98,10 @@ class APILK:
     MFA_DISABLE: Final[str] = "MFA_DISABLE"
     MFA_STATUS: Final[str] = "MFA_STATUS"
 
+    # Phone OTP sub-routes
+    PHONE_SEND_OTP: Final[str] = "PHONE_SEND_OTP"
+    PHONE_VERIFY_OTP: Final[str] = "PHONE_VERIFY_OTP"
+
     class PRODUCT:
         """Route definitions for ``apis/product/...``."""
 

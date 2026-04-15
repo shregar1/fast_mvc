@@ -332,13 +332,18 @@ class ValidationResult(Generic[T]):
         self,
         value: Optional[T] = None,
         errors: Optional[List[str]] = None,
+        *args: Any,
+        **kwargs: Any,
     ):
         """Execute __init__ operation.
 
         Args:
             value: The value parameter.
             errors: The errors parameter.
+            *args: Additional positional arguments forwarded to parent.
+            **kwargs: Additional keyword arguments forwarded to parent.
         """
+        super().__init__(*args, **kwargs)
         self._value = value
         self._errors = errors or []
 

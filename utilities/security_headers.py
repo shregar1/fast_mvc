@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Any, Optional
 
 from fast_middleware import SecurityHeadersConfig
 
@@ -20,7 +20,9 @@ class SecurityHeadersUtility(IUtility):
         urn: Optional[str] = None,
         user_urn: Optional[str] = None,
         api_name: Optional[str] = None,
-        user_id: Optional[str] = None,
+        user_id: Optional[int] = None,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         """Initialize the security headers utility.
 
@@ -29,12 +31,16 @@ class SecurityHeadersUtility(IUtility):
             user_urn: User's unique resource name.
             api_name: Name of the API endpoint.
             user_id: Database identifier of the user.
+            *args: Additional positional arguments forwarded to parent.
+            **kwargs: Additional keyword arguments forwarded to parent.
         """
         super().__init__(
             urn=urn,
             user_urn=user_urn,
             api_name=api_name,
             user_id=user_id,
+            *args,
+            **kwargs,
         )
 
     @classmethod

@@ -18,9 +18,10 @@ class SubscriptionRepository(IUserRepository):
     def __init__(
         self,
         session: Any = None,
+        *args: Any,
         **kwargs: Any,
     ) -> None:
-        super().__init__(session=session, **kwargs)
+        super().__init__(session=session, *args, **kwargs)
         self.session = session
         self._model = None
         try:

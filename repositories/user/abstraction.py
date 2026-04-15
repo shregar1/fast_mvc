@@ -13,8 +13,9 @@ class IUserRepository(IRepository):
         urn: Optional[str] = None,
         user_urn: Optional[str] = None,
         api_name: Optional[str] = None,
-        user_id: Optional[str] = None,
+        user_id: Optional[int] = None,
         session: Any = None,
+        *args: Any,
         **kwargs: Any,
     ) -> None:
         """Initialize the user-domain repository base.
@@ -25,6 +26,7 @@ class IUserRepository(IRepository):
             api_name: API name. Defaults to None.
             user_id: User's database ID. Defaults to None.
             session: Database session when applicable. Defaults to None.
+            *args: Forwarded to :class:`IRepository`.
             **kwargs: Forwarded to :class:`IRepository`.
 
         """
@@ -34,5 +36,6 @@ class IUserRepository(IRepository):
             api_name=api_name,
             user_id=user_id,
             session=session,
+            *args,
             **kwargs,
         )

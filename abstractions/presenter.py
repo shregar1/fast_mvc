@@ -222,6 +222,8 @@ class JsonPresenter(IPresenter[TData, dict]):
         fields: Optional[List[str]] = None,
         exclude: Optional[List[str]] = None,
         transforms: Optional[Dict[str, Callable]] = None,
+        *args: Any,
+        **kwargs: Any,
     ):
         """Execute __init__ operation.
 
@@ -229,7 +231,10 @@ class JsonPresenter(IPresenter[TData, dict]):
             fields: The fields parameter.
             exclude: The exclude parameter.
             transforms: The transforms parameter.
+            *args: Additional positional arguments forwarded to parent.
+            **kwargs: Additional keyword arguments forwarded to parent.
         """
+        super().__init__(*args, **kwargs)
         self._fields = fields
         self._exclude = exclude or []
         self._transforms = transforms or {}
@@ -276,13 +281,18 @@ class HtmlPresenter(IPresenter[TData, str]):
         self,
         template: str,
         escape_html: bool = True,
+        *args: Any,
+        **kwargs: Any,
     ):
         """Execute __init__ operation.
 
         Args:
             template: The template parameter.
             escape_html: The escape_html parameter.
+            *args: Additional positional arguments forwarded to parent.
+            **kwargs: Additional keyword arguments forwarded to parent.
         """
+        super().__init__(*args, **kwargs)
         self._template = template
         self._escape = escape_html
 
@@ -314,12 +324,15 @@ class CompositePresenter(IPresenter[TData, TViewModel]):
         ])
     """
 
-    def __init__(self, presenters: List[IPresenter]):
+    def __init__(self, presenters: List[IPresenter], *args: Any, **kwargs: Any):
         """Execute __init__ operation.
 
         Args:
             presenters: The presenters parameter.
+            *args: Additional positional arguments forwarded to parent.
+            **kwargs: Additional keyword arguments forwarded to parent.
         """
+        super().__init__(*args, **kwargs)
         self._presenters = presenters
 
     def present(self, data: TData) -> dict:

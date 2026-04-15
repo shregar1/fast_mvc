@@ -19,7 +19,7 @@ class IRepository(FrameworkRepository):
         urn: Optional[str] = None,
         user_urn: Optional[str] = None,
         api_name: Optional[str] = None,
-        user_id: Optional[str] = None,
+        user_id: Optional[int] = None,
         session: Any = None,
         *args: Any,
         **kwargs: Any,

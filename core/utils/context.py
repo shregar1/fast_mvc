@@ -41,7 +41,7 @@ class ContextMixin:
         urn: Optional[str] = None,
         user_urn: Optional[str] = None,
         api_name: Optional[str] = None,
-        user_id: Optional[str] = None,
+        user_id: Optional[int] = None,
         logger: Any = None,
         **kwargs: Any,
     ) -> None:
@@ -57,7 +57,7 @@ class ContextMixin:
         self._urn: Optional[str] = urn
         self._user_urn: Optional[str] = user_urn
         self._api_name: Optional[str] = api_name
-        self._user_id: Optional[str] = user_id
+        self._user_id: Optional[int] = user_id
         self._logger: Any = logger or _default_logger
         self._context: Dict[str, Any] = kwargs
 
@@ -67,7 +67,7 @@ class ContextMixin:
         return self._urn
 
     @urn.setter
-    def urn(self, value: str) -> None:
+    def urn(self, value: Optional[str]) -> None:
         """Set the Unique Request Number."""
         self._urn = value
 
@@ -77,7 +77,7 @@ class ContextMixin:
         return self._user_urn
 
     @user_urn.setter
-    def user_urn(self, value: str) -> None:
+    def user_urn(self, value: Optional[str]) -> None:
         """Set the User URN."""
         self._user_urn = value
 
@@ -87,17 +87,17 @@ class ContextMixin:
         return self._api_name
 
     @api_name.setter
-    def api_name(self, value: str) -> None:
+    def api_name(self, value: Optional[str]) -> None:
         """Set the API name."""
         self._api_name = value
 
     @property
-    def user_id(self) -> Optional[str]:
+    def user_id(self) -> Optional[int]:
         """Get the User ID."""
         return self._user_id
 
     @user_id.setter
-    def user_id(self, value: str) -> None:
+    def user_id(self, value: Optional[int]) -> None:
         """Set the User ID."""
         self._user_id = value
 

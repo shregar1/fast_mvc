@@ -258,7 +258,7 @@ class TestControllersModuleImports:
     """Test controllers module imports."""
 
     @pytest.mark.parametrize("module_name", [
-        "controllers.abstraction",
+        "abstractions.controller",
     ])
     def test_controller_modules_importable(self, module_name):
         """Test controller modules can be imported."""

@@ -45,6 +45,10 @@ global-exclude *.egg-info
 global-exclude .git
 global-exclude .gitignore
 
+# Exclude documentation sources (built separately via mkdocs)
+prune docs
+prune site
+
 # Exclude tests and test artifacts
 prune tests
 prune factories

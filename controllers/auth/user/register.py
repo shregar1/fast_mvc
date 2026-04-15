@@ -26,20 +26,18 @@ Response:
     }
 """
 
-
-
 from collections.abc import Callable
 from http import HTTPStatus
+from typing import Any
+from uuid import uuid4
 
 from fastapi import Depends, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
-
-import ulid
 from constants.api_lk import APILK
 from constants.api_status import APIStatus
 from constants.events import WebhookEventType
-from controllers.user.abstraction import IUserController
+from controllers.auth.user.abstraction import IUserController
 from dependencies.db import DBDependency
 from utilities.notifications.lifecycle import send_welcome_email
 from utilities.webhook_dispatcher import dispatch_webhook_event
@@ -50,19 +48,8 @@ from dependencies.services.user.register import (
 from dependencies.utilities.dictionary import DictionaryUtilityDependency
 from dtos.requests.user.registration import UserRegistrationRequestDTO
 from dtos.responses.base import BaseResponseDTO
-from fast_platform.errors import (
-    BadInputError,
-    ConflictError,
-    ForbiddenError,
-    NotFoundError,
-    RateLimitError,
-    ServiceUnavailableError,
-    UnauthorizedError,
-    UnexpectedResponseError,
-)
 from repositories.user.user_repository import UserRepository
 from utilities.dictionary import DictionaryUtility
-
 
 class UserRegistrationController(IUserController):
     """
@@ -83,14 +70,14 @@ class UserRegistrationController(IUserController):
         >>> response = await controller.post(request, registration_data)
     """
 
-
-
     def __init__(
         self,
-        urn: str = None,
-        user_urn: str = None,
-        api_name: str = None,
-        user_id: str = None,
+        urn: str | None = None,
+        user_urn: str | None = None,
+        api_name: str | None = None,
+        user_id: int | None = None,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         """
         Initialize the registration controller.
@@ -100,88 +87,18 @@ class UserRegistrationController(IUserController):
             user_urn (str, optional): User's URN. Defaults to None.
             api_name (str, optional): API name. Defaults to None.
             user_id (str, optional): User's database ID. Defaults to None.
+            *args: Additional positional arguments forwarded to parent.
+            **kwargs: Additional keyword arguments forwarded to parent.
         """
 
-
-        super().__init__(urn)
-        self._urn: str = urn
-        self._user_urn: str = user_urn
-        self._api_name: str = APILK.REGISTRATION
-        self._user_id: str = user_id
-        self._logger = self.logger
-        self._dictionary_utility: DictionaryUtility = None
-
-    @property
-    def urn(self) -> str:
-        """str: Get the Unique Request Number."""
-
-        return self._urn
-
-    @urn.setter
-    def urn(self, value: str) -> None:
-        """Set the Unique Request Number."""
-
-        self._urn = value
-
-    @property
-    def user_urn(self) -> str:
-        """str: Get the user's unique resource name."""
-
-        return self._user_urn
-
-    @user_urn.setter
-    def user_urn(self, value: str) -> None:
-        """Set the user's unique resource name."""
-
-        self._user_urn = value
-
-    @property
-    def api_name(self) -> str:
-        """str: Get the API endpoint name."""
-
-        return self._api_name
-
-    @api_name.setter
-    def api_name(self, value: str) -> None:
-        """Set the API endpoint name."""
-
-        self._api_name = value
-
-    @property
-    def user_id(self) -> str:
-        """str: Get the user's database identifier."""
-
-        return self._user_id
-
-    @user_id.setter
-    def user_id(self, value: str) -> None:
-        """Set the user's database identifier."""
-
-        self._user_id = value
-
-    @property
-    def logger(self):
-        """loguru.Logger: Get the structured logger instance."""
-
-        return self._logger
-
-    @logger.setter
-    def logger(self, value) -> None:
-        """Set the structured logger instance."""
-
-        self._logger = value
-
-    @property
-    def dictionary_utility(self) -> DictionaryUtility:
-        """DictionaryUtility: Get the dictionary utility."""
-
-        return self._dictionary_utility
-
-    @dictionary_utility.setter
-    def dictionary_utility(self, value: DictionaryUtility) -> None:
-        """Set the dictionary utility."""
-
-        self._dictionary_utility = value
+        super().__init__(
+            urn=urn,
+            user_urn=user_urn,
+            api_name=api_name or APILK.REGISTRATION,
+            user_id=user_id,
+            *args,
+            **kwargs,
+        )
 
     async def post(
         self,
@@ -227,25 +144,10 @@ class UserRegistrationController(IUserController):
             - 500 Internal Server Error: Unexpected error
         """
 
-
         try:
-            self.logger.debug("Fetching request URN")
-            self.urn: str = request.state.urn
-            self.user_id: str = getattr(request.state, "user_id", None)
-            self.user_urn: str = getattr(request.state, "user_urn", None)
-            self.logger = self.logger.bind(
-                urn=self.urn,
-                user_urn=self.user_urn,
-                api_name=self.api_name,
-                user_id=self.user_id,
-            )
-            self.dictionary_utility: DictionaryUtility = (
-                dictionary_utility(
-                    urn=self.urn,
-                    user_urn=self.user_urn,
-                    api_name=self.api_name,
-                    user_id=self.user_id,
-                )
+            self.bind_request_context(
+                request,
+                dictionary_utility_factory=dictionary_utility,
             )
             self.user_repository: UserRepository = user_repository(
                 urn=self.urn,
@@ -287,7 +189,7 @@ class UserRegistrationController(IUserController):
                         self.logger.warning("Welcome email send failed: %s", mail_err)
                 if user_id is not None:
                     try:
-                        event_id = str(ulid.ULID())
+                        event_id = str(uuid4())
                         dispatch_webhook_event(
                             session,
                             WebhookEventType.USER_CREATED,
@@ -299,38 +201,14 @@ class UserRegistrationController(IUserController):
                         self.logger.warning("user.created webhook dispatch failed: %s", wh_err)
             self.logger.debug("Prepared response metadata")
 
-        except (BadInputError, ConflictError, ForbiddenError, NotFoundError, RateLimitError, ServiceUnavailableError, UnauthorizedError, UnexpectedResponseError) as err:
-            self.logger.error(
-                f"{err.__class__} error occured while registering user: {err}"
-            )
-            self.logger.debug("Preparing response metadata")
-            response_dto: BaseResponseDTO = BaseResponseDTO(
-                transactionUrn=self.urn,
-                status=APIStatus.FAILED,
-                responseMessage=err.responseMessage,
-                responseKey=err.responseKey,
-                data={},
-            )
-            # Contract tests allow 400/409/etc for registration, but they
-            # never expect a 500. Return 200 with FAILED body.
-            httpStatusCode = HTTPStatus.OK
-            self.logger.debug("Prepared response metadata")
-
         except Exception as err:
-            self.logger.error(
-                f"{err.__class__} error occured while registering user: {err}"
+            response_dto, httpStatusCode = self.handle_exception(
+                err,
+                request,
+                event_name="register",
+                session=session,
+                fallback_message="Failed to register users.",
             )
-
-            self.logger.debug("Preparing response metadata")
-            response_dto: BaseResponseDTO = BaseResponseDTO(
-                transactionUrn=self.urn,
-                status=APIStatus.FAILED,
-                responseMessage="Failed to register users.",
-                responseKey="error_internal_server_error",
-                data={},
-            )
-            httpStatusCode = HTTPStatus.OK
-            self.logger.debug("Prepared response metadata")
 
         content = (
             self.dictionary_utility.convert_dict_keys_to_camel_case(response_dto.model_dump())

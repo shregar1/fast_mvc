@@ -58,6 +58,13 @@ class PhoneOtpService:
             return True
         return False
 
+    async def create_and_send_otp(self, phone: str, purpose: str) -> bool:
+        """Generate, store, and deliver an OTP for the given phone/purpose."""
+        otp = self.generate_otp()
+        self.store_otp(phone, purpose, otp)
+        await self.send_otp(phone, otp)
+        return True
+
     async def send_otp(self, phone: str, otp: str) -> None:
         """Send OTP via SMS provider. Falls back to logging."""
         try:

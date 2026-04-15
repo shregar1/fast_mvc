@@ -73,7 +73,7 @@ async def send_verification_email(
         logger.warning("Failed to send verification email to %s: %s", email, exc)
 
 
-# Alias used by controllers/auth/user/auth/send_verification_email.py
+# Alias used by controllers/auth/user/account/send_verification_email.py
 send_verify_email = send_verification_email
 
 __all__ = [

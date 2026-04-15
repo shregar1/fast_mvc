@@ -1,68 +1,71 @@
-"""
-POST /user/phone/send-otp – Send OTP to phone for login or register.
-"""
+"""POST /user/phone/send-otp – Send OTP to phone for login or register."""
 
-
-
+from collections.abc import Callable
 from http import HTTPStatus
-
-from typing import Optional
+from typing import Any, Optional
 
 from fastapi import Depends, Request
 from fastapi.responses import JSONResponse
 from redis import Redis
 from sqlalchemy.orm import Session
 
-from constants.api_status import APIStatus
+from constants.api_lk import APILK
+from controllers.apis.v1.abstraction import IV1APIController
 from dependencies.cache import CacheDependency
 from dependencies.db import DBDependency
+from dependencies.services.user.phone.send_otp import PhoneSendOtpServiceDependency
+from dependencies.utilities.dictionary import DictionaryUtilityDependency
 from dtos.requests.user.phone_send_otp import PhoneSendOtpRequestDTO
-from dtos.responses.base import BaseResponseDTO
-from fast_platform.errors import BadInputError, UnexpectedResponseError
-from services.user.phone_otp import PhoneOtpService
-from start_utils import logger
 
 
-class PhoneSendOtpController:
+class PhoneSendOtpController(IV1APIController):
+    def __init__(self, urn: str | None = None, *args: Any, **kwargs: Any) -> None:
+        super().__init__(urn=urn, api_name=APILK.PHONE_SEND_OTP, *args, **kwargs)
+
     async def post(
         self,
         request: Request,
         body: PhoneSendOtpRequestDTO,
         session: Session = Depends(DBDependency.derive),
         redis_client: Optional[Redis] = Depends(CacheDependency.derive),
+        service_factory: Callable = Depends(PhoneSendOtpServiceDependency.derive),
+        dictionary_utility: Callable = Depends(DictionaryUtilityDependency.derive),
     ) -> JSONResponse:
-        """
-        Send a 6-digit OTP to the given phone for any purpose (e.g. login, register, verify_phone, reset_password).
-        OTP is valid for 5 minutes. Same purpose must be used when verifying. Always return same message to avoid enumeration.
-        """
-        urn = getattr(request.state, "urn", "") or ""
-        try:
-            if not redis_client:
-                raise UnexpectedResponseError(
-                    responseMessage="OTP service is temporarily unavailable.",
-                    responseKey="error_service_unavailable",
-                    httpStatusCode=HTTPStatus.SERVICE_UNAVAILABLE,
-                )
-            ok = PhoneOtpService(urn=urn).create_and_send_otp(
-                body.phone,
-                body.purpose,
-                redis_client,
-            )
-            if not ok:
-                logger.warning("Send OTP failed for phone %s", body.phone[:6] + "***")
-        except (BadInputError, UnexpectedResponseError):
-            raise
-        except Exception as e:
-            logger.warning("Send OTP error: %s", e)
-
-        response_dto = BaseResponseDTO(
-            transactionUrn=urn,
-            status=APIStatus.SUCCESS,
-            responseMessage="If this number is valid, you will receive an OTP shortly.",
-            responseKey="success_otp_sent",
-            data={},
+        """Send a 6-digit OTP to the given phone. Always returns the same
+        response message to avoid phone-number enumeration."""
+        self.bind_request_context(
+            request,
+            dictionary_utility_factory=dictionary_utility,
         )
-        return JSONResponse(status_code=HTTPStatus.OK, content=response_dto.model_dump())
+
+        http_status = HTTPStatus.OK
+        try:
+            service = service_factory(
+                urn=self.urn,
+                user_urn=self.user_urn,
+                api_name=self.api_name,
+                user_id=self.user_id,
+                session=session,
+                redis_client=redis_client,
+            )
+            response_dto = await service.run(body.phone, body.purpose)
+        except Exception as err:
+            response_dto, http_status = self.handle_exception(
+                err,
+                request,
+                event_name="phone.send_otp",
+                session=session,
+                force_http_ok=True,
+                fallback_message="If this number is valid, you will receive an OTP shortly.",
+                fallback_key="success_otp_sent",
+            )
+
+        content = (
+            self.dictionary_utility.convert_dict_keys_to_camel_case(response_dto.model_dump())
+            if self.dictionary_utility is not None
+            else response_dto.model_dump()
+        )
+        return JSONResponse(status_code=http_status, content=content)
 
 
 __all__ = ["PhoneSendOtpController"]

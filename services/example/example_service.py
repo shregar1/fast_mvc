@@ -13,13 +13,15 @@ class ExampleService(IExampleService):
     Orchestrates between repository and controllers.
     """
 
-    def __init__(self, example_repo: ExampleRepository, **kwargs: Any):
+    def __init__(self, example_repo: ExampleRepository, *args: Any, **kwargs: Any):
         """Execute __init__ operation.
 
         Args:
             example_repo: The example repository instance.
+            *args: Additional positional arguments forwarded to parent.
+            **kwargs: Additional keyword arguments forwarded to parent.
         """
-        super().__init__(**kwargs)
+        super().__init__(*args, **kwargs)
         self.example_repo = example_repo
 
     def run(self, request_dto: ExampleCreateRequestDTO) -> dict:

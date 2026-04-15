@@ -67,7 +67,7 @@ class IUtility(ABC):
         urn: Optional[str] = None,
         user_urn: Optional[str] = None,
         api_name: Optional[str] = None,
-        user_id: Optional[str] = None,
+        user_id: Optional[int] = None,
         *args: Any,
         **kwargs: Any,
     ) -> None:

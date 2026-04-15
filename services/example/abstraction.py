@@ -14,6 +14,7 @@ class IExampleService(IService):
         user_urn: Optional[str] = None,
         api_name: Optional[str] = None,
         user_id: Optional[int] = None,
+        *args: Any,
         **kwargs: Any,
     ) -> None:
         """Initialize the example-domain service base."""
@@ -22,5 +23,6 @@ class IExampleService(IService):
             user_urn=user_urn,
             api_name=api_name,
             user_id=user_id,
+            *args,
             **kwargs,
         )

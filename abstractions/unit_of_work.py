@@ -116,13 +116,16 @@ class IUnitOfWork(IUnitOfWork):
 
     """
 
-    def __init__(self, session_factory: Any):
+    def __init__(self, session_factory: Any, *args: Any, **kwargs: Any):
         """Initialize Unit of Work.
 
         Args:
             session_factory: Factory for creating database sessions.
+            *args: Additional positional arguments forwarded to parent.
+            **kwargs: Additional keyword arguments forwarded to parent.
 
         """
+        super().__init__(*args, **kwargs)
         self._session_factory = session_factory
         self._session: Optional[Any] = None
         self._repositories: Dict[str, Any] = {}

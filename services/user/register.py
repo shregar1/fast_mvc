@@ -25,9 +25,10 @@ class UserRegistrationService(IUserService):
     def __init__(
         self,
         user_repository: Any = None,
+        *args: Any,
         **kwargs: Any,
     ) -> None:
-        super().__init__(**kwargs)
+        super().__init__(*args, **kwargs)
         self.user_repository = user_repository
 
     @staticmethod

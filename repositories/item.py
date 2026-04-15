@@ -23,9 +23,9 @@ class ItemRepository(IRepository):
 
     """
 
-    def __init__(self, **kwargs: Any) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Initialize repository with empty storage."""
-        super().__init__(**kwargs)
+        super().__init__(*args, **kwargs)
         self._storage: dict[str, dict[str, Any]] = {}
         self._counter = 0
 

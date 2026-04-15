@@ -143,8 +143,14 @@ class FluentValidator(IValidator[T]):
         result = validator.validate(user)
     """
 
-    def __init__(self):
-        """Execute __init__ operation."""
+    def __init__(self, *args: Any, **kwargs: Any):
+        """Execute __init__ operation.
+
+        Args:
+            *args: Additional positional arguments forwarded to parent.
+            **kwargs: Additional keyword arguments forwarded to parent.
+        """
+        super().__init__(*args, **kwargs)
         self._rules: List[Callable[[T], ValidationResult]] = []
         self._current_field: Optional[str] = None
         self._current_getter: Optional[Callable[[T], Any]] = None
@@ -418,12 +424,15 @@ class CompositeValidator(IValidator[T]):
         result = composite.validate(user)
     """
 
-    def __init__(self, validators: List[IValidator[T]]):
+    def __init__(self, validators: List[IValidator[T]], *args: Any, **kwargs: Any):
         """Execute __init__ operation.
 
         Args:
             validators: The validators parameter.
+            *args: Additional positional arguments forwarded to parent.
+            **kwargs: Additional keyword arguments forwarded to parent.
         """
+        super().__init__(*args, **kwargs)
         self._validators = validators
 
     def validate(self, obj: T) -> ValidationResult:
@@ -455,13 +464,18 @@ class ConditionalValidator(IValidator[T]):
         self,
         condition: Callable[[T], bool],
         validator: IValidator[T],
+        *args: Any,
+        **kwargs: Any,
     ):
         """Execute __init__ operation.
 
         Args:
             condition: The condition parameter.
             validator: The validator parameter.
+            *args: Additional positional arguments forwarded to parent.
+            **kwargs: Additional keyword arguments forwarded to parent.
         """
+        super().__init__(*args, **kwargs)
         self._condition = condition
         self._validator = validator
 

@@ -19,9 +19,10 @@ class UserLogoutService(IUserService):
         jwt_utility: Any = None,
         refresh_token_repository: Any = None,
         auth_token: Optional[str] = None,
+        *args: Any,
         **kwargs: Any,
     ) -> None:
-        super().__init__(**kwargs)
+        super().__init__(*args, **kwargs)
         self.user_repository = user_repository
         self.jwt_utility = jwt_utility
         self.refresh_token_repository = refresh_token_repository

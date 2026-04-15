@@ -53,7 +53,7 @@ class IQuery(Generic[TResult]):
     Usage:
         @dataclass
         class GetUserByIdQuery(IQuery[User]):
-            user_id: str
+            user_id: int
 
         @dataclass
         class ListUsersQuery(IQuery[List[User]]):
