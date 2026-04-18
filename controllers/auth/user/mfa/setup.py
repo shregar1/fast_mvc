@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from constants.api_lk import APILK
 from controllers.apis.v1.abstraction import IV1APIController
 from dependencies.db import DBDependency
+from dependencies.repositiories.user import UserRepositoryDependency
 from dependencies.services.mfa import MFAServiceDependency
 from dependencies.services.user.mfa.setup import MFASetupServiceDependency
 from dependencies.utilities.dictionary import DictionaryUtilityDependency
@@ -26,6 +27,7 @@ class MFASetupController(IV1APIController):
         session: Session = Depends(DBDependency.derive),
         service_factory: Callable = Depends(MFASetupServiceDependency.derive),
         mfa_service_factory: Callable = Depends(MFAServiceDependency.derive),
+        user_repository_factory: Callable = Depends(UserRepositoryDependency.derive),
         dictionary_utility: Callable = Depends(DictionaryUtilityDependency.derive),
     ) -> JSONResponse:
         """POST /user/mfa/setup – Start MFA setup (returns secret + provisioning URI)."""
@@ -41,12 +43,19 @@ class MFASetupController(IV1APIController):
                 api_name=self.api_name,
                 user_id=self.user_id,
             )
-            service = service_factory(
+            user_repository = user_repository_factory(
                 urn=self.urn,
                 user_urn=self.user_urn,
                 api_name=self.api_name,
                 user_id=self.user_id,
                 session=session,
+            )
+            service = service_factory(
+                urn=self.urn,
+                user_urn=self.user_urn,
+                api_name=self.api_name,
+                user_id=self.user_id,
+                user_repository=user_repository,
                 mfa_service=mfa_service,
             )
             response_dto = await service.run()

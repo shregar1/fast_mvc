@@ -46,6 +46,7 @@ from constants.api_lk import APILK
 from constants.api_status import APIStatus
 from controllers.auth.user.abstraction import IUserController
 from dependencies.db import DBDependency
+from dependencies.repositiories.refresh_token import RefreshTokenRepositoryDependency
 from dependencies.repositiories.user import UserRepositoryDependency
 from dependencies.services.user.login import UserLoginServiceDependency
 from dependencies.services.user.token_issuance import (
@@ -55,7 +56,6 @@ from dependencies.utilities.dictionary import DictionaryUtilityDependency
 from dependencies.utilities.jwt import JWTUtilityDependency
 from dtos.requests.user.login import UserLoginRequestDTO
 from dtos.responses.base import BaseResponseDTO
-from repositories.user.refresh_token_repository import RefreshTokenRepository
 from repositories.user.user_repository import UserRepository
 from structured_log import log_event
 from utilities.audit import log_audit
@@ -115,7 +115,10 @@ class UserLoginController(IUserController):
         ),
         jwt_utility: JWTUtility = Depends(
             JWTUtilityDependency.derive
-        )
+        ),
+        refresh_token_repository_factory: Callable = Depends(
+            RefreshTokenRepositoryDependency.derive
+        ),
     ) -> JSONResponse:
         """
         Handle POST request for user login.
@@ -184,7 +187,13 @@ class UserLoginController(IUserController):
                 user_id=self.user_id,
                 session=session,
             )
-            refresh_token_repo = RefreshTokenRepository(session=session)
+            refresh_token_repo = refresh_token_repository_factory(
+                urn=self.urn,
+                user_urn=self.user_urn,
+                api_name=self.api_name,
+                user_id=self.user_id,
+                session=session,
+            )
 
             self.logger.debug("Validating request")
             await self.validate_request(

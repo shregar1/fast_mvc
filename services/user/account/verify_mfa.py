@@ -6,39 +6,34 @@ from datetime import datetime
 from typing import Any, Optional
 
 import jwt
-from sqlalchemy.orm import Session
 
 from constants.api_status import APIStatus
 from dtos.requests.user.account.verify_mfa import VerifyMFARequestDTO
 from dtos.responses.base import BaseResponseDTO
-from fast_database.persistence.models.user import User
 from fast_platform.errors import BadInputError, UnauthorizedError
-from services.mfa import MFAService
+from repositories.user.user_repository import UserRepository
+from services.user.abstraction import IUserService
 from services.user.token_issuance import TokenIssuanceService
-from start_utils import ALGORITHM, SECRET_KEY, logger
+from start_utils import ALGORITHM, SECRET_KEY
 
 
-class VerifyMFAService:
+class VerifyMFAService(IUserService):
     """Verify an MFA code against a challenge token and issue full JWTs."""
 
     def __init__(
         self,
-        urn: Optional[str] = None,
-        user_urn: Optional[str] = None,
-        api_name: Optional[str] = None,
-        user_id: Any = None,
-        session: Optional[Session] = None,
+        *args: Any,
+        user_repository: UserRepository,
+        mfa_service: Any,
         token_issuance_service: Optional[TokenIssuanceService] = None,
+        **kwargs: Any,
     ) -> None:
-        self._urn = urn or ""
-        self._user_urn = user_urn
-        self._api_name = api_name or "AUTH_VERIFY_MFA"
-        self._user_id = user_id
-        self._session = session
+        super().__init__(**kwargs)
+        self._user_repository = user_repository
+        self._mfa_service = mfa_service
         self._token_issuance_service = token_issuance_service
-        self._logger = logger.bind(urn=self._urn, api_name=self._api_name)
 
-    async def run(self, request_dto: VerifyMFARequestDTO) -> BaseResponseDTO:
+    async def run(self, request_dto: VerifyMFARequestDTO | None = None) -> BaseResponseDTO:
         try:
             payload = jwt.decode(
                 request_dto.mfa_challenge_token, SECRET_KEY, algorithms=[ALGORITHM],
@@ -56,26 +51,18 @@ class VerifyMFAService:
 
         user_id = payload.get("user_id")
         user_urn = payload.get("user_urn")
-        user = (
-            self._session.query(User)
-            .filter(User.id == user_id, User.is_deleted.is_(False))
-            .first()
-        )
+        user = self._user_repository.retrieve_record_by_id(user_id)
         if not user:
             raise UnauthorizedError(
                 responseMessage="User not found.",
                 responseKey="error_authentication_error",
             )
 
-        mfa_svc = MFAService(
-            urn=self._urn, user_urn=user_urn, api_name=self._api_name,
-            user_id=int(user_id) if user_id else None,
-        )
-        secret = getattr(user, "mfa_secret", None)
-        code_ok = bool(secret and mfa_svc.verify_totp(secret, request_dto.code))
+        secret = user.mfa_secret
+        code_ok = bool(secret and self._mfa_service.verify_totp(secret, request_dto.code))
         if not code_ok:
             backup_hash = getattr(user, "mfa_backup_codes_hash", None) or ""
-            matched, remaining = mfa_svc.verify_backup_code(request_dto.code, backup_hash)
+            matched, remaining = self._mfa_service.verify_backup_code(request_dto.code, backup_hash)
             if matched:
                 user.mfa_backup_codes_hash = remaining
                 code_ok = True
@@ -98,7 +85,7 @@ class VerifyMFAService:
         )
 
         return BaseResponseDTO(
-            transactionUrn=self._urn,
+            transactionUrn=self.urn,
             status=APIStatus.SUCCESS,
             responseMessage="Successfully logged in.",
             responseKey="success_user_login",

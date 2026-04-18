@@ -6,13 +6,7 @@ including URN tracking and user information.
 
 from typing import Any, Dict, Optional
 
-# Use loguru logger if available, otherwise use standard logging
-try:
-    from loguru import logger as _default_logger
-except ImportError:
-    import logging
-
-    _default_logger = logging.getLogger("fast_mvc")
+from loguru import logger as _default_logger
 
 
 class ContextMixin:

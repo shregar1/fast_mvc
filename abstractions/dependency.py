@@ -82,7 +82,7 @@ class IDependency(ABC):
         )
 
     @property
-    def urn(self) -> str | None | None:
+    def urn(self) -> str | None:
         """str | None: Get the Unique Request Number."""
         return self._urn
 

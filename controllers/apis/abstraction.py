@@ -9,14 +9,14 @@ from typing import Any, Optional
 from fastapi import Request
 from fastapi.responses import JSONResponse
 
-from abstractions.controller import IController
+from controllers.apis.json_api_controller import JSONAPIController
 
 
-class IAPIController(IController):
+class IAPIController(JSONAPIController):
     """Interface for controllers under ``controllers/apis``.
 
-    Inherits :meth:`handle_exception` and the common property surface from
-    :class:`abstractions.controller.IController`. Adds
+    Inherits :meth:`handle_exception`, :meth:`build_json_response`, and the
+    common property surface from the JSON API stack. Adds
     :meth:`invoke_with_exception_handling` for callback-style handlers and
     :meth:`_handle_controller_exception` as a thin backward-compatible wrapper.
     """

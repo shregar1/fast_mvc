@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from constants.default import Default
 from constants.response_key import ResponseKey
-from fastapi import HTTPException, Request, status
+from fast_platform.errors import UnauthorizedError
+from fastapi import Request
 
 
 class AuthDependency:
@@ -21,13 +22,13 @@ class AuthDependency:
             The current user dictionary.
             
         Raises:
-            HTTPException: 401 if user is not authenticated.
+            UnauthorizedError: If user is not authenticated.
         """
         user = getattr(request.state, "user", None)
         if user is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=Default.AUTHENTICATION_REQUIRED_MESSAGE,
+            raise UnauthorizedError(
+                responseMessage=Default.AUTHENTICATION_REQUIRED_MESSAGE,
+                responseKey=ResponseKey.UNAUTHORIZED,
             )
         return user
 

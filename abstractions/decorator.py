@@ -64,9 +64,9 @@ class IDecorator(IComponent[T]):
     Usage:
         class LoggingDecorator(IDecorator):
             def execute(self) -> T:
-                print("Before execution")
+                logger.info("Before execution")
                 result = self._wrapped.execute()
-                print("After execution")
+                logger.info("After execution")
                 return result
     """
 

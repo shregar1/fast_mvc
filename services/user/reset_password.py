@@ -65,6 +65,7 @@ class ResetPasswordService:
             )
 
         repo.update_password(user, hash_password(new_password))
+        self._session.commit()
 
         log_event("reset_password.success", urn=self._urn, email=email)
 

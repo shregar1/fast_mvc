@@ -3,19 +3,16 @@
 from __future__ import annotations
 
 import io
-from typing import Any, Optional
+from typing import Any
 
-from sqlalchemy.orm import Session
-
-from fast_database.persistence.models.user import User
 from fast_platform.errors import (
     BadInputError,
     NotFoundError,
     ServiceUnavailableError,
     UnauthorizedError,
 )
-from services.mfa import MFAService
-from start_utils import logger
+from repositories.user.user_repository import UserRepository
+from services.user.abstraction import IUserService
 
 try:
     import qrcode  # type: ignore[import-not-found]
@@ -23,50 +20,40 @@ except ImportError:
     qrcode = None  # type: ignore
 
 
-class MFAQrCodeService:
+class MFAQrCodeService(IUserService):
     """Produce a PNG QR code for the user's pending MFA provisioning URI."""
 
     def __init__(
         self,
         *args: Any,
-        urn: Optional[str] = None,
-        user_urn: Optional[str] = None,
-        api_name: Optional[str] = None,
-        user_id: Any = None,
-        session: Optional[Session] = None,
-        mfa_service: MFAService,
+        user_repository: UserRepository,
+        mfa_service: Any,
         **kwargs: Any,
     ) -> None:
-        super().__init__()
-        self._urn = urn or ""
-        self._user_urn = user_urn
-        self._api_name = api_name or "MFA_SETUP_QR_CODE"
-        self._user_id = user_id
-        self._session = session
+        super().__init__(**kwargs)
+        self._user_repository = user_repository
         self._mfa_service = mfa_service
-        self._mfa = mfa_service
-        self._logger = logger.bind(urn=self._urn, api_name=self._api_name)
 
-    async def run(self) -> tuple[bytes, str]:
+    async def run(self, request_dto: Any = None) -> tuple[bytes, str]:
         """Return ``(png_bytes, mime_type)`` for the pending setup secret."""
-        if not self._user_id:
+        if self.user_id is None:
             raise UnauthorizedError(
                 responseMessage="Unauthorized.",
                 responseKey="error_authentication_error",
             )
-        user = self._session.query(User).filter(User.id == self._user_id).first()
+        user = self._user_repository.retrieve_record_by_id(self.user_id)
         if not user:
             raise NotFoundError(
                 responseMessage="User not found.",
                 responseKey="error_user_not_found",
             )
-        if getattr(user, "mfa_enabled", False):
+        if user.mfa_enabled:
             raise BadInputError(
                 responseMessage="MFA is already enabled.",
                 responseKey="error_bad_input",
             )
 
-        secret = getattr(user, "mfa_secret", None)
+        secret = user.mfa_secret
         if not secret:
             raise BadInputError(
                 responseMessage="Call POST /mfa/setup first.",
@@ -82,7 +69,7 @@ class MFAQrCodeService:
                 responseKey="error_service_unavailable",
             )
 
-        uri = self._mfa.get_provisioning_uri(secret, user.email or "user")
+        uri = self._mfa_service.get_provisioning_uri(secret, user.email or "user")
         img = qrcode.make(uri)
         buf = io.BytesIO()
         img.save(buf, format="PNG")

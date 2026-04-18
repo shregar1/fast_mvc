@@ -24,14 +24,6 @@ except ImportError:
     StructuredLogger = None  # type: ignore
     Tracer = None  # type: ignore
 
-# Resilience (fast_platform.resilience)
-try:
-    from core.resilience import CircuitBreaker, RetryPolicy, retry
-except ImportError:
-    CircuitBreaker = None  # type: ignore
-    RetryPolicy = None  # type: ignore
-    retry = None  # type: ignore
-
 # Tasks/Jobs (fast_platform.jobs)
 try:
     from core.tasks import (
@@ -85,10 +77,6 @@ __all__ = [
     "Metrics",
     "Tracer",
     "AuditLog",
-    # Resilience
-    "CircuitBreaker",
-    "RetryPolicy",
-    "retry",
     # Jobs (fast_jobs)
     "enqueue",
     "cancel_job",

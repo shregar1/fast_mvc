@@ -1,14 +1,16 @@
 """``/user/me`` – authenticated user profile endpoint."""
 
+from collections.abc import Callable
+from http import HTTPStatus
+
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
-from http import HTTPStatus
 from sqlalchemy.orm import Session
 
 from constants.api_status import APIStatus
 from dependencies.db import DBDependency
+from dependencies.repositiories.user import UserRepositoryDependency
 from dtos.responses.base import BaseResponseDTO
-from fast_database.persistence.models.user import User
 
 router = APIRouter(prefix="/me", tags=["me"])
 
@@ -17,6 +19,7 @@ router = APIRouter(prefix="/me", tags=["me"])
 async def get_me(
     request: Request,
     session: Session = Depends(DBDependency.derive),
+    user_repository_factory: Callable = Depends(UserRepositoryDependency.derive),
 ):
     """Return current authenticated user's profile."""
     user_id = getattr(request.state, "user_id", None)
@@ -26,7 +29,14 @@ async def get_me(
             content={"detail": "Authentication required"},
         )
 
-    user = session.query(User).filter(User.id == user_id).first()
+    repo = user_repository_factory(
+        urn=getattr(request.state, "urn", None),
+        user_urn=getattr(request.state, "user_urn", None),
+        api_name="USER_ME",
+        user_id=user_id,
+        session=session,
+    )
+    user = repo.retrieve_record_by_id(user_id)
     if not user:
         return JSONResponse(
             status_code=HTTPStatus.NOT_FOUND,
@@ -44,7 +54,7 @@ async def get_me(
                 "userId": user.id,
                 "email": user.email,
                 "userUrn": getattr(user, "urn", ""),
-                "mfaEnabled": getattr(user, "mfa_enabled", False),
+                "mfaEnabled": user.mfa_enabled,
                 "emailVerified": getattr(user, "email_verified", False),
                 "phone": getattr(user, "phone", None),
                 "phoneVerified": getattr(user, "phone_verified", False),

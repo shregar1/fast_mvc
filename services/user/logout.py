@@ -37,12 +37,12 @@ class UserLogoutService(IUserService):
             except Exception as exc:
                 logger.warning("Failed to revoke refresh tokens for user %s: %s", self.user_id, exc)
 
-        # Update login state
+        # Update login state via repository
         if self.user_id and self.user_repository:
             try:
                 user = self.user_repository.retrieve_record_by_id(self.user_id)
-                if user and hasattr(user, "last_login"):
-                    user.last_login = None
+                if user:
+                    self.user_repository.clear_last_login(user)
             except Exception as exc:
                 logger.warning("Failed to update login state for user %s: %s", self.user_id, exc)
 

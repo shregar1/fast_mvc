@@ -34,9 +34,9 @@ class ItemService(IItemService):
             return failure("Item not found")
         return success(get_result.value)
 
-    def run(self, request_dto: Any) -> dict:
+    async def run(self, request_dto: Any = None) -> None:
         """Framework hook; item flows use explicit methods (create_item, …)."""
-        return {}
+        raise NotImplementedError("Use specific item service methods")
 
     # Business Operations
 

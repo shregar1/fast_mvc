@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from repositories.user.abstraction import IUserRepository
 
@@ -97,33 +97,63 @@ class UserRepository(IUserRepository):
             )
         ).first()
 
-    # ── Single-op writes (repo owns commit) ─────────────────────────
+    # ── Single-op writes (caller owns commit) ────────────────────────
 
     def mark_email_verified(self, user: Any, verified_at: Any) -> Any:
-        """Set ``email_verified_at`` on the given user and persist.
+        """Set ``email_verified_at`` on the given user.
 
-        Single-op write: repository owns the commit boundary.
+        The caller is responsible for committing the transaction.
         """
         if self.session is None:
             raise RuntimeError("Database session is required to update records.")
         user.email_verified_at = verified_at
         self.session.add(user)
-        self.session.commit()
-        self.session.refresh(user)
         return user
 
     def update_password(self, user: Any, password_hash: str) -> Any:
-        """Update a user's password hash and persist.
+        """Update a user's password hash.
 
-        Single-op write: repository owns the commit boundary.
+        The caller is responsible for committing the transaction.
         """
         if self.session is None:
             raise RuntimeError("Database session is required to update records.")
         user.password = password_hash
         self.session.add(user)
-        self.session.commit()
-        self.session.refresh(user)
         return user
+
+    def set_mfa_enabled(self, user: Any, enabled: bool) -> None:
+        """Toggle ``mfa_enabled`` on the given user and persist.
+
+        The caller is responsible for committing the transaction.
+        """
+        if self.session is None:
+            raise RuntimeError("Database session is required to update records.")
+        user.mfa_enabled = enabled
+        self.session.commit()
+
+    def set_mfa_secret(self, user: Any, secret: str | None) -> None:
+        """Set or clear ``mfa_secret`` on the given user and persist.
+
+        The caller is responsible for committing the transaction.
+        """
+        if self.session is None:
+            raise RuntimeError("Database session is required to update records.")
+        user.mfa_secret = secret
+        self.session.commit()
+
+    def touch_last_login(self, user: Any) -> None:
+        """Set ``last_login`` to the current server time.
+
+        The caller is responsible for committing the transaction.
+        """
+        user.last_login = func.now()
+
+    def clear_last_login(self, user: Any) -> None:
+        """Clear ``last_login`` on the given user.
+
+        The caller is responsible for committing the transaction.
+        """
+        user.last_login = None
 
 
 __all__ = ["UserRepository"]

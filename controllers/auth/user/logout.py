@@ -33,13 +33,13 @@ from constants.http_header import HttpHeader
 from constants.api_status import APIStatus
 from controllers.auth.user.abstraction import IUserController
 from dependencies.db import DBDependency
+from dependencies.repositiories.refresh_token import RefreshTokenRepositoryDependency
 from dependencies.repositiories.user import UserRepositoryDependency
 from dependencies.services.user.logout import UserLogoutServiceDependency
 from dependencies.utilities.dictionary import DictionaryUtilityDependency
 from dependencies.utilities.jwt import JWTUtilityDependency
 from dtos.requests.user.logout import UserLogoutRequestDTO
 from dtos.responses.base import BaseResponseDTO
-from repositories.user.refresh_token_repository import RefreshTokenRepository
 from repositories.user.user_repository import UserRepository
 from structured_log import log_event
 from utilities.dictionary import DictionaryUtility
@@ -110,7 +110,10 @@ class UserLogoutController(IUserController):
         ),
         jwt_utility: JWTUtility = Depends(
             JWTUtilityDependency.derive
-        )
+        ),
+        refresh_token_repository_factory: Callable = Depends(
+            RefreshTokenRepositoryDependency.derive
+        ),
     ) -> JSONResponse:
         """
         Handle POST request for user logout.
@@ -177,7 +180,13 @@ class UserLogoutController(IUserController):
                     HttpHeader.AUTHORIZATION_BEARER_PREFIX_LENGTH:
                 ].strip()
 
-            refresh_token_repo = RefreshTokenRepository(session=session)
+            refresh_token_repo = refresh_token_repository_factory(
+                urn=self.urn,
+                user_urn=self.user_urn,
+                api_name=self.api_name,
+                user_id=self.user_id,
+                session=session,
+            )
 
             self.logger.debug("Running logout service")
             response_dto: BaseResponseDTO = await user_logout_service_factory(

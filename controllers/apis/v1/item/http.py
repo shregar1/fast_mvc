@@ -5,7 +5,8 @@ from __future__ import annotations
 from http import HTTPStatus
 from typing import Any
 
-from fastapi import HTTPException, Request
+from fast_platform.errors import NotFoundError
+from fastapi import Request
 from fastapi.responses import JSONResponse
 
 from abstractions.result import Result
@@ -55,14 +56,14 @@ class ItemHttpResponseBuilder:
         item_id: str,
     ) -> Item:
         if result.is_failure:
-            raise HTTPException(
-                status_code=HTTPStatus.NOT_FOUND,
-                detail=str(result.error),
+            raise NotFoundError(
+                responseMessage=str(result.error),
+                responseKey="error_item_not_found",
             )
         if result.value is None:
-            raise HTTPException(
-                status_code=HTTPStatus.NOT_FOUND,
-                detail=f"Item not found: {item_id}",
+            raise NotFoundError(
+                responseMessage=f"Item not found: {item_id}",
+                responseKey="error_item_not_found",
             )
         return result.value
 
@@ -111,14 +112,14 @@ class ItemHttpResponseBuilder:
         item_id: str,
     ) -> None:
         if result.is_failure:
-            raise HTTPException(
-                status_code=HTTPStatus.NOT_FOUND,
-                detail=str(result.error),
+            raise NotFoundError(
+                responseMessage=str(result.error),
+                responseKey="error_item_not_found",
             )
         if not result.value:
-            raise HTTPException(
-                status_code=HTTPStatus.NOT_FOUND,
-                detail=f"Item not found: {item_id}",
+            raise NotFoundError(
+                responseMessage=f"Item not found: {item_id}",
+                responseKey="error_item_not_found",
             )
 
     @staticmethod

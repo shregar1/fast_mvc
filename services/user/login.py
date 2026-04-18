@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 from typing import Any
 
 import bcrypt
@@ -100,10 +99,9 @@ class UserLoginService(IUserService):
             public_key_pem=public_key_pem,
         )
 
-        # Update login state on the model (will be committed by controller/session)
+        # Update login state via repository (caller owns commit)
         try:
-            if hasattr(user, "last_login"):
-                user.last_login = datetime.now(timezone.utc)
+            self.user_repository.touch_last_login(user)
         except Exception:
             pass
 
