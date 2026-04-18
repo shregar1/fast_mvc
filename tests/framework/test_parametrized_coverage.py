@@ -90,8 +90,8 @@ class TestStringUtilityParametrized:
         assert result == expected
 
 
-class TestAuthUtilityParametrized:
-    """Parametrized tests for AuthUtility."""
+class TestAuthHelpersParametrized:
+    """Parametrized tests for utilities.auth helpers."""
 
     @pytest.mark.parametrize("val1,val2,expected", [
         ("abc", "abc", True),
@@ -101,8 +101,8 @@ class TestAuthUtilityParametrized:
     ])
     def test_constant_time_compare_various(self, val1, val2, expected):
         """Test constant_time_compare with various inputs."""
-        from utilities.auth import AuthUtility
-        result = AuthUtility.constant_time_compare(val1, val2)
+        from utilities.auth import constant_time_compare
+        result = constant_time_compare(val1, val2)
         assert result == expected
 
 
@@ -175,7 +175,6 @@ class TestUtilityInheritanceParametrized:
         "EnvironmentParserUtility",
         "DateTimeUtility",
         "StringUtility",
-        "AuthUtility",
         "SystemUtility",
         "CorsConfigUtility",
         "SecurityHeadersUtility",
@@ -183,12 +182,11 @@ class TestUtilityInheritanceParametrized:
     ])
     def test_utility_has_logger(self, utility_class):
         """Test utility class has logger property."""
-        from utilities import env, datetime, string, auth, system, cors, security_headers, validator
+        from utilities import env, datetime, string, system, cors, security_headers, validator
         module_map = {
             "EnvironmentParserUtility": env,
             "DateTimeUtility": datetime,
             "StringUtility": string,
-            "AuthUtility": auth,
             "SystemUtility": system,
             "CorsConfigUtility": cors,
             "SecurityHeadersUtility": security_headers,
@@ -201,7 +199,6 @@ class TestUtilityInheritanceParametrized:
         "EnvironmentParserUtility",
         "DateTimeUtility",
         "StringUtility",
-        "AuthUtility",
         "SystemUtility",
         "CorsConfigUtility",
         "SecurityHeadersUtility",
@@ -209,12 +206,11 @@ class TestUtilityInheritanceParametrized:
     ])
     def test_utility_has_urn(self, utility_class):
         """Test utility class has urn property."""
-        from utilities import env, datetime, string, auth, system, cors, security_headers, validator
+        from utilities import env, datetime, string, system, cors, security_headers, validator
         module_map = {
             "EnvironmentParserUtility": env,
             "DateTimeUtility": datetime,
             "StringUtility": string,
-            "AuthUtility": auth,
             "SystemUtility": system,
             "CorsConfigUtility": cors,
             "SecurityHeadersUtility": security_headers,

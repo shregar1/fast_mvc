@@ -23,7 +23,7 @@ from starlette.responses import PlainTextResponse, Response
 
 from constants.default import Default
 from constants.http_header import HttpHeader
-from utilities.auth import AuthUtility
+from utilities.auth import constant_time_compare, parse_basic_authorization
 from utilities.string import StringUtility
 
 
@@ -112,15 +112,15 @@ class DocsBasicAuthMiddleware(BaseHTTPMiddleware):
 
         expected_user = os.environ["DOCS_USERNAME"].strip()
         expected_pass = os.environ["DOCS_PASSWORD"].strip()
-        parsed = AuthUtility.parse_basic_authorization(
+        parsed = parse_basic_authorization(
             request.headers.get(HttpHeader.AUTHORIZATION)
         )
         if parsed is None:
             return DocsAuthConfig.unauthorized_response()
         username, password = parsed
         if not (
-            AuthUtility.constant_time_compare(username, expected_user)
-            and AuthUtility.constant_time_compare(password, expected_pass)
+            constant_time_compare(username, expected_user)
+            and constant_time_compare(password, expected_pass)
         ):
             return DocsAuthConfig.unauthorized_response()
         return await call_next(request)

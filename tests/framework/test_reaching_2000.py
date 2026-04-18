@@ -126,34 +126,34 @@ class TestAuthOperations:
 
     def test_constant_time_compare_empty(self):
         """Test constant_time_compare with empty strings."""
-        from utilities.auth import AuthUtility
-        assert AuthUtility.constant_time_compare("", "") is True
+        from utilities.auth import constant_time_compare
+        assert constant_time_compare("", "") is True
 
     def test_constant_time_compare_single_char(self):
         """Test constant_time_compare with single chars."""
-        from utilities.auth import AuthUtility
-        assert AuthUtility.constant_time_compare("a", "a") is True
-        assert AuthUtility.constant_time_compare("a", "b") is False
+        from utilities.auth import constant_time_compare
+        assert constant_time_compare("a", "a") is True
+        assert constant_time_compare("a", "b") is False
 
     def test_constant_time_compare_long_strings(self):
         """Test constant_time_compare with long strings."""
-        from utilities.auth import AuthUtility
+        from utilities.auth import constant_time_compare
         s1 = "a" * 100
         s2 = "a" * 100
         s3 = "b" * 100
-        assert AuthUtility.constant_time_compare(s1, s2) is True
-        assert AuthUtility.constant_time_compare(s1, s3) is False
+        assert constant_time_compare(s1, s2) is True
+        assert constant_time_compare(s1, s3) is False
 
     def test_parse_basic_authorization_empty(self):
         """Test parse_basic_authorization with empty input."""
-        from utilities.auth import AuthUtility
-        result = AuthUtility.parse_basic_authorization("")
+        from utilities.auth import parse_basic_authorization
+        result = parse_basic_authorization("")
         assert result is None or result == (None, None)
 
     def test_parse_basic_authorization_no_basic(self):
         """Test parse_basic_authorization without Basic prefix."""
-        from utilities.auth import AuthUtility
-        result = AuthUtility.parse_basic_authorization("token")
+        from utilities.auth import parse_basic_authorization
+        result = parse_basic_authorization("token")
         assert result is None or result == (None, None)
 
 
@@ -418,7 +418,6 @@ class TestUtilityPropertiesParametrized:
     @pytest.mark.parametrize("prop", ["urn", "user_urn", "api_name", "user_id", "logger"])
     def test_all_utilities_have_properties(self, prop):
         """Test all utilities have standard properties."""
-        from utilities.auth import AuthUtility
         from utilities.datetime import DateTimeUtility
         from utilities.system import SystemUtility
         from utilities.env import EnvironmentParserUtility
@@ -426,8 +425,8 @@ class TestUtilityPropertiesParametrized:
         from utilities.cors import CorsConfigUtility
         from utilities.security_headers import SecurityHeadersUtility
         from utilities.validator import ConfigValidatorUtility
-        
-        for cls in [AuthUtility, DateTimeUtility, SystemUtility, EnvironmentParserUtility,
+
+        for cls in [DateTimeUtility, SystemUtility, EnvironmentParserUtility,
                     StringUtility, CorsConfigUtility, SecurityHeadersUtility, ConfigValidatorUtility]:
             assert hasattr(cls, prop), f"{cls.__name__} missing {prop}"
 

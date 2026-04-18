@@ -24,10 +24,11 @@ class TestUtilityImports:
         from utilities.string import StringUtility
         assert StringUtility is not None
 
-    def test_import_auth_utility(self):
-        """Test AuthUtility can be imported."""
-        from utilities.auth import AuthUtility
-        assert AuthUtility is not None
+    def test_import_auth_helpers(self):
+        """Test utilities.auth module-level helpers can be imported."""
+        from utilities.auth import constant_time_compare, parse_basic_authorization
+        assert constant_time_compare is not None
+        assert parse_basic_authorization is not None
 
     def test_import_cors_utility(self):
         """Test CorsConfigUtility can be imported."""
@@ -70,12 +71,6 @@ class TestUtilityInheritance:
         from utilities.string import StringUtility
         from abstractions.utility import IUtility
         assert issubclass(StringUtility, IUtility)
-
-    def test_auth_utility_inheritance(self):
-        """Test AuthUtility inherits from IUtility."""
-        from utilities.auth import AuthUtility
-        from abstractions.utility import IUtility
-        assert issubclass(AuthUtility, IUtility)
 
     def test_cors_utility_inheritance(self):
         """Test CorsConfigUtility inherits from IUtility."""
@@ -123,12 +118,6 @@ class TestUtilityInstantiation:
         util = StringUtility()
         assert util is not None
 
-    def test_auth_utility_instantiation(self):
-        """Test AuthUtility can be instantiated."""
-        from utilities.auth import AuthUtility
-        util = AuthUtility()
-        assert util is not None
-
     def test_cors_utility_instantiation(self):
         """Test CorsConfigUtility can be instantiated."""
         from utilities.cors import CorsConfigUtility
@@ -161,7 +150,6 @@ class TestUtilityContext:
         ("utilities.env.EnvironmentParserUtility", "env"),
         ("utilities.datetime.DateTimeUtility", "datetime"),
         ("utilities.string.StringUtility", "string"),
-        ("utilities.auth.AuthUtility", "auth"),
         ("utilities.cors.CorsConfigUtility", "cors"),
         ("utilities.security_headers.SecurityHeadersUtility", "security_headers"),
         ("utilities.system.SystemUtility", "system"),
@@ -179,7 +167,6 @@ class TestUtilityContext:
         ("utilities.env.EnvironmentParserUtility", "env"),
         ("utilities.datetime.DateTimeUtility", "datetime"),
         ("utilities.string.StringUtility", "string"),
-        ("utilities.auth.AuthUtility", "auth"),
         ("utilities.cors.CorsConfigUtility", "cors"),
         ("utilities.security_headers.SecurityHeadersUtility", "security_headers"),
         ("utilities.system.SystemUtility", "system"),
@@ -197,7 +184,6 @@ class TestUtilityContext:
         ("utilities.env.EnvironmentParserUtility", "env"),
         ("utilities.datetime.DateTimeUtility", "datetime"),
         ("utilities.string.StringUtility", "string"),
-        ("utilities.auth.AuthUtility", "auth"),
         ("utilities.cors.CorsConfigUtility", "cors"),
         ("utilities.security_headers.SecurityHeadersUtility", "security_headers"),
         ("utilities.system.SystemUtility", "system"),
@@ -215,7 +201,6 @@ class TestUtilityContext:
         ("utilities.env.EnvironmentParserUtility", "env"),
         ("utilities.datetime.DateTimeUtility", "datetime"),
         ("utilities.string.StringUtility", "string"),
-        ("utilities.auth.AuthUtility", "auth"),
         ("utilities.cors.CorsConfigUtility", "cors"),
         ("utilities.security_headers.SecurityHeadersUtility", "security_headers"),
         ("utilities.system.SystemUtility", "system"),
@@ -233,7 +218,6 @@ class TestUtilityContext:
         ("utilities.env.EnvironmentParserUtility", "env"),
         ("utilities.datetime.DateTimeUtility", "datetime"),
         ("utilities.string.StringUtility", "string"),
-        ("utilities.auth.AuthUtility", "auth"),
         ("utilities.cors.CorsConfigUtility", "cors"),
         ("utilities.security_headers.SecurityHeadersUtility", "security_headers"),
         ("utilities.system.SystemUtility", "system"),

@@ -8,15 +8,6 @@ import pytest
 class TestUtilityInstancesWithVariousParams:
     """Test utility instances with various params."""
 
-    def test_auth_utility_with_all_params(self):
-        """Test AuthUtility with all params."""
-        from utilities.auth import AuthUtility
-        util = AuthUtility(urn="u", user_urn="uu", api_name="a", user_id="uid")
-        assert util.urn == "u"
-        assert util.user_urn == "uu"
-        assert util.api_name == "a"
-        assert util.user_id == "uid"
-
     def test_datetime_utility_with_all_params(self):
         """Test DateTimeUtility with all params."""
         from utilities.datetime import DateTimeUtility
@@ -69,42 +60,6 @@ class TestUtilityInstancesWithVariousParams:
 
 class TestUtilityPropertyUpdates:
     """Test utility property updates."""
-
-    def test_auth_urn_update(self):
-        """Test AuthUtility urn update."""
-        from utilities.auth import AuthUtility
-        util = AuthUtility()
-        util.urn = "first"
-        assert util.urn == "first"
-        util.urn = "second"
-        assert util.urn == "second"
-
-    def test_auth_user_urn_update(self):
-        """Test AuthUtility user_urn update."""
-        from utilities.auth import AuthUtility
-        util = AuthUtility()
-        util.user_urn = "first"
-        assert util.user_urn == "first"
-        util.user_urn = "second"
-        assert util.user_urn == "second"
-
-    def test_auth_api_name_update(self):
-        """Test AuthUtility api_name update."""
-        from utilities.auth import AuthUtility
-        util = AuthUtility()
-        util.api_name = "first"
-        assert util.api_name == "first"
-        util.api_name = "second"
-        assert util.api_name == "second"
-
-    def test_auth_user_id_update(self):
-        """Test AuthUtility user_id update."""
-        from utilities.auth import AuthUtility
-        util = AuthUtility()
-        util.user_id = "first"
-        assert util.user_id == "first"
-        util.user_id = "second"
-        assert util.user_id == "second"
 
     def test_datetime_urn_update(self):
         """Test DateTimeUtility urn update."""
@@ -233,13 +188,13 @@ class TestStringUtilityReturnTypes:
         assert isinstance(result, str)
 
 
-class TestAuthUtilityReturnTypes:
-    """Test AuthUtility return types."""
+class TestAuthHelperReturnTypes:
+    """Test utilities.auth return types."""
 
     def test_constant_time_compare_returns_bool(self):
         """Test constant_time_compare returns bool."""
-        from utilities.auth import AuthUtility
-        result = AuthUtility.constant_time_compare("a", "b")
+        from utilities.auth import constant_time_compare
+        result = constant_time_compare("a", "b")
         assert isinstance(result, bool)
 
 

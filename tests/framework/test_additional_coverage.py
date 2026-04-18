@@ -10,13 +10,6 @@ import asyncio
 class TestUtilityInstances:
     """Test utility class instantiation."""
 
-    def test_auth_utility_instantiation(self):
-        """Test AuthUtility can be instantiated."""
-        from utilities.auth import AuthUtility
-        util = AuthUtility()
-        assert util is not None
-        assert isinstance(util, AuthUtility)
-
     def test_datetime_utility_instantiation(self):
         """Test DateTimeUtility can be instantiated."""
         from utilities.datetime import DateTimeUtility
@@ -69,20 +62,6 @@ class TestUtilityInstances:
 
 class TestUtilityPropertiesWithValues:
     """Test utility properties with values."""
-
-    def test_auth_utility_properties(self):
-        """Test AuthUtility properties."""
-        from utilities.auth import AuthUtility
-        util = AuthUtility(
-            urn="test-urn",
-            user_urn="user-urn",
-            api_name="api-name",
-            user_id="user-id"
-        )
-        assert util.urn == "test-urn"
-        assert util.user_urn == "user-urn"
-        assert util.api_name == "api-name"
-        assert util.user_id == "user-id"
 
     def test_datetime_utility_properties(self):
         """Test DateTimeUtility properties."""
@@ -144,39 +123,36 @@ class TestStringUtilityMethods:
         assert result == "/path"
 
 
-class TestAuthUtilityMethods:
-    """Test AuthUtility methods."""
+class TestAuthHelperMethods:
+    """Test utilities.auth helper functions."""
 
     def test_constant_time_compare_same(self):
         """Test constant_time_compare with same strings."""
-        from utilities.auth import AuthUtility
-        result = AuthUtility.constant_time_compare("secret", "secret")
-        assert result is True
+        from utilities.auth import constant_time_compare
+        assert constant_time_compare("secret", "secret") is True
 
     def test_constant_time_compare_different(self):
         """Test constant_time_compare with different strings."""
-        from utilities.auth import AuthUtility
-        result = AuthUtility.constant_time_compare("secret", "different")
-        assert result is False
+        from utilities.auth import constant_time_compare
+        assert constant_time_compare("secret", "different") is False
 
     def test_constant_time_compare_different_lengths(self):
         """Test constant_time_compare with different length strings."""
-        from utilities.auth import AuthUtility
-        result = AuthUtility.constant_time_compare("short", "longerstring")
-        assert result is False
+        from utilities.auth import constant_time_compare
+        assert constant_time_compare("short", "longerstring") is False
 
     def test_parse_basic_authorization_valid(self):
         """Test parse_basic_authorization with valid input."""
-        from utilities.auth import AuthUtility
+        from utilities.auth import parse_basic_authorization
         import base64
         credentials = base64.b64encode(b"user:pass").decode()
-        result = AuthUtility.parse_basic_authorization(f"Basic {credentials}")
+        result = parse_basic_authorization(f"Basic {credentials}")
         assert result is not None
 
     def test_parse_basic_authorization_invalid(self):
         """Test parse_basic_authorization with invalid input."""
-        from utilities.auth import AuthUtility
-        result = AuthUtility.parse_basic_authorization("Invalid")
+        from utilities.auth import parse_basic_authorization
+        result = parse_basic_authorization("Invalid")
         assert result is None or result == (None, None)
 
 

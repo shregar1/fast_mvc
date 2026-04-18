@@ -8,34 +8,6 @@ import pytest
 class TestUtilityPropertySetters:
     """Test utility property setters."""
 
-    def test_auth_urn_setter_changes_value(self):
-        """Test AuthUtility urn setter changes value."""
-        from utilities.auth import AuthUtility
-        util = AuthUtility(urn="original")
-        util.urn = "changed"
-        assert util.urn == "changed"
-
-    def test_auth_user_urn_setter_changes_value(self):
-        """Test AuthUtility user_urn setter changes value."""
-        from utilities.auth import AuthUtility
-        util = AuthUtility(user_urn="original")
-        util.user_urn = "changed"
-        assert util.user_urn == "changed"
-
-    def test_auth_api_name_setter_changes_value(self):
-        """Test AuthUtility api_name setter changes value."""
-        from utilities.auth import AuthUtility
-        util = AuthUtility(api_name="original")
-        util.api_name = "changed"
-        assert util.api_name == "changed"
-
-    def test_auth_user_id_setter_changes_value(self):
-        """Test AuthUtility user_id setter changes value."""
-        from utilities.auth import AuthUtility
-        util = AuthUtility(user_id="original")
-        util.user_id = "changed"
-        assert util.user_id == "changed"
-
     def test_datetime_urn_setter_changes_value(self):
         """Test DateTimeUtility urn setter changes value."""
         from utilities.datetime import DateTimeUtility
@@ -161,18 +133,18 @@ class TestStringUtilityEdgeCases:
 
 
 class TestAuthUtilityEdgeCases:
-    """Test AuthUtility edge cases."""
+    """Test auth helper edge cases."""
 
     def test_constant_time_compare_unicode(self):
         """Test constant_time_compare with unicode."""
-        from utilities.auth import AuthUtility
-        result = AuthUtility.constant_time_compare("测试", "测试")
+        from utilities.auth import constant_time_compare
+        result = constant_time_compare("测试", "测试")
         assert result is True
 
     def test_constant_time_compare_different_unicode(self):
         """Test constant_time_compare with different unicode."""
-        from utilities.auth import AuthUtility
-        result = AuthUtility.constant_time_compare("测试", " different")
+        from utilities.auth import constant_time_compare
+        result = constant_time_compare("测试", " different")
         assert result is False
 
 

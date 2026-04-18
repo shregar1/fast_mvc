@@ -31,14 +31,15 @@ class TestUtilityMethodsExist:
         from utilities.string import StringUtility
         assert hasattr(StringUtility, method_name)
 
-    @pytest.mark.parametrize("method_name", [
+    @pytest.mark.parametrize("func_name", [
         "constant_time_compare",
         "parse_basic_authorization",
     ])
-    def test_auth_utility_methods(self, method_name):
-        """Test AuthUtility has methods."""
-        from utilities.auth import AuthUtility
-        assert hasattr(AuthUtility, method_name)
+    def test_auth_module_functions(self, func_name):
+        """Test utilities.auth exposes module-level functions."""
+        import utilities.auth as auth_module
+        assert hasattr(auth_module, func_name)
+        assert callable(getattr(auth_module, func_name))
 
     @pytest.mark.parametrize("method_name", [
         "utc_now",
@@ -313,7 +314,6 @@ class TestUtilityInstancesWithContext:
     """Test utility instances with context."""
 
     @pytest.mark.parametrize("cls_name,module", [
-        ("AuthUtility", "utilities.auth"),
         ("DateTimeUtility", "utilities.datetime"),
         ("SystemUtility", "utilities.system"),
         ("EnvironmentParserUtility", "utilities.env"),

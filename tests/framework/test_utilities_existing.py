@@ -6,40 +6,38 @@ import pytest
 from unittest.mock import patch
 
 
-class TestAuthUtilityExisting:
-    """Test AuthUtility existing methods."""
+class TestAuthHelpersExisting:
+    """Test auth helper functions."""
 
     def test_constant_time_compare_exists(self):
         """Test constant_time_compare exists."""
-        from utilities.auth import AuthUtility
-        assert hasattr(AuthUtility, "constant_time_compare")
+        import utilities.auth as auth_module
+        assert hasattr(auth_module, "constant_time_compare")
 
     def test_constant_time_compare_is_callable(self):
         """Test constant_time_compare is callable."""
-        from utilities.auth import AuthUtility
-        assert callable(AuthUtility.constant_time_compare)
+        from utilities.auth import constant_time_compare
+        assert callable(constant_time_compare)
 
     def test_constant_time_compare_equal_strings(self):
         """Test constant_time_compare with equal strings."""
-        from utilities.auth import AuthUtility
-        result = AuthUtility.constant_time_compare("abc", "abc")
-        assert result is True
+        from utilities.auth import constant_time_compare
+        assert constant_time_compare("abc", "abc") is True
 
     def test_constant_time_compare_different_strings(self):
         """Test constant_time_compare with different strings."""
-        from utilities.auth import AuthUtility
-        result = AuthUtility.constant_time_compare("abc", "def")
-        assert result is False
+        from utilities.auth import constant_time_compare
+        assert constant_time_compare("abc", "def") is False
 
     def test_parse_basic_authorization_exists(self):
         """Test parse_basic_authorization exists."""
-        from utilities.auth import AuthUtility
-        assert hasattr(AuthUtility, "parse_basic_authorization")
+        import utilities.auth as auth_module
+        assert hasattr(auth_module, "parse_basic_authorization")
 
     def test_parse_basic_authorization_is_callable(self):
         """Test parse_basic_authorization is callable."""
-        from utilities.auth import AuthUtility
-        assert callable(AuthUtility.parse_basic_authorization)
+        from utilities.auth import parse_basic_authorization
+        assert callable(parse_basic_authorization)
 
 
 class TestDateTimeUtilityExisting:
@@ -241,18 +239,6 @@ class TestConfigValidatorUtilityExisting:
 
 class TestUtilityPropertiesExisting:
     """Test utility properties."""
-
-    @pytest.mark.parametrize("prop_name", [
-        "urn",
-        "user_urn",
-        "api_name",
-        "user_id",
-        "logger",
-    ])
-    def test_auth_utility_properties_exist(self, prop_name):
-        """Test AuthUtility properties exist."""
-        from utilities.auth import AuthUtility
-        assert hasattr(AuthUtility, prop_name)
 
     @pytest.mark.parametrize("prop_name", [
         "urn",

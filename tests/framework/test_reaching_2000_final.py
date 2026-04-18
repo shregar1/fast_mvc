@@ -31,15 +31,15 @@ class TestUtilityMethodSignatures:
         method = getattr(StringUtility, method_name)
         assert callable(method)
 
-    @pytest.mark.parametrize("method_name", [
+    @pytest.mark.parametrize("func_name", [
         "constant_time_compare",
         "parse_basic_authorization",
     ])
-    def test_auth_static_methods(self, method_name):
-        """Test AuthUtility methods are static."""
-        from utilities.auth import AuthUtility
-        method = getattr(AuthUtility, method_name)
-        assert callable(method)
+    def test_auth_module_functions(self, func_name):
+        """Test utilities.auth module-level functions are callable."""
+        import utilities.auth as auth_module
+        func = getattr(auth_module, func_name)
+        assert callable(func)
 
     @pytest.mark.parametrize("method_name", [
         "utc_now",
@@ -175,12 +175,6 @@ class TestLogLevelsExist:
 
 class TestUtilityInstancesAreNotNone:
     """Test utility instances are not None."""
-
-    def test_auth_utility_not_none(self):
-        """Test AuthUtility instance is not None."""
-        from utilities.auth import AuthUtility
-        util = AuthUtility()
-        assert util is not None
 
     def test_datetime_utility_not_none(self):
         """Test DateTimeUtility instance is not None."""
@@ -442,31 +436,6 @@ class TestDocumentationFiles:
 
 class TestUtilityPropertyTypes:
     """Test utility property types."""
-
-    def test_auth_urn_is_none_or_str(self):
-        """Test AuthUtility urn is None or str."""
-        from utilities.auth import AuthUtility
-        util = AuthUtility()
-        assert util.urn is None or isinstance(util.urn, str)
-
-    def test_auth_user_urn_is_none_or_str(self):
-        """Test AuthUtility user_urn is None or str."""
-        from utilities.auth import AuthUtility
-        util = AuthUtility()
-        assert util.user_urn is None or isinstance(util.user_urn, str)
-
-    def test_auth_api_name_is_none_or_str(self):
-        """Test AuthUtility api_name is None or str."""
-        from utilities.auth import AuthUtility
-        util = AuthUtility()
-        assert util.api_name is None or isinstance(util.api_name, str)
-
-    def test_auth_user_id_is_none_or_str(self):
-        """Test AuthUtility user_id is None or str."""
-        from utilities.auth import AuthUtility
-        util = AuthUtility()
-        assert util.user_id is None or isinstance(util.user_id, str)
-
 
 class TestValidatorConstants:
     """Test validator constants."""

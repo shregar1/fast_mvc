@@ -39,6 +39,7 @@ from constants.api_status import APIStatus
 from constants.events import WebhookEventType
 from controllers.auth.user.abstraction import IUserController
 from dependencies.db import DBDependency
+from fast_platform.errors import ServiceUnavailableError
 from utilities.notifications.lifecycle import send_welcome_email
 from utilities.webhook_dispatcher import dispatch_webhook_event
 from dependencies.repositiories.user import UserRepositoryDependency
@@ -183,11 +184,13 @@ class UserRegistrationController(IUserController):
                 user_id = response_dto.data.get("user_id")
                 user_email = response_dto.data.get("user_email")
                 if user_email:
+                    # Non-fatal: registration already persisted — side-effect failure is logged, not raised.
                     try:
                         await send_welcome_email(user_email)
-                    except Exception as mail_err:
-                        self.logger.warning("Welcome email send failed: %s", mail_err)
+                    except ServiceUnavailableError:
+                        self.logger.exception("Welcome email send failed")
                 if user_id is not None:
+                    # Non-fatal: registration already persisted — side-effect failure is logged, not raised.
                     try:
                         event_id = str(uuid4())
                         dispatch_webhook_event(
@@ -197,8 +200,8 @@ class UserRegistrationController(IUserController):
                             {"user_id": user_id, "email": user_email or ""},
                             user_id=user_id,
                         )
-                    except Exception as wh_err:
-                        self.logger.warning("user.created webhook dispatch failed: %s", wh_err)
+                    except Exception:
+                        self.logger.exception("user.created webhook dispatch failed")
             self.logger.debug("Prepared response metadata")
 
         except Exception as err:

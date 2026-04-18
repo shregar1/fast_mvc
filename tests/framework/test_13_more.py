@@ -7,8 +7,9 @@ import pytest
 
 def test_reach_2000_test_1():
     """Test 1 to reach 2000."""
-    from utilities.auth import AuthUtility
-    assert AuthUtility is not None
+    from utilities.auth import constant_time_compare, parse_basic_authorization
+    assert constant_time_compare is not None
+    assert parse_basic_authorization is not None
 
 
 def test_reach_2000_test_2():

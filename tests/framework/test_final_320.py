@@ -9,13 +9,6 @@ import pytest
 class TestUtilityInstantiationContexts:
     """Test utility instantiation with various contexts."""
 
-    @pytest.mark.parametrize("urn", [None, "", "test-urn", "urn-123", "a" * 100])
-    def test_auth_utility_with_urn(self, urn):
-        """Test AuthUtility with various urns."""
-        from utilities.auth import AuthUtility
-        util = AuthUtility(urn=urn)
-        assert util.urn == urn
-
     @pytest.mark.parametrize("urn", [None, "", "test-urn", "urn-123"])
     def test_datetime_utility_with_urn(self, urn):
         """Test DateTimeUtility with various urns."""
@@ -30,59 +23,11 @@ class TestUtilityInstantiationContexts:
         util = SystemUtility(urn=urn)
         assert util.urn == urn
 
-    @pytest.mark.parametrize("user_urn", [None, "", "user-123", "user@test"])
-    def test_auth_utility_with_user_urn(self, user_urn):
-        """Test AuthUtility with various user_urns."""
-        from utilities.auth import AuthUtility
-        util = AuthUtility(user_urn=user_urn)
-        assert util.user_urn == user_urn
-
-    @pytest.mark.parametrize("api_name", [None, "", "api-1", "test_api"])
-    def test_auth_utility_with_api_name(self, api_name):
-        """Test AuthUtility with various api_names."""
-        from utilities.auth import AuthUtility
-        util = AuthUtility(api_name=api_name)
-        assert util.api_name == api_name
-
-    @pytest.mark.parametrize("user_id", [None, "", "123", "user-456"])
-    def test_auth_utility_with_user_id(self, user_id):
-        """Test AuthUtility with various user_ids."""
-        from utilities.auth import AuthUtility
-        util = AuthUtility(user_id=user_id)
-        assert util.user_id == user_id
 
 
 # 50 tests for property getters/setters
 class TestUtilityPropertyAccess:
     """Test utility property access."""
-
-    def test_auth_urn_getter_setter(self):
-        """Test AuthUtility urn getter/setter."""
-        from utilities.auth import AuthUtility
-        util = AuthUtility()
-        util.urn = "test"
-        assert util.urn == "test"
-
-    def test_auth_user_urn_getter_setter(self):
-        """Test AuthUtility user_urn getter/setter."""
-        from utilities.auth import AuthUtility
-        util = AuthUtility()
-        util.user_urn = "test"
-        assert util.user_urn == "test"
-
-    def test_auth_api_name_getter_setter(self):
-        """Test AuthUtility api_name getter/setter."""
-        from utilities.auth import AuthUtility
-        util = AuthUtility()
-        util.api_name = "test"
-        assert util.api_name == "test"
-
-    def test_auth_user_id_getter_setter(self):
-        """Test AuthUtility user_id getter/setter."""
-        from utilities.auth import AuthUtility
-        util = AuthUtility()
-        util.user_id = "test"
-        assert util.user_id == "test"
 
     def test_datetime_urn_getter_setter(self):
         """Test DateTimeUtility urn getter/setter."""
@@ -304,8 +249,9 @@ class TestModuleImportsExtended:
 
     def test_import_utilities_auth(self):
         """Test importing utilities.auth."""
-        from utilities.auth import AuthUtility
-        assert AuthUtility is not None
+        from utilities.auth import constant_time_compare, parse_basic_authorization
+        assert constant_time_compare is not None
+        assert parse_basic_authorization is not None
 
     def test_import_utilities_system(self):
         """Test importing utilities.system."""
