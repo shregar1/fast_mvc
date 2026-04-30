@@ -270,7 +270,7 @@ Backed by Redis or Kafka depending on configuration.
 """
 
 CHANNEL_BACKEND: str = (
-    EnvironmentParserUtility.parse_str(EnvironmentVar.CHANNEL_BACKEND, channels_configuration.backend)
+    EnvironmentParserUtility.parse_str(EnvironmentVar.CHANNEL_BACKEND, channels_configuration.get("backend", Default.CHANNEL_BACKEND))
     if channels_configuration is not None
     else Default.CHANNEL_BACKEND
 )
@@ -279,7 +279,7 @@ if CHANNEL_BACKEND == Default.CHANNEL_BACKEND and redis_session:
     try:
         import redis.asyncio as aioredis
         from fastx_channels import (  # pyright: ignore[reportMissingImports]
-            RedisChannelBackend,
+            RedisBackend,
         )
 
         channel_redis_url = redis_url
@@ -291,7 +291,7 @@ if CHANNEL_BACKEND == Default.CHANNEL_BACKEND and redis_session:
             channel_redis_url = f"redis://{auth}{host}:{port}/0"
 
         redis_async = aioredis.from_url(channel_redis_url)
-        channel_backend = RedisChannelBackend(redis_async)
+        channel_backend = RedisBackend(redis_async)
         logger.info("Initialized Redis channels backend")
     except Exception as exc:
         logger.error(f"Failed to initialize Redis channels backend: {exc}")
