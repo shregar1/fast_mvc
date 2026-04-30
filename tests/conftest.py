@@ -8,8 +8,8 @@ This file is automatically loaded by pytest and provides:
 Usage:
     Fixtures are automatically available in all test files.
 
-    def test_something(item_client, test_item):
-        # item_client and test_item are automatically injected
+    def test_something(client):
+        # client is automatically injected
         pass
 
     def test_factories(fetch_example_request_payload):
@@ -70,25 +70,10 @@ def pytest_configure(config):
 
 
 # =============================================================================
-# CUSTOM FIXTURES SPECIFIC TO TESTS
+# CUSTOM FIXTURES
 # =============================================================================
 
 import pytest
-
-
-# =============================================================================
-# ITEM API FIXTURES
-# =============================================================================
-
-@pytest.fixture(autouse=True)
-def _reset_item_storage_between_tests(request: pytest.FixtureRequest) -> Generator[None]:
-    """Keep in-memory item store isolated per test."""
-    if request.node.get_closest_marker("no_item_reset"):
-        yield
-        return
-    ItemTestHelper.clear_app_item_storage()
-    yield
-    ItemTestHelper.clear_app_item_storage()
 
 
 @pytest.fixture(scope="session")
@@ -98,24 +83,24 @@ def app():
 
 
 @pytest.fixture
-def item_client(app):
+def client(app):
+    """Synchronous test client for the FastAPI app."""
     return TestClient(app)
 
 
 @pytest.fixture
-async def async_item_client(app) -> AsyncIterator[AsyncClient]:
+async def async_client(app) -> AsyncIterator[AsyncClient]:
+    """Async test client for the FastAPI app."""
     transport = ASGITransport(app=app)
     async with AsyncClient(
         transport=transport, base_url="http://test"
-    ) as client:
-        yield client
+    ) as ac:
+        yield ac
 
 
 @pytest.fixture
-def authenticated_client(item_client):
-    return item_client
-
-
+def authenticated_client(client):
+    return client
 
 
 @pytest.fixture
@@ -142,59 +127,6 @@ def mock_invalid_auth():
 @pytest.fixture
 def mock_expired_token():
     return contextlib.nullcontext()
-
-
-@pytest.fixture
-def create_item_payload() -> dict:
-    return {
-        "reference_urn": str(uuid4()),
-        "name": "Test Item",
-        "description": "Test Description",
-        "completed": False,
-    }
-
-
-@pytest.fixture
-def update_item_payload() -> dict:
-    return {
-        "reference_urn": str(uuid4()),
-        "name": "Updated Name",
-        "description": "Updated description",
-    }
-
-
-@pytest.fixture
-def invalid_item_payloads() -> list[dict]:
-    return [{"name": ""}, {"name": "x" * 101}]
-
-
-@pytest.fixture
-def test_item(item_client: TestClient, create_item_payload: dict) -> Item:
-    r = item_client.post("/items", json=create_item_payload)
-    assert r.status_code == 201, r.text
-    return ItemTestHelper.item_from_api_json(r.json())
-
-
-@pytest.fixture
-def test_items(item_client: TestClient, mock_auth) -> list[Item]:
-    names = ["Alpha Search Me", "Beta Other", "Gamma Third"]
-    with mock_auth:
-        return [
-            ItemTestHelper.post_item(item_client, name=n, description="d", completed=False)
-            for n in names
-        ]
-
-
-@pytest.fixture
-def completed_items(item_client: TestClient, mock_auth) -> list[Item]:
-    with mock_auth:
-        return [ItemTestHelper.post_item(item_client, name="Done Item", completed=True)]
-
-
-@pytest.fixture
-def pending_items(item_client: TestClient, mock_auth) -> list[Item]:
-    with mock_auth:
-        return [ItemTestHelper.post_item(item_client, name="Todo Item", completed=False)]
 
 
 @pytest.fixture

@@ -229,7 +229,7 @@ class RouteExportEngine:
                 item["request"]["header"].append(
                     {
                         "key": HttpHeader.AUTHORIZATION,
-                        "value": f"{HttpHeader.AUTHORIZATION_BEARER_PREFIX}{{token}}",
+                        "value": f"{HttpHeader.AUTHORIZATION_BEARER_PREFIX}{{{{token}}}}",
                         "type": "text",
                     }
                 )

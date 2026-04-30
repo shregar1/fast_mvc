@@ -47,9 +47,9 @@ def _request_body_stub(op: dict[str, Any]) -> dict[str, Any] | None:
 
 
 @pytest.mark.api
-def test_openapi_every_route_returns_without_server_error(item_client: TestClient) -> None:
+def test_openapi_every_route_returns_without_server_error(client: TestClient) -> None:
     """Hit each OpenAPI path/method; expect anything except 5xx."""
-    r = item_client.get("/openapi.json")
+    r = client.get("/openapi.json")
     assert r.status_code == 200, r.text
     spec = r.json()
     paths: dict[str, Any] = spec.get("paths") or {}
@@ -68,7 +68,7 @@ def test_openapi_every_route_returns_without_server_error(item_client: TestClien
             if body is not None:
                 kwargs["json"] = body
 
-            resp = item_client.request(method.upper(), url, **kwargs)
+            resp = client.request(method.upper(), url, **kwargs)
             assert resp.status_code < 500, (
                 f"{method.upper()} {url} -> {resp.status_code}: {resp.text[:500]}"
             )

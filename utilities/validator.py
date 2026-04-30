@@ -292,7 +292,7 @@ class ConfigValidatorUtility(IUtility):
         if value.lower() not in Default.VALID_ENVIRONMENTS:
             return (
                 False,
-                f"Invalid environment. Must be one of: {', '.join(valid_envs)}",
+                f"Invalid environment. Must be one of: {', '.join(Default.VALID_ENVIRONMENTS)}",
             )
 
         return True, ""
