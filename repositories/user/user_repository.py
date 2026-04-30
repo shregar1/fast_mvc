@@ -33,7 +33,7 @@ class UserRepository(IUserRepository):
         )
         self.session = session
         try:
-            from fast_database.persistence.models.user import User
+            from fastx_database.persistence.models.user import User
             self._model = User
         except ImportError:
             self._model = None

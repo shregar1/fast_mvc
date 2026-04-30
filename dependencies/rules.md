@@ -4,7 +4,7 @@ The `dependencies/` tree holds the FastAPI-facing dependency factories that wire
 
 ## Structure
 
-1. **Mirror the target tree** — a service at `services/user/login.py` has a dependency at `dependencies/services/user/login.py`.
+1. **Mirror the target tree** — a service at `services/auth/user/login.py` has a dependency at `dependencies/services/auth/user/login.py`.
 2. **One class, one `derive` classmethod** — returns a callable factory that takes context + collaborators and builds the target.
 3. **No business logic** — dependencies are plumbing. If a condition affects what gets constructed, surface it via explicit params.
 

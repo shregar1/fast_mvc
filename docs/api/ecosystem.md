@@ -52,11 +52,11 @@ Automated reference for all packages in the FastX ecosystem.
 #### 📦 data
 ::: data
 
-#### 📦 fast_platform
-::: fast_platform
+#### 📦 fastx_platform
+::: fastx_platform
 
-#### 📦 fast_platform
-::: fast_platform
+#### 📦 fastx_platform
+::: fastx_platform
 
 #### 📦 integrations
 ::: integrations

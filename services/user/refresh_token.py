@@ -10,7 +10,7 @@ from constants.api_status import APIStatus
 from constants.response_keys import ResponseKey
 from dtos.requests.user.refresh import RefreshTokenRequestDTO
 from dtos.responses.base import BaseResponseDTO
-from fast_platform.errors import UnauthorizedError
+from fastx_platform.errors import UnauthorizedError
 from services.user.abstraction import IUserService
 from services.user.token_issuance import TokenIssuanceService
 from start_utils import logger

@@ -39,7 +39,7 @@ from constants.api_status import APIStatus
 from constants.events import WebhookEventType
 from controllers.auth.user.abstraction import IUserController
 from dependencies.db import DBDependency
-from fast_platform.errors import ServiceUnavailableError
+from fastx_platform.errors import ServiceUnavailableError
 from utilities.notifications.lifecycle import send_welcome_email
 from utilities.webhook_dispatcher import dispatch_webhook_event
 from dependencies.repositiories.user import UserRepositoryDependency

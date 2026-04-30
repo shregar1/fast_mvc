@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from constants.api_status import APIStatus
 from dtos.responses.base import BaseResponseDTO
-from fast_platform.errors import BadInputError
+from fastx_platform.errors import BadInputError
 from repositories.user.user_repository import UserRepository
 from start_utils import ALGORITHM, SECRET_KEY, logger
 

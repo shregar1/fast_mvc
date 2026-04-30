@@ -5,7 +5,7 @@ from __future__ import annotations
 import inspect
 from typing import Any
 
-from fast_middleware import CORSMiddleware  # pyright: ignore[reportMissingImports]
+from fastx_middleware import CORSMiddleware  # pyright: ignore[reportMissingImports]
 from pydantic import Field
 
 from constants.cors import CorsDefaults

@@ -58,7 +58,7 @@ async def verify_otp_and_issue_tokens(
         :class:`BaseResponseDTO` with tokens (for login/register) or
         verified flag (for other purposes).
     """
-    from fast_platform.errors import BadInputError, NotFoundError
+    from fastx_platform.errors import BadInputError, NotFoundError
 
     if not otp_service.verify_otp(phone, purpose, otp):
         raise BadInputError(

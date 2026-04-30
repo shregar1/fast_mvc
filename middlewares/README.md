@@ -8,11 +8,11 @@ Middleware runs **around** every matching request: order of registration matters
 
 ## Overview
 
-Generic HTTP middleware (request ID, security headers, rate limiting, CORS, timing, body-size limits, etc.) comes from **`fast-middleware`** on PyPI (`fast_middleware` imports) and, in full templates, the extended **`fastmiddleware`** stack used in `app.py`.
+Generic HTTP middleware (request ID, security headers, rate limiting, CORS, timing, body-size limits, etc.) comes from **`fast-middleware`** on PyPI (`fastx_middleware` imports) and, in full templates, the extended **`fastmiddleware`** stack used in `app.py`.
 
 This directory only contains **app-specific** wiring:
 
-- **`authentication.py`** — Subclasses `JWTBearerAuthMiddleware` from `fast_middleware`, binding JWT decode, user repository session checks, and `IResponseDTO` error payloads.
+- **`authentication.py`** — Subclasses `JWTBearerAuthMiddleware` from `fastx_middleware`, binding JWT decode, user repository session checks, and `IResponseDTO` error payloads.
 
 Import the app middleware as:
 
@@ -40,10 +40,10 @@ app.add_middleware(AuthenticationMiddleware)
 
 ## Generic JWT middleware (library)
 
-`JWTBearerAuthMiddleware` lives in **`fast_middleware.jwt_bearer_auth`**. It takes injectable callables (`decode_bearer`, `load_user`, `build_error_response`, …) so other apps can reuse it without depending on FastX’s repositories or DTOs.
+`JWTBearerAuthMiddleware` lives in **`fastx_middleware.jwt_bearer_auth`**. It takes injectable callables (`decode_bearer`, `load_user`, `build_error_response`, …) so other apps can reuse it without depending on FastX’s repositories or DTOs.
 
 ```python
-from fast_middleware import JWTBearerAuthMiddleware, ErrorKind
+from fastx_middleware import JWTBearerAuthMiddleware, ErrorKind
 ```
 
 See the `fast-middleware` package README for `BodySizeLimitMiddleware`, `SecurityHeadersMiddleware`, `RequestIDMiddleware`, and related helpers.

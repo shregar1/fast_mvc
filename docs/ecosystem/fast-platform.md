@@ -8,7 +8,7 @@ FastPlatform is a single installable package that bundles 30+ standalone service
 
 ## 🏗️ Package Taxonomy
 
-FastPlatform is organized into functional sections defined in `fast_platform.taxonomy`:
+FastPlatform is organized into functional sections defined in `fastx_platform.taxonomy`:
 
 | Section | Role | Key Packages |
 |---------|------|--------------|

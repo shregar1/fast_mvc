@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 # PyPI: pip install fastx-mvc  (wheels: fastx_mvc-*.whl)
 name = "fastx-mvc"
-version = "1.6.1"
+version = "1.7.0"
 description = "Production-grade MVC Framework for FastAPI - Generate projects, entities, and migrations with a single command"
 readme = "README.md"
 license = {text = "MIT"}
@@ -163,7 +163,7 @@ py-modules = ["app", "start_utils"]
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["fast_mvc*", "fastx*", "abstractions*", "controllers*", "core*", "dependencies*", "dtos*", "errors*", "middlewares*", "migrations*", "models*", "repositories*", "services*", "utilities*", "constants*", "config*"]
+include = ["fastx_mvc*", "fastx*", "abstractions*", "controllers*", "core*", "dependencies*", "dtos*", "errors*", "middlewares*", "migrations*", "models*", "repositories*", "services*", "utilities*", "constants*", "config*"]
 exclude = ["tests*", "tests.*", "tests/**", "docs*", "scripts*", "dist*", "htmlcov*", "factories*"]
 
 [tool.setuptools.package-data]

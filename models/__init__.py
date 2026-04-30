@@ -1,5 +1,3 @@
-"""Domain models (one resource per module when practical, e.g. ``models/item.py``)."""
+"""Domain models (one resource per module when practical)."""
 
-from models.item import Item
-
-__all__ = ["Item"]
+__all__: list[str] = []

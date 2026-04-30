@@ -1,7 +1,7 @@
 """User Repository Dependency.
 
 Returns a factory callable that, when invoked with request context,
-produces a :class:`~fast_database.repositories.user.UserRepository`.
+produces a :class:`~fastx_database.repositories.user.UserRepository`.
 """
 
 from __future__ import annotations

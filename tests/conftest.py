@@ -29,11 +29,11 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-# Monorepo: local ``fast_platform`` (and optional packages) for imports like ``fast_platform.errors``
+# Monorepo: local ``fastx_platform`` (and optional packages) for imports like ``fastx_platform.errors``
 _REPO_ROOT = PROJECT_ROOT.parent
 for _extra in (
-    _REPO_ROOT / "fast_platform" / "src",
-    _REPO_ROOT / "fast_dashboards" / "src",
+    _REPO_ROOT / "fastx_platform" / "src",
+    _REPO_ROOT / "fastx_dashboards" / "src",
 ):
     if _extra.is_dir():
         sys.path.insert(0, str(_extra))
@@ -47,8 +47,6 @@ from httpx import ASGITransport, AsyncClient
 from fastapi.testclient import TestClient
 
 from app import app as fastapi_app
-from models.item import Item
-from tests.utils.item_helpers import ItemTestHelper
 
 # =============================================================================
 # PYTEST CONFIGURATION
@@ -118,17 +116,6 @@ def authenticated_client(item_client):
     return item_client
 
 
-@pytest.fixture
-def item_db():
-    """Placeholder (sample stack uses in-memory repository)."""
-    return None
-
-
-@pytest.fixture
-def item_repository():
-    from repositories.item import ItemRepository
-
-    return ItemRepository()
 
 
 @pytest.fixture

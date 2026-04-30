@@ -1,6 +1,6 @@
 """Application core integration layer (FastAPI wiring, optional services).
 
-This module provides re-exports for optional fast_platform services.
+This module provides re-exports for optional fastx_platform services.
 Each import is wrapped in try/except to allow the core to work without
 the optional dependencies.
 
@@ -12,19 +12,19 @@ Usage:
     from core import CircuitBreaker, Metrics
 """
 
-# Optional fast_platform services - gracefully degrade if not installed
+# Optional fastx_platform services - gracefully degrade if not installed
 # These require: pip install fastx-mvc[platform] or specific extras
 
-# Observability (fast_platform.observability)
+# Observability (fastx_platform.observability)
 try:
-    from fast_platform.observability import AuditLog, Metrics, StructuredLogger, Tracer
+    from fastx_platform.observability import AuditLog, Metrics, StructuredLogger, Tracer
 except ImportError:
     AuditLog = None  # type: ignore
     Metrics = None  # type: ignore
     StructuredLogger = None  # type: ignore
     Tracer = None  # type: ignore
 
-# Tasks/Jobs (fast_platform.jobs)
+# Tasks/Jobs (fastx_platform.jobs)
 try:
     from core.tasks import (
         JobsConfiguration,
@@ -40,7 +40,7 @@ except ImportError:
     enqueue = None  # type: ignore
     get_job_status = None  # type: ignore
 
-# Security (fast_platform.security)
+# Security (fastx_platform.security)
 try:
     from core.security import APIKeyManager, FieldEncryption, WebhookVerifier
 except ImportError:
@@ -48,14 +48,14 @@ except ImportError:
     FieldEncryption = None  # type: ignore
     WebhookVerifier = None  # type: ignore
 
-# Feature Flags (fast_platform.features)
+# Feature Flags (fastx_platform.features)
 try:
     from core.features import FeatureFlags, feature_flag
 except ImportError:
     FeatureFlags = None  # type: ignore
     feature_flag = None  # type: ignore
 
-# Tenancy (fast_platform.tenancy)
+# Tenancy (fastx_platform.tenancy)
 try:
     from core.tenancy import Tenant, TenantContext, get_current_tenant
 except ImportError:
@@ -63,9 +63,9 @@ except ImportError:
     TenantContext = None  # type: ignore
     get_current_tenant = None  # type: ignore
 
-# Versioning (fast_platform.utils.versioning)
+# Versioning (fastx_platform.utils.versioning)
 try:
-    from fast_platform.utils.versioning import APIVersion, versioned_router
+    from fastx_platform.utils.versioning import APIVersion, versioned_router
 except ImportError:
     APIVersion = None  # type: ignore
     versioned_router = None  # type: ignore

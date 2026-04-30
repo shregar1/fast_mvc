@@ -6,7 +6,7 @@ from typing import Any, Optional
 
 from constants.api_status import APIStatus
 from dtos.responses.base import BaseResponseDTO
-from fast_platform.errors import ServiceUnavailableError
+from fastx_platform.errors import ServiceUnavailableError
 from utilities.phone_otp import PhoneOtpUtility
 from start_utils import logger
 

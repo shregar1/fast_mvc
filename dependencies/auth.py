@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from constants.default import Default
 from constants.response_key import ResponseKey
-from fast_platform.errors import UnauthorizedError
+from fastx_platform.errors import UnauthorizedError
 from fastapi import Request
 
 

@@ -72,7 +72,7 @@ class PhoneOtpUtility(IUtility):
     async def send_otp(self, phone: str, otp: str) -> None:
         """Send OTP via SMS provider. Falls back to logging."""
         try:
-            from fast_platform.notifications import send_sms  # type: ignore
+            from fastx_platform.notifications import send_sms  # type: ignore
 
             await send_sms(to=phone, message=f"Your verification code is: {otp}")
         except ImportError:

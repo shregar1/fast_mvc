@@ -43,9 +43,9 @@ from loguru import logger
 from typing import Any
 from urllib.parse import quote
 
-# Optional fast_platform configuration (requires fastx-mvc[platform])
+# Optional fastx_platform configuration (requires fastx-mvc[platform])
 try:
-    from fast_platform import (  # pyright: ignore[reportMissingImports]
+    from fastx_platform import (  # pyright: ignore[reportMissingImports]
         CacheConfiguration, CacheConfigurationDTO,
         DBConfiguration, DBConfigurationDTO,
     )
@@ -56,7 +56,7 @@ except ImportError:
     DBConfigurationDTO = None  # type: ignore
 
 try:
-    from fast_platform import (  # pyright: ignore[reportMissingImports]
+    from fastx_platform import (  # pyright: ignore[reportMissingImports]
         ChannelsConfiguration, ChannelsConfigurationDTO,
     )
 except ImportError:
@@ -82,7 +82,7 @@ os.environ.setdefault(
 )
 
 logger.info("Loading Configurations")
-# Load configurations from fast_platform if available
+# Load configurations from fastx_platform if available
 cache_configuration = None  # type: ignore
 db_configuration = None  # type: ignore
 channels_configuration = None  # type: ignore
@@ -93,7 +93,7 @@ if DBConfiguration:
     db_configuration = DBConfiguration().get_config()
 
 try:
-    from fast_channels import (  # pyright: ignore[reportMissingImports]
+    from fastx_channels import (  # pyright: ignore[reportMissingImports]
         ChannelsConfiguration
     )
 
@@ -278,7 +278,7 @@ CHANNEL_BACKEND: str = (
 if CHANNEL_BACKEND == Default.CHANNEL_BACKEND and redis_session:
     try:
         import redis.asyncio as aioredis
-        from fast_channels import (  # pyright: ignore[reportMissingImports]
+        from fastx_channels import (  # pyright: ignore[reportMissingImports]
             RedisChannelBackend,
         )
 

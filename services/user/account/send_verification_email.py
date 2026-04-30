@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 from constants.api_status import APIStatus
 from constants.default import Default
 from dtos.responses.base import BaseResponseDTO
-from fast_platform.errors import (
+from fastx_platform.errors import (
     BadInputError,
     ServiceUnavailableError,
     UnauthorizedError,

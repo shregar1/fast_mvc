@@ -60,7 +60,7 @@ from constants.logging_setup import configure_loguru
 configure_loguru()
 
 # Import middlewares from fast-middleware package
-from fast_middleware import (  # pyright: ignore[reportMissingImports]
+from fastx_middleware import (  # pyright: ignore[reportMissingImports]
     AuthConfig,
     AuthenticationMiddleware,
     CORSMiddleware,
@@ -117,13 +117,8 @@ try:
 except ImportError:
     UserRouter = None  # type: ignore
 
-# Optional sample Item API (CRUD demonstration)
-try:
-    from controllers.apis.v1.item.item_controller import router as ExampleItemRouter
-except ImportError:
-    ExampleItemRouter = None  # type: ignore
 
-# Optional WebSocket router (requires fast_channels)
+# Optional WebSocket router (requires fastx_channels)
 try:
     from core.websockets.router import router as WebSocketRouter
 except ImportError:
@@ -131,7 +126,7 @@ except ImportError:
 
 # Optional observability (requires fast-platform)
 try:
-    from fast_platform.observability import (  # pyright: ignore[reportMissingImports]
+    from fastx_platform.observability import (  # pyright: ignore[reportMissingImports]
         configure_datadog,
         configure_otel,
     )
@@ -141,7 +136,7 @@ except ImportError:
 
 # Optional routers (require corresponding fast_* packages)
 try:
-    from fast_dashboards import DashboardRouter  # noqa: I001  # pyright: ignore[reportMissingImports, reportAttributeAccessIssue]
+    from fastx_dashboards import DashboardRouter  # noqa: I001  # pyright: ignore[reportMissingImports, reportAttributeAccessIssue]
 except ImportError:
     DashboardRouter = None  # type: ignore[assignment]
 try:
@@ -166,7 +161,7 @@ from dtos.responses.apis.abstraction import IResponseAPIDTO
 
 # Domain errors (requires fastx-mvc[platform])
 try:
-    import fast_platform.errors as platform_errors  # pyright: ignore[reportMissingImports]
+    import fastx_platform.errors as platform_errors  # pyright: ignore[reportMissingImports]
 
     HAS_PLATFORM_ERRORS = True
 except ImportError:
@@ -823,9 +818,6 @@ else:
 logger.info("Initializing routers")
 if UserRouter is not None:
     app.include_router(UserRouter, tags=["User"])
-if ExampleItemRouter is not None:
-    app.include_router(ExampleItemRouter)
-    logger.info("Example Item API enabled at /items")
 if WebSocketRouter is not None:
     app.include_router(WebSocketRouter)
 if NotificationsRouter is not None:

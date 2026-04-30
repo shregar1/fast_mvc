@@ -1,4 +1,4 @@
-"""Logical layout of the ``fastx-mvc`` application tree (aligned with ``fast_platform.taxonomy``).
+"""Logical layout of the ``fastx-mvc`` application tree (aligned with ``fastx_platform.taxonomy``).
 
 The framework uses familiar top-level folders:
 
@@ -12,9 +12,9 @@ The framework uses familiar top-level folders:
 - **dependencies** — DI wiring
 - **constants** — static constants
 - **utilities** — helpers
-- **fast_cli** — CLI and scaffolding (product tooling)
+- **fastx_cli** — CLI and scaffolding (product tooling)
 
-This maps conceptually to ``fast_platform`` sections (e.g. controllers/services → core;
+This maps conceptually to ``fastx_platform`` sections (e.g. controllers/services → core;
 repositories + models (via ``fast_dataI``) → persistence; middlewares → operations).
 Physical folder names stay stable for the scaffolded app template.
 """
@@ -40,7 +40,7 @@ class MvcSection(str, Enum):
     DEPENDENCIES = "dependencies"
     CONSTANTS = "constants"
     UTILITIES = "utilities"
-    FAST_CLI = "fast_cli"
+    FASTX_CLI = "fastx_cli"
 
 
 FOLDER_TO_SECTION: Final[dict[str, MvcSection]] = {
@@ -54,5 +54,5 @@ FOLDER_TO_SECTION: Final[dict[str, MvcSection]] = {
     "dependencies": MvcSection.DEPENDENCIES,
     "constants": MvcSection.CONSTANTS,
     "utilities": MvcSection.UTILITIES,
-    "fast_cli": MvcSection.FAST_CLI,
+    "fastx_cli": MvcSection.FASTX_CLI,
 }

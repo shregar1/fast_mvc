@@ -6,7 +6,7 @@ from typing import Any, Optional
 
 from dtos.requests.user.phone_verify_otp import PhoneVerifyOtpRequestDTO
 from dtos.responses.base import BaseResponseDTO
-from fast_platform.errors import ServiceUnavailableError
+from fastx_platform.errors import ServiceUnavailableError
 from utilities.phone_otp import PhoneOtpUtility
 from services.user.phone_verify_service import verify_otp_and_issue_tokens
 from start_utils import logger

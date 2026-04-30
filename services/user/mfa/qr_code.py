@@ -5,7 +5,7 @@ from __future__ import annotations
 import io
 from typing import Any
 
-from fast_platform.errors import (
+from fastx_platform.errors import (
     BadInputError,
     NotFoundError,
     ServiceUnavailableError,

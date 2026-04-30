@@ -38,7 +38,7 @@ def log_audit(
         ip: Client IP address.
     """
     try:
-        from fast_database.persistence.models.audit_log import AuditLog  # noqa: F401
+        from fastx_database.persistence.models.audit_log import AuditLog  # noqa: F401
 
         record = AuditLog(
             action=action,

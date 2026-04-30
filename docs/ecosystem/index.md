@@ -21,8 +21,8 @@ Each package is decoupled and can be used independently, but they are designed t
 ## 🛠️ Philosophy: Modular & Decoupled
 
 The FastX ecosystem follows a **"Flat but Deep"** philosophy:
-- **Flat Imports:** All packages under `fast_platform` use top-level imports (e.g., `from notifications import ...`) to keep your code clean.
-- **Deep Functionality:** Each module handles the complexities of its domain (e.g., `fast_middleware` handles HSTS, CSP, and Rate Limiting automatically).
+- **Flat Imports:** All packages under `fastx_platform` use top-level imports (e.g., `from notifications import ...`) to keep your code clean.
+- **Deep Functionality:** Each module handles the complexities of its domain (e.g., `fastx_middleware` handles HSTS, CSP, and Rate Limiting automatically).
 - **Vendor Friendly:** You can choose to vendor specific parts of the ecosystem into your project or install them as standalone wheels.
 
 ---

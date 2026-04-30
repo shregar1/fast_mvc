@@ -12,7 +12,7 @@ from typing import Any, Dict, List
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
-from fast_channels import InMemoryPresenceBackend, PresenceService
+from fastx_channels import InMemoryPresenceBackend, PresenceService
 from services.streams import Tick, OrderEvent, get_market_data_hub
 from constants.default import Default
 from core.websockets.utils import WebSocketStreamHelper

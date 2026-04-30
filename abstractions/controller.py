@@ -25,7 +25,7 @@ from fastapi import Request
 from constants.api_status import APIStatus
 from core.utils.context import ContextMixin
 from dtos.responses.base import BaseResponseDTO
-from fast_platform.errors import (
+from fastx_platform.errors import (
     BadInputError,
     ConflictError,
     ForbiddenError,
@@ -77,7 +77,7 @@ class IController(ContextMixin, ABC):
         """
         # Call ``ContextMixin.__init__`` explicitly so the type checker does not
         # merge this with other ``ContextMixin`` implementations (e.g. in
-        # ``fast_platform``) that may use a different ``user_id`` type.
+        # ``fastx_platform``) that may use a different ``user_id`` type.
         ContextMixin.__init__(
             self,
             urn=urn,

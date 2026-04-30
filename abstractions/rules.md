@@ -14,14 +14,14 @@ The `abstractions/` tree holds framework-level base classes. Changes here ripple
 
 - Don't put business logic in an abstraction. Ever. `handle_exception` is framework logic (error-to-envelope mapping). "Check if user is subscribed" is not.
 - Don't make abstractions depend on concrete implementations — they should import from `core/`, `constants/`, `dtos/responses/base.py`, and typed errors. That's it.
-- Don't re-declare properties that `ContextMixin` already provides (`urn`, `user_urn`, `api_name`, `user_id`, `logger`). Shadowing them causes subtle MRO bugs with `fast_platform.core.utils.context.ContextMixin`.
+- Don't re-declare properties that `ContextMixin` already provides (`urn`, `user_urn`, `api_name`, `user_id`, `logger`). Shadowing them causes subtle MRO bugs with `fastx_platform.core.utils.context.ContextMixin`.
 - Don't break signature compatibility silently. Adding a required param to `IController.__init__` is a breaking change for every subclass.
 - Don't import `fastapi` into non-controller abstractions. `IService`, `IRepository`, `IUtility` must stay transport-agnostic.
 
 ## Inheritance Map
 
 ```
-ContextMixin (core.utils.context / fast_platform.core.utils.context)
+ContextMixin (core.utils.context / fastx_platform.core.utils.context)
     │
     ├── IController (abstractions/controller.py)
     │       ├── IAuthController (controllers/auth/abstraction.py)
@@ -35,7 +35,7 @@ ContextMixin (core.utils.context / fast_platform.core.utils.context)
 
 ## The MRO Hazard
 
-`core.utils.context.ContextMixin` and `fast_platform.core.utils.context.ContextMixin` both exist. Whichever one the type checker resolves first wins. If you change the typing of a ContextMixin property locally, update **both** — or the type checker will chase you through every caller.
+`core.utils.context.ContextMixin` and `fastx_platform.core.utils.context.ContextMixin` both exist. Whichever one the type checker resolves first wins. If you change the typing of a ContextMixin property locally, update **both** — or the type checker will chase you through every caller.
 
 ## Adding a New Abstraction
 

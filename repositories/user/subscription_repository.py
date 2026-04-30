@@ -27,7 +27,7 @@ class SubscriptionRepository(IUserRepository):
         self.session = session
         self._model = None
         try:
-            from fast_database.persistence.models.subscription import Subscription
+            from fastx_database.persistence.models.subscription import Subscription
             self._model = Subscription
         except ImportError:
             pass

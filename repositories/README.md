@@ -30,7 +30,7 @@ For a simple resource, use a **single module** per model (e.g. `item.py`, `produ
 ## How it fits in the stack
 
 ```text
-Controller → Service → Repository → Database (SQLAlchemy / fast_database)
+Controller → Service → Repository → Database (SQLAlchemy / fastx_database)
 ```
 
 Services depend on repository **instances** or factories; repositories depend on **sessions** and **configuration** supplied by **`dependencies`** and **`config`**.

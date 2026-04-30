@@ -54,7 +54,7 @@ flowchart LR
 
 ## Directory checklist (generator output)
 
-Use **`<segment>`** (e.g. `item`, `product`) and **`<Ver>`** (e.g. `v1`). Paths are relative to the application package root (e.g. `fast_mvc/`).
+Use **`<segment>`** (e.g. `item`, `product`) and **`<Ver>`** (e.g. `v1`). Paths are relative to the application package root (e.g. `fastx_mvc/`).
 
 ### 1. Domain model (optional but typical)
 
@@ -148,7 +148,7 @@ controllers/
 
 - **`app.py`**: `app.include_router(<Router>, ...)` for the new router (optional try/except for optional features).
 - **`apis/__init__.py`** (if used): nest under main API router.
-- **Package `__init__.py`**: optional re-exports for `from fast_mvc import ...`.
+- **Package `__init__.py`**: optional re-exports for `from fastx_mvc import ...`.
 
 ### 8. Factories (tests / local tooling)
 

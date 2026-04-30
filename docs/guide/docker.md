@@ -10,7 +10,7 @@ FastX includes a complete Docker Compose stack with PostgreSQL, Redis, and the F
 ## Quick Start
 
 ```bash
-# From the repository root (fast_mvc/)
+# From the repository root (fastx_mvc/)
 docker compose up -d --build
 
 # Legacy Compose v1 alias (if installed)

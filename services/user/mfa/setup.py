@@ -6,7 +6,7 @@ from typing import Any
 
 from constants.api_status import APIStatus
 from dtos.responses.base import BaseResponseDTO
-from fast_platform.errors import BadInputError, NotFoundError, UnauthorizedError
+from fastx_platform.errors import BadInputError, NotFoundError, UnauthorizedError
 from repositories.user.user_repository import UserRepository
 from services.user.abstraction import IUserService
 

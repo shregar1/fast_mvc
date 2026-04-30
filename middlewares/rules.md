@@ -7,7 +7,7 @@ Middlewares wrap every request/response. A bug here is a site-wide incident — 
 - **Short-circuit cheaply** — reject bad input (auth missing, rate limit hit) before any downstream work happens.
 - **Set `request.state` fields** that downstream code reads: `state.urn`, `state.user_id`, `state.user_urn`. Controllers read them via `bind_request_context`.
 - **Make the happy path branchless** — one `if` for the bypass (health checks, docs), one for the reject, then `await call_next(request)`.
-- **Propagate typed errors** — raise from `fast_platform.errors` so the error handler returns a consistent envelope.
+- **Propagate typed errors** — raise from `fastx_platform.errors` so the error handler returns a consistent envelope.
 - **Use `urn` for correlation** — attach it to every log line emitted inside the middleware.
 
 ## Don't

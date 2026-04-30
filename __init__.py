@@ -4,49 +4,21 @@ A production-grade MVC framework for FastAPI with clean architecture,
 dependency injection, and modular service integration.
 
 Basic Usage:
-    from fast_mvc import FastXApp, Controller, Service, Repository
+    from fastx_mvc import FastXApp, Controller, Service, Repository
 
     app = FastXApp()
     app.run()
 
-Sample Item API (included):
-    # Item CRUD lives under the normal package layout (models, services, …).
-
-    from fast_mvc import item_router  # FastAPI router
-
-    # Add to your app:
-    app.include_router(item_router)
-
-    # Or use components directly:
-    from fast_mvc import Item, ItemService, ItemRepository
-
-    service = ItemService()
-    result = await service.create_item("Buy milk", "Get from store")
-
-    # Available example endpoints:
-    # POST   /items              - Create item
-    # GET    /items              - List all items
-    # GET    /items/{id}         - Get item by ID
-    # PATCH  /items/{id}         - Update item
-    # DELETE /items/{id}         - Delete item
-    # POST   /items/{id}/complete   - Mark completed
-    # POST   /items/{id}/uncomplete - Mark pending
-    # POST   /items/{id}/toggle     - Toggle status
-    # GET    /items/search       - Search items
-    # GET    /items/completed    - List completed
-    # GET    /items/pending      - List pending
-    # GET    /items/statistics   - Get stats
-
 With Optional Services:
     # Install: pip install fastx-mvc[platform]
-    from fast_platform.notifications import EmailClient
-    from fast_platform.storage import S3Client
+    from fastx_platform.notifications import EmailClient
+    from fastx_platform.storage import S3Client
 
 Modules:
     - abstractions: I interfaces (Controller, Service, Repository, etc.)
     - dtos: Data Transfer Objects and validation
     - dependencies: DI container and utilities
-    - models, services, repositories: sample Item API (see docs/guide/new-api-scaffolding.md)
+    - models, services, repositories: domain layers
 
 Optional Integrations (via fast-platform):
     - notifications: Email, SMS, Chat, Push notifications
@@ -74,20 +46,6 @@ from dtos.requests.abstraction import IRequestDTO
 # Application factory
 from app import app as FastXApp
 
-# Sample Item API (optional — demonstrates full stack wiring)
-try:
-    from controllers.apis.v1.item.item_controller import (
-        ItemController,
-        router as item_router,
-    )
-    from dtos.requests.item import CreateItemRequestDTO, UpdateItemRequestDTO
-    from models.item import Item
-    from repositories.item import ItemRepository
-    from services.item import ItemService
-
-    _EXAMPLE_AVAILABLE = True
-except ImportError:
-    _EXAMPLE_AVAILABLE = False
 
 __version__ = "1.5.0"
 
@@ -117,21 +75,3 @@ __all__ = [
     "FastXApp",
 ]
 
-# Add example exports if available
-if _EXAMPLE_AVAILABLE:
-    __all__.extend(
-        [
-            # Example Entity
-            "Item",
-            # Example Repository
-            "ItemRepository",
-            # Example Service
-            "ItemService",
-            # Example Controller
-            "ItemController",
-            "item_router",
-            # Example DTOs
-            "CreateItemRequestDTO",
-            "UpdateItemRequestDTO",
-        ]
-    )

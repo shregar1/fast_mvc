@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from fast_middleware import SecurityHeadersConfig
+from fastx_middleware import SecurityHeadersConfig
 
 from abstractions.utility import IUtility
 from constants.security_headers import SecurityHeadersConstants, SecurityHeadersEnvVar

@@ -27,7 +27,7 @@ try:
 
     app: Any = make_celery_app()
 except Exception:
-    # This repo's Docker build may not include the full `fast_platform` job stack.
+    # This repo's Docker build may not include the full `fastx_platform` job stack.
     # Fallback keeps worker/scheduler containers healthy (even if no jobs are configured).
     app = _make_fallback_celery_app()
 

@@ -11,7 +11,7 @@ from constants.default import Default
 from constants.response_keys import ResponseKey
 from dtos.requests.user.login import UserLoginRequestDTO
 from dtos.responses.base import BaseResponseDTO
-from fast_platform.errors import (
+from fastx_platform.errors import (
     NotFoundError,
     UnauthorizedError,
 )

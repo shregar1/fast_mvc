@@ -1,4 +1,4 @@
-"""FastAPI exception handlers for ``fast_platform.errors`` and uncaught exceptions."""
+"""FastAPI exception handlers for ``fastx_platform.errors`` and uncaught exceptions."""
 
 from __future__ import annotations
 
@@ -63,7 +63,7 @@ class ApplicationExceptionHandlers:
 
     @classmethod
     def register_platform_handlers(cls, app: FastAPI, platform_errors: ModuleType) -> None:
-        """Register handlers for :mod:`fast_platform.errors` exception types."""
+        """Register handlers for :mod:`fastx_platform.errors` exception types."""
         specs: list[tuple[type[BaseException], str]] = [
             (platform_errors.UnexpectedResponseError, LogLevelName.ERROR),
             (platform_errors.BadInputError, LogLevelName.WARNING),

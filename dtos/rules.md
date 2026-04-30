@@ -6,11 +6,18 @@ DTOs are Pydantic models at the edges of the app — they define the **exact** s
 
 ```
 dtos/
-  requests/                # inbound payloads (validated by FastAPI)
-    <domain>/<action>.py
+  abstraction.py             # ApplicationBaseModel, IDTO re-exports
+  config.py                  # DtoConfigBuilder
+  requests/                  # inbound payloads (validated by FastAPI)
+    <domain>/dtos.py         # all request DTOs for a domain in one file
   responses/
-    base.py                # BaseResponseDTO envelope
-    <domain>/<resource>_response.py
+    abstraction.py           # IResponseDTO envelope interface
+    base.py                  # BaseResponseDTO (concrete envelope)
+    apis/v1/<domain>/dtos.py # response payload DTOs per API domain
+    auth/user/dtos.py        # auth response payload DTOs
+    auth/user/mfa/dtos.py
+    auth/user/phone/dtos.py
+    auth/user/account/dtos.py
 ```
 
 ## Do
@@ -47,6 +54,26 @@ BaseResponseDTO(
 
 - `responseKey` is the machine-readable key for i18n — keep it stable; treat renames as breaking.
 - `data` is `dict | list | None` — narrow with `isinstance` before accessing keys.
+
+## Response Payload DTOs
+
+Every API endpoint has a matching response payload DTO that types the `data` field. These live alongside the domain:
+
+```python
+# dtos/responses/apis/v1/<domain>/dtos.py
+class ActionResponseData(BaseModel):
+    field: Any
+
+# dtos/responses/auth/user/mfa/dtos.py
+class MFASetupResponseData(BaseModel):
+    secret: str
+    provisioningUri: str
+```
+
+- **Naming**: `{Action}ResponseData` (e.g. `ListItemsResponseData`, `LoginMFAResponseData`).
+- **One `dtos.py` per domain** — all payload DTOs for that domain in one file, re-exported via `__init__.py`.
+- **Use `Any` for opaque repo-returned dicts** — tighten to concrete fields as the schema solidifies.
+- **Empty payloads** get `pass` body.
 
 ## File Layout
 

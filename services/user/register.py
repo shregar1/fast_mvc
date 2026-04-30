@@ -9,7 +9,7 @@ from constants.api_status import APIStatus
 from constants.response_keys import ResponseKey
 from dtos.requests.user.registration import UserRegistrationRequestDTO
 from dtos.responses.base import BaseResponseDTO
-from fast_platform.errors import ConflictError
+from fastx_platform.errors import ConflictError
 from services.user.abstraction import IUserService
 from utilities.security import hash_password
 

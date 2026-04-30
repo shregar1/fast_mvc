@@ -22,7 +22,7 @@ class RefreshTokenRepository(IUserRepository):
         super().__init__(session=session, *args, **kwargs)
         self.session = session
         try:
-            from fast_database.persistence.models.refresh_token import RefreshToken
+            from fastx_database.persistence.models.refresh_token import RefreshToken
             self._model = RefreshToken
         except ImportError:
             self._model = None

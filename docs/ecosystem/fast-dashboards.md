@@ -20,7 +20,7 @@ FastDashboards provides a composite `DashboardRouter` that includes:
 
 ## 🧭 Layout Engine
 
-The `fast_dashboards.layout` module provides a reusable HTML shell with:
+The `fastx_dashboards.layout` module provides a reusable HTML shell with:
 - **`render_dashboard_page`**: Standardized dashboard UI with SEO defaults.
 - **`I_CSS`**: Sleek, modern styling out of the box.
 - **`PageSEO`**: Open Graph, Twitter Cards, and schema.org integration.
@@ -32,7 +32,7 @@ The `fast_dashboards.layout` module provides a reusable HTML shell with:
 
 Securely embed external analytics dashboards using time-limited HMAC signatures:
 ```python
-from fast_dashboards import sign_embed_url, verify_signed_embed_url
+from fastx_dashboards import sign_embed_url, verify_signed_embed_url
 
 secret = b"your-32-byte-secret"
 # Generate a secure iframe-safe URL
@@ -54,7 +54,7 @@ FastDashboards includes unified providers for third-party analytics:
 
 Mount the dashboard router to any FastAPI app:
 ```python
-from fast_dashboards import DashboardRouter
+from fastx_dashboards import DashboardRouter
 
 app.include_router(DashboardRouter, prefix="/ops", tags=["Operational UI"])
 ```
@@ -65,9 +65,9 @@ app.include_router(DashboardRouter, prefix="/ops", tags=["Operational UI"])
 
 FastDashboards is available for all FastX projects:
 ```bash
-pip install -e ./fast_dashboards
+pip install -e ./fastx_dashboards
 ```
 To use MetaI signed embeds, install with extras:
 ```bash
-pip install 'fast_dashboards[metaI]'
+pip install 'fastx_dashboards[metaI]'
 ```

@@ -32,7 +32,7 @@ class ConcreteRepository(IRepository):
 class TestIRepository:
     """Test class for IRepository."""
 
-    def test_base_from_fast_database_is_instantiable(self) -> None:
+    def test_base_from_fastx_database_is_instantiable(self) -> None:
         """Upstream ``IRepository`` is a concrete class."""
         repo = IRepository()
         assert repo is not None

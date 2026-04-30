@@ -10,7 +10,7 @@ from __future__ import annotations
 from typing import Any, Optional
 
 from constants.default import Default
-from fast_platform.errors import ServiceUnavailableError
+from fastx_platform.errors import ServiceUnavailableError
 from start_utils import logger
 
 
@@ -25,7 +25,7 @@ async def _send(
 ) -> None:
     """Shared send envelope: import provider, dispatch, translate errors."""
     try:
-        from fast_platform.notifications import send_email  # type: ignore
+        from fastx_platform.notifications import send_email  # type: ignore
 
         await send_email(to=email, template=template, subject=subject, **template_vars)
     except ImportError:

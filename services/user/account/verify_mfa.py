@@ -10,7 +10,7 @@ import jwt
 from constants.api_status import APIStatus
 from dtos.requests.user.account.verify_mfa import VerifyMFARequestDTO
 from dtos.responses.base import BaseResponseDTO
-from fast_platform.errors import BadInputError, UnauthorizedError
+from fastx_platform.errors import BadInputError, UnauthorizedError
 from repositories.user.user_repository import UserRepository
 from services.user.abstraction import IUserService
 from services.user.token_issuance import TokenIssuanceService

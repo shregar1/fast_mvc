@@ -42,7 +42,7 @@ This reduces merge conflicts, simplifies testing, and makes versioning (`v1` to 
 FastCLI is available as a standalone CLI package:
 
 ```bash
-pip install -e ./fast_cli
+pip install -e ./fastx_cli
 ```
 
 Once installed, use it from anywhere:

@@ -33,7 +33,7 @@ def dispatch_webhook_event(
         user_id: Optional user ID associated with the event.
     """
     try:
-        from fast_platform.messaging.webhooks import dispatch  # type: ignore
+        from fastx_platform.messaging.webhooks import dispatch  # type: ignore
 
         dispatch(
             session=session,
