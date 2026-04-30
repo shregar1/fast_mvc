@@ -27,6 +27,7 @@ class MFAStatusService(IUserService):
         """Fetch MFA enablement flag for the authenticated user."""
         if self.user_id is None:
             raise UnauthorizedError(
+                httpStatusCode=401,
                 responseMessage="Unauthorized.",
                 responseKey="error_authentication_error",
             )
@@ -34,6 +35,7 @@ class MFAStatusService(IUserService):
         user = self._user_repository.retrieve_record_by_id(self.user_id)
         if user is None:
             raise NotFoundError(
+                httpStatusCode=404,
                 responseMessage="User not found.",
                 responseKey="error_user_not_found",
             )

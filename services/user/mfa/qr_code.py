@@ -38,17 +38,20 @@ class MFAQrCodeService(IUserService):
         """Return ``(png_bytes, mime_type)`` for the pending setup secret."""
         if self.user_id is None:
             raise UnauthorizedError(
+                httpStatusCode=401,
                 responseMessage="Unauthorized.",
                 responseKey="error_authentication_error",
             )
         user = self._user_repository.retrieve_record_by_id(self.user_id)
         if not user:
             raise NotFoundError(
+                httpStatusCode=404,
                 responseMessage="User not found.",
                 responseKey="error_user_not_found",
             )
         if user.mfa_enabled:
             raise BadInputError(
+                httpStatusCode=400,
                 responseMessage="MFA is already enabled.",
                 responseKey="error_bad_input",
             )
@@ -56,12 +59,14 @@ class MFAQrCodeService(IUserService):
         secret = user.mfa_secret
         if not secret:
             raise BadInputError(
+                httpStatusCode=400,
                 responseMessage="Call POST /mfa/setup first.",
                 responseKey="error_bad_input",
             )
 
         if qrcode is None:
             raise ServiceUnavailableError(
+                httpStatusCode=503,
                 responseMessage=(
                     "QR code generation not available. Use the provisioningUri from "
                     "POST /mfa/setup to generate a QR client-side."

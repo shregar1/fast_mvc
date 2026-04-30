@@ -36,11 +36,13 @@ class PhoneSendOtpService:
     async def run(self, phone: str, purpose: str) -> BaseResponseDTO:
         if self._redis is None:
             raise ServiceUnavailableError(
+                httpStatusCode=503,
                 responseMessage="OTP service is temporarily unavailable.",
                 responseKey="error_service_unavailable",
             )
         if self._phone_otp_service is None:
             raise ServiceUnavailableError(
+                httpStatusCode=503,
                 responseMessage="OTP service is temporarily unavailable.",
                 responseKey="error_service_unavailable",
             )

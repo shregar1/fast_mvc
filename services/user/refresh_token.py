@@ -41,12 +41,14 @@ class UserRefreshTokenService(IUserService):
             payload = self.jwt_utility.decode_token(request_dto.refreshToken)
         except (pyjwt.ExpiredSignatureError, pyjwt.InvalidTokenError, ValueError):
             raise UnauthorizedError(
+                httpStatusCode=401,
                 responseMessage="Invalid or expired refresh token.",
                 responseKey=ResponseKey.ERROR_INVALID_REFRESH_TOKEN,
             )
 
         if payload.get("type") != "refresh":
             raise UnauthorizedError(
+                httpStatusCode=401,
                 responseMessage="Invalid token type.",
                 responseKey=ResponseKey.ERROR_INVALID_TOKEN_TYPE,
             )
@@ -61,6 +63,7 @@ class UserRefreshTokenService(IUserService):
                 )
                 if not stored:
                     raise UnauthorizedError(
+                        httpStatusCode=401,
                         responseMessage="Refresh token has been revoked.",
                         responseKey=ResponseKey.ERROR_TOKEN_REVOKED,
                     )
@@ -73,6 +76,7 @@ class UserRefreshTokenService(IUserService):
         user = self.user_repository.retrieve_record_by_id(user_id) if user_id else None
         if not user:
             raise UnauthorizedError(
+                httpStatusCode=401,
                 responseMessage="User not found.",
                 responseKey=ResponseKey.ERROR_USER_NOT_FOUND,
             )

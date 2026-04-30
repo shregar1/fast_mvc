@@ -58,11 +58,13 @@ class ItemHttpResponseBuilder:
     ) -> Item:
         if result.is_failure:
             raise NotFoundError(
+                httpStatusCode=404,
                 responseMessage=str(result.error),
                 responseKey=ResponseKey.ERROR_ITEM_NOT_FOUND,
             )
         if result.value is None:
             raise NotFoundError(
+                httpStatusCode=404,
                 responseMessage=f"Item not found: {item_id}",
                 responseKey=ResponseKey.ERROR_ITEM_NOT_FOUND,
             )
@@ -114,11 +116,13 @@ class ItemHttpResponseBuilder:
     ) -> None:
         if result.is_failure:
             raise NotFoundError(
+                httpStatusCode=404,
                 responseMessage=str(result.error),
                 responseKey=ResponseKey.ERROR_ITEM_NOT_FOUND,
             )
         if not result.value:
             raise NotFoundError(
+                httpStatusCode=404,
                 responseMessage=f"Item not found: {item_id}",
                 responseKey=ResponseKey.ERROR_ITEM_NOT_FOUND,
             )

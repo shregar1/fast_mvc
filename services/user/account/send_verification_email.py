@@ -43,6 +43,7 @@ class SendVerificationEmailService:
     async def run(self) -> BaseResponseDTO:
         if not self._user_id:
             raise UnauthorizedError(
+                httpStatusCode=401,
                 responseMessage="Authentication required to send verification email.",
                 responseKey="error_unauthorized",
             )
@@ -56,6 +57,7 @@ class SendVerificationEmailService:
         user = repo.retrieve_record_by_id(str(self._user_id))
         if not user or getattr(user, "is_deleted", False):
             raise UnauthorizedError(
+                httpStatusCode=401,
                 responseMessage="User not found.",
                 responseKey="error_unauthorized",
             )
@@ -63,6 +65,7 @@ class SendVerificationEmailService:
         email = getattr(user, "email", None)
         if not email:
             raise BadInputError(
+                httpStatusCode=400,
                 responseMessage="No email on account.",
                 responseKey="error_no_email",
             )
@@ -107,6 +110,7 @@ class SendVerificationEmailService:
             )
         except Exception as err:
             raise ServiceUnavailableError(
+                httpStatusCode=503,
                 responseMessage="Failed to send verification email. Please try again later.",
                 responseKey="error_send_failed",
             ) from err

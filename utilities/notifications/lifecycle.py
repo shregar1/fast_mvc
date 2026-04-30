@@ -36,6 +36,7 @@ async def _send(
     except Exception as err:
         logger.exception("%s email send failed for %s", kind, email)
         raise ServiceUnavailableError(
+            httpStatusCode=503,
             responseMessage="Failed to send notification email.",
             responseKey=fail_key,
         ) from err

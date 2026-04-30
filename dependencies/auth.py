@@ -27,6 +27,7 @@ class AuthDependency:
         user = getattr(request.state, "user", None)
         if user is None:
             raise UnauthorizedError(
+                httpStatusCode=401,
                 responseMessage=Default.AUTHENTICATION_REQUIRED_MESSAGE,
                 responseKey=ResponseKey.UNAUTHORIZED,
             )

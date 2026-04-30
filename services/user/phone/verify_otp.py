@@ -41,6 +41,7 @@ class PhoneVerifyOtpService:
     async def run(self, request_dto: PhoneVerifyOtpRequestDTO) -> BaseResponseDTO:
         if self._redis is None:
             raise ServiceUnavailableError(
+                httpStatusCode=503,
                 responseMessage="OTP verification is temporarily unavailable.",
                 responseKey="error_service_unavailable",
             )

@@ -28,17 +28,20 @@ class MFASetupService(IUserService):
     async def run(self, request_dto: Any = None) -> BaseResponseDTO:
         if self.user_id is None:
             raise UnauthorizedError(
+                httpStatusCode=401,
                 responseMessage="Unauthorized.",
                 responseKey="error_authentication_error",
             )
         user = self._user_repository.retrieve_record_by_id(self.user_id)
         if not user:
             raise NotFoundError(
+                httpStatusCode=404,
                 responseMessage="User not found.",
                 responseKey="error_user_not_found",
             )
         if user.mfa_enabled:
             raise BadInputError(
+                httpStatusCode=400,
                 responseMessage="MFA is already enabled.",
                 responseKey="error_bad_input",
             )

@@ -36,6 +36,7 @@ class VerifyEmailService:
     async def run(self, token: str) -> BaseResponseDTO:
         if not token or not token.strip():
             raise BadInputError(
+                httpStatusCode=400,
                 responseMessage="Invalid or expired verification link.",
                 responseKey="error_verify_email_invalid",
             )
@@ -45,18 +46,21 @@ class VerifyEmailService:
             )
         except (jwt.ExpiredSignatureError, jwt.InvalidTokenError) as err:
             raise BadInputError(
+                httpStatusCode=400,
                 responseMessage="Invalid or expired verification link.",
                 responseKey="error_verify_email_invalid",
             ) from err
 
         if payload.get("purpose") != "email_verification":
             raise BadInputError(
+                httpStatusCode=400,
                 responseMessage="Invalid or expired verification link.",
                 responseKey="error_verify_email_invalid",
             )
         email = payload.get("email")
         if not email:
             raise BadInputError(
+                httpStatusCode=400,
                 responseMessage="Invalid or expired verification link.",
                 responseKey="error_verify_email_invalid",
             )
@@ -71,6 +75,7 @@ class VerifyEmailService:
         user = repo.retrieve_record_by_email(email, is_deleted=False)
         if not user:
             raise BadInputError(
+                httpStatusCode=400,
                 responseMessage="Invalid or expired verification link.",
                 responseKey="error_verify_email_invalid",
             )

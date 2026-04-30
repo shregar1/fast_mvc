@@ -62,6 +62,7 @@ async def verify_otp_and_issue_tokens(
 
     if not otp_service.verify_otp(phone, purpose, otp):
         raise BadInputError(
+            httpStatusCode=400,
             responseMessage="Invalid or expired OTP.",
             responseKey="error_invalid_otp",
         )
@@ -114,7 +115,7 @@ async def verify_otp_and_issue_tokens(
         user.is_logged_in = True
         user.last_login = datetime.now(timezone.utc)
     except Exception:
-        pass
+        logger.exception("Failed to update login state for user %s", user_id)
 
     return BaseResponseDTO(
         transactionUrn=urn,

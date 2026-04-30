@@ -62,6 +62,7 @@ class UserLoginService(IUserService):
             stored_hash,
         ):
             raise UnauthorizedError(
+                httpStatusCode=401,
                 responseMessage="Invalid email or password.",
                 responseKey=ResponseKey.ERROR_INVALID_CREDENTIALS,
             )
@@ -104,7 +105,7 @@ class UserLoginService(IUserService):
         try:
             self.user_repository.touch_last_login(user)
         except Exception:
-            pass
+            self.logger.exception("Failed to update last_login for user %s", self.user_id)
 
         data = {
             "status": True,

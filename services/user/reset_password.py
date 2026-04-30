@@ -41,17 +41,20 @@ class ResetPasswordService:
             payload = jwt.decode(token.strip(), SECRET_KEY, algorithms=[ALGORITHM])
         except jwt.ExpiredSignatureError as err:
             raise BadInputError(
+                httpStatusCode=400,
                 responseMessage="Invalid or expired reset token.",
                 responseKey="error_invalid_reset_token",
             ) from err
         except jwt.InvalidTokenError as err:
             raise BadInputError(
+                httpStatusCode=400,
                 responseMessage="Invalid or expired reset token.",
                 responseKey="error_invalid_reset_token",
             ) from err
 
         if payload.get("purpose") != "password_reset":
             raise BadInputError(
+                httpStatusCode=400,
                 responseMessage="Invalid reset token.",
                 responseKey="error_invalid_reset_token",
             )
@@ -59,6 +62,7 @@ class ResetPasswordService:
         email = payload.get("email")
         if not email or not isinstance(email, str):
             raise BadInputError(
+                httpStatusCode=400,
                 responseMessage="Invalid reset token.",
                 responseKey="error_invalid_reset_token",
             )
@@ -66,6 +70,7 @@ class ResetPasswordService:
         user = self._repo.retrieve_record_by_email(email.strip().lower(), is_deleted=False)
         if not user:
             raise BadInputError(
+                httpStatusCode=400,
                 responseMessage="Invalid or expired reset token.",
                 responseKey="error_invalid_reset_token",
             )

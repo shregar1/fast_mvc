@@ -40,11 +40,13 @@ class VerifyMFAService(IUserService):
             )
         except Exception as err:
             raise UnauthorizedError(
+                httpStatusCode=401,
                 responseMessage="Invalid or expired MFA challenge token.",
                 responseKey="error_authentication_error",
             ) from err
         if payload.get("purpose") != "mfa_challenge":
             raise UnauthorizedError(
+                httpStatusCode=401,
                 responseMessage="Invalid token.",
                 responseKey="error_authentication_error",
             )
@@ -54,6 +56,7 @@ class VerifyMFAService(IUserService):
         user = self._user_repository.retrieve_record_by_id(user_id)
         if not user:
             raise UnauthorizedError(
+                httpStatusCode=401,
                 responseMessage="User not found.",
                 responseKey="error_authentication_error",
             )
@@ -68,6 +71,7 @@ class VerifyMFAService(IUserService):
                 code_ok = True
         if not code_ok:
             raise BadInputError(
+                httpStatusCode=400,
                 responseMessage="Invalid MFA code.",
                 responseKey="error_bad_input",
             )
