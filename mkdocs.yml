@@ -112,11 +112,12 @@ nav:
     - Rules: CHANGELOG_RULES.md
   - Ecosystem:
     - Overview: ecosystem/index.md
-    - FastCLI: ecosystem/fast-cli.md
-    - FastDataI: ecosystem/fast-database.md
-    - FastMiddleware: ecosystem/fast-middleware.md
-    - FastDashboards: ecosystem/fast-dashboards.md
-    - FastPlatform: ecosystem/fast-platform.md
+    - FastX CLI: ecosystem/fastx-cli.md
+    - FastX Database: ecosystem/fastx-database.md
+    - FastX Middleware: ecosystem/fastx-middleware.md
+    - FastX Dashboards: ecosystem/fastx-dashboards.md
+    - FastX Channels: ecosystem/fastx-channels.md
+    - FastX Platform: ecosystem/fastx-platform.md
   - Reference: reference/index.md
 
 dev_addr: 127.0.0.1:8001

@@ -75,7 +75,7 @@ alembic upgrade head
 FastDataI can be installed in any SQLAlchemy project:
 
 ```bash
-pip install fast-database
+pip install fastx-database
 ```
 
 Add **`[dev]`** to include `factory-boy` for testing.

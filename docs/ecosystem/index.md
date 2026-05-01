@@ -10,11 +10,12 @@ Each package is decoupled and can be used independently, but they are designed t
 
 | Package | Role | Key Feature |
 |---------|------|-------------|
-| [**FastCLI**](fast-cli.md) | **Orchestration** | Vertical slice scaffolding & dev-ops automation. |
-| [**FastDataI**](fast-database.md) | **Persistence** | Production-ready SQLAlchemy models, Mixins, and Repositories. |
-| [**FastMiddleware**](fast-middleware.md) | **Cross-Cutting** | 90+ ASGI middlewares for security, performance, and observability. |
-| [**FastDashboards**](fast-dashboards.md) | **Operations** | HTML dashboards for health, logs, and embedded analytics. |
-| [**FastPlatform**](fast-platform.md) | **Infrastructure** | Unified distribution for 30+ services (Messaging, Search, LLM, etc.). |
+| [**FastX CLI**](fastx-cli.md) | **Orchestration** | Vertical slice scaffolding & dev-ops automation. |
+| [**FastX Database**](fastx-database.md) | **Persistence** | Production-ready SQLAlchemy models, Mixins, and Repositories. |
+| [**FastX Middleware**](fastx-middleware.md) | **Cross-Cutting** | 90+ ASGI middlewares for security, performance, and observability. |
+| [**FastX Dashboards**](fastx-dashboards.md) | **Operations** | HTML dashboards for health, logs, and embedded analytics. |
+| [**FastX Channels**](fastx-channels.md) | **Real-Time** | WebSocket channel abstraction with pub/sub rooms and presence tracking. |
+| [**FastX Platform**](fastx-platform.md) | **Infrastructure** | Unified distribution for 60+ services (Messaging, Search, LLM, etc.). |
 
 ---
 
@@ -29,11 +30,11 @@ The FastX ecosystem follows a **"Flat but Deep"** philosophy:
 
 ## 🚀 Getting Started with the Ecosystem
 
-If you are using the FastX CLI, most of these packages are already available in your environment. You can explore them in your `src/` or `fast_<package>/` directories.
+If you are using the FastX CLI, most of these packages are already available in your environment. You can explore them in your `src/` or `fastx_<package>/` directories.
 
 To install a specific part of the ecosystem in any Python project:
 ```bash
-pip install fast-platform      # Get the whole platform
-pip install fast-database      # Persistence only
-pip install fast-middleware    # HTTP utilities only
+pip install fastx-platform      # Get the whole platform
+pip install fastx-database      # Persistence only
+pip install fastx-middleware    # HTTP utilities only
 ```

@@ -58,6 +58,6 @@ Includes a pre-configured `SecurityHeadersConfig` for best practices:
 
 FastMiddleware can be installed in any FastAPI or Starlette project:
 ```bash
-pip install fast-middleware
+pip install fastx-middleware
 ```
 The installable package is **`fastmiddleware`** (no hyphen in import).
