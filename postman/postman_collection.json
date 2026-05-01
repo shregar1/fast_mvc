@@ -1,6 +1,6 @@
 {
   "info": {
-    "name": "FastMVC - Auto Generated",
+    "name": "{{PROJECT_NAME}} - Auto Generated",
     "description": "**One-click import:** this file includes **collection variables** (`base_url`, `reference_urn`, `reference_number`, `token`, `refresh_token`). Folders mirror the **URL path** (e.g. `health/live`, `items/{id}`). Import only this collection \u2014 no environment required. Edit values under the collection \u2192 **Variables** (or use the collection menu \u2192 Edit). Run **Collection Runner** for auto-generated tests per request. To also emit a separate environment JSON under `postman/`, set env var `POSTMAN_EXPORT_ENVIRONMENT=1` before boot.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },

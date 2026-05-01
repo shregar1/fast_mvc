@@ -1,4 +1,4 @@
-# FastX Makefile
+# {{PROJECT_NAME}} Makefile
 # Convenience commands for development
 # Usage: make <command>
 
@@ -27,7 +27,7 @@ PROJECT_NAME := $(notdir $(CURDIR))
 
 ## help: Show this help message
 help:
-	@echo "$(BLUE)FastX Development Commands$(RESET)"
+	@echo "$(BLUE){{PROJECT_NAME}} Development Commands$(RESET)"
 	@echo ""
 	@grep -E '^##' $(MAKEFILE_LIST) | sed -e 's/## //g' | column -t -s ':'
 	@echo ""
@@ -88,7 +88,7 @@ prod:
 	@if [ -f ".env" ]; then set -a; . ./.env; set +a; fi; \
 	$(UVICORN) app:app --host 0.0.0.0 --port $${PORT:-8000} --workers 4 --log-level $${UVICORN_LOG_LEVEL:-error}
 
-## test: Run developer tests (excludes FastX framework tests)
+## test: Run developer tests (excludes framework tests)
 test:
 	@echo "$(BLUE)🧪 Running developer tests...$(RESET)"
 	@echo "$(YELLOW)   (Framework tests excluded. Run 'make test-all' to include them)$(RESET)"
@@ -99,9 +99,9 @@ test-dev:
 	@echo "$(BLUE)🧪 Running developer tests...$(RESET)"
 	@$(PYTEST) -v --tb=short
 
-## test-framework: Run only FastX framework tests
+## test-framework: Run only framework tests
 test-framework:
-	@echo "$(BLUE)🧪 Running FastX framework tests...$(RESET)"
+	@echo "$(BLUE)🧪 Running framework tests...$(RESET)"
 	@$(PYTEST) tests/framework -v --tb=short
 
 ## test-all: Run all tests (developer + framework)
@@ -204,9 +204,9 @@ db-status:
 shell:
 	@echo "$(BLUE)🐍 Starting Python shell...$(RESET)"
 	@$(PYTHON) -c "import sys; sys.path.insert(0, '.'); import app; print('Loaded app'); print('Available: app, FastAPI, etc.')"
-	@$(PYTHON) -i -c "import sys; sys.path.insert(0, '.'); import app; print('\n=== FastX Shell ===\n'); print('Variables available:'); print('  app - FastAPI application')"
+	@$(PYTHON) -i -c "import sys; sys.path.insert(0, '.'); import app; print('\n=== {{PROJECT_NAME}} Shell ===\n'); print('Variables available:'); print('  app - FastAPI application')"
 
-## build: Remove dist/ then build sdist and wheel for PyPI (fastx-mvc)
+## build: Remove dist/ then build sdist and wheel for PyPI
 build:
 	@echo "$(BLUE)📦 Building package (rm -rf dist first)...$(RESET)"
 	@rm -rf dist && $(PYTHON) -m build
@@ -241,7 +241,7 @@ docker-build:
 
 ## docker-up: Start full stack with Docker Compose
 docker-up:
-	@echo "$(BLUE)🐳 Starting FastX full stack...$(RESET)"
+	@echo "$(BLUE)🐳 Starting {{PROJECT_NAME}} full stack...$(RESET)"
 	@docker-compose up -d
 	@echo "$(GREEN)✓ Stack started successfully!$(RESET)"
 	@echo ""
@@ -300,7 +300,7 @@ docker-shell:
 
 ## docker-db-shell: Open PostgreSQL shell
 docker-db-shell:
-	@docker-compose exec postgres psql -U postgres -d fastx
+	@docker-compose exec postgres psql -U postgres -d $${POSTGRES_DB:-{{PROJECT_SLUG}}}
 
 ## docker-redis-shell: Open Redis CLI
 docker-redis-shell:

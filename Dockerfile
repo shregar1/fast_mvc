@@ -1,9 +1,9 @@
 # =============================================================================
-# FastX Production Dockerfile
+# {{PROJECT_NAME}} Production Dockerfile
 # =============================================================================
 
 # Stage 1: Builder
-FROM python:3.11-slim as builder
+FROM python:{{PYTHON_VERSION}}-slim as builder
 
 WORKDIR /app
 
@@ -21,7 +21,7 @@ RUN pip install --no-cache-dir --user '.[jobs]' \
     && pip install --no-cache-dir --user celery
 
 # Stage 2: Production
-FROM python:3.11-slim
+FROM python:{{PYTHON_VERSION}}-slim
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \

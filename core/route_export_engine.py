@@ -77,7 +77,7 @@ class RouteExportEngine:
         git_name = SystemUtility.git_repository_folder_name()
         if git_name:
             return git_name
-        return "fastx"
+        return Path.cwd().name
 
     def install(self) -> None:
         """Install monkey patches that observe route registration."""
