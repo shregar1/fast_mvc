@@ -348,6 +348,10 @@ async def _set_urn_on_state(request: Request, call_next):
     if not hasattr(request.state, "urn"):
         request.state.urn = str(uuid4())
 
+    # Extract X-Reference-Number header and set on request state
+    reference_number = request.headers.get("x-reference-number")
+    request.state.reference_number = reference_number or ""
+
     auth = getattr(request.state, "auth", None)
     if isinstance(auth, dict):
         for key, value in auth.items():
@@ -415,8 +419,9 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     return JSONResponse(
         status_code=HTTPStatus.BAD_REQUEST,
         content=response_payload,
-        headers=HttpHeader().get_reference_urn_header(
-            reference_urn=request.headers.get(HttpHeader.X_REFERENCE_URN)
+        headers=HttpHeader().correlation_response_headers(
+            reference_urn=request.headers.get(HttpHeader.X_REFERENCE_URN),
+            reference_number=request.headers.get(HttpHeader.X_REFERENCE_NUMBER),
         ),
     )
 

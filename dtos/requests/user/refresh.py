@@ -1,8 +1,6 @@
 """Refresh token request DTO."""
 
-from uuid import uuid4
-
-from pydantic import Field, field_validator
+from pydantic import field_validator
 
 from dtos.requests.user.abstraction import IRequestUserDTO
 
@@ -10,7 +8,6 @@ from dtos.requests.user.abstraction import IRequestUserDTO
 class RefreshTokenRequestDTO(IRequestUserDTO):
     """DTO for POST /user/refresh."""
 
-    reference_urn: str = Field(default_factory=lambda: str(uuid4()))
     refreshToken: str
 
     @field_validator("refreshToken")

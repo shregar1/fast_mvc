@@ -56,8 +56,9 @@ class ApplicationExceptionHandlers:
         return JSONResponse(
             status_code=getattr(exc, "httpStatusCode", HTTPStatus.INTERNAL_SERVER_ERROR),
             content=response_dto.model_dump(mode="json"),
-            headers=HttpHeader().get_reference_urn_header(
-                reference_urn=request.headers.get(HttpHeader.X_REFERENCE_URN)
+            headers=HttpHeader().correlation_response_headers(
+                reference_urn=request.headers.get(HttpHeader.X_REFERENCE_URN),
+                reference_number=request.headers.get(HttpHeader.X_REFERENCE_NUMBER),
             ),
         )
 
@@ -98,8 +99,9 @@ class ApplicationExceptionHandlers:
         return JSONResponse(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
             content=response_dto.model_dump(mode="json"),
-            headers=HttpHeader().get_reference_urn_header(
-                reference_urn=request.headers.get(HttpHeader.X_REFERENCE_URN)
+            headers=HttpHeader().correlation_response_headers(
+                reference_urn=request.headers.get(HttpHeader.X_REFERENCE_URN),
+                reference_number=request.headers.get(HttpHeader.X_REFERENCE_NUMBER),
             ),
         )
 

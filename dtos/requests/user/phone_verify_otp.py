@@ -1,8 +1,6 @@
 """Phone verify-OTP request DTO."""
 
-from uuid import uuid4
-
-from pydantic import Field, field_validator
+from pydantic import field_validator
 
 from dtos.requests.user.abstraction import IRequestUserDTO
 
@@ -10,7 +8,6 @@ from dtos.requests.user.abstraction import IRequestUserDTO
 class PhoneVerifyOtpRequestDTO(IRequestUserDTO):
     """DTO for POST /user/phone/verify-otp."""
 
-    reference_urn: str = Field(default_factory=lambda: str(uuid4()))
     phone: str
     otp: str
     purpose: str = "login"

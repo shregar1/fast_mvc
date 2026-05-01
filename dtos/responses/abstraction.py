@@ -56,6 +56,14 @@ class IResponseDTO(BaseModel, IDTO):
         default=None,
         description=(
             "Echo of the client correlation id when provided "
-            "(e.g. IRequestDTO.reference_urn or the x-reference-urn request header)."
+            "via the x-reference-urn request header."
+        ),
+    )
+
+    reference_number: str | None = Field(
+        default=None,
+        description=(
+            "Echo of the client reference number when provided "
+            "via the X-Reference-Number request header."
         ),
     )

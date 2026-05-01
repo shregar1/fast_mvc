@@ -14,7 +14,7 @@ Usage:
 
     def test_factories(fetch_example_request_payload):
         # Top-level factories package (see factories/README.md)
-        assert "reference_urn" in fetch_example_request_payload
+        assert "name" in fetch_example_request_payload
 """
 
 import os
@@ -203,5 +203,5 @@ from factories import ExampleFetchRequestFactory
 
 @pytest.fixture
 def fetch_example_request_payload() -> dict:
-    """Valid ``FetchUserRequestDTO`` body fields as a dict (includes ``reference_urn``)."""
+    """Valid ``FetchUserRequestDTO`` body fields as a dict."""
     return ExampleFetchRequestFactory.build()

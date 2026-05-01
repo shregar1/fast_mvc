@@ -12,6 +12,7 @@ class HttpHeader:
     X_REQUEST_ID: ClassVar[str] = "X-Request-ID"
     X_PROCESS_TIME: ClassVar[str] = "X-Process-Time"
     X_REFERENCE_URN: ClassVar[str] = "x-reference-urn"
+    X_REFERENCE_NUMBER: ClassVar[str] = "x-reference-number"
     X_TRANSACTION_URN: ClassVar[str] = "x-transaction-urn"
 
     AUTHORIZATION: ClassVar[str] = "Authorization"
@@ -35,17 +36,29 @@ class HttpHeader:
             return {}
         return {self.X_REFERENCE_URN: reference_urn}
 
+    def get_reference_number_header(
+        self,
+        *,
+        reference_number: Optional[str] = None,
+    ) -> dict[str, str]:
+        """Build response headers including ``x-reference-number`` when a value is present."""
+        if reference_number is None or reference_number == "":
+            return {}
+        return {self.X_REFERENCE_NUMBER: reference_number}
 
     def correlation_response_headers(
         self,
         *,
         reference_urn: Optional[str] = None,
+        reference_number: Optional[str] = None,
         transaction_urn: Optional[str] = None,
     ) -> dict[str, str]:
         """Merge optional client reference echo and server transaction URN for API responses."""
         headers: dict[str, str] = {}
         if reference_urn:
             headers[self.X_REFERENCE_URN] = reference_urn
+        if reference_number:
+            headers[self.X_REFERENCE_NUMBER] = reference_number
         if transaction_urn:
             headers[self.X_TRANSACTION_URN] = transaction_urn
         return headers

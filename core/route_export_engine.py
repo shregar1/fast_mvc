@@ -172,6 +172,7 @@ class RouteExportEngine:
                 f"curl -X {method} '{{{{base_url}}}}{path_with_values}{query_string}'",
                 f"-H 'accept: {HttpHeader.CONTENT_TYPE_JSON}'",
                 "-H 'x-reference-urn: {{reference_urn}}'",
+                "-H 'X-Reference-Number: {{reference_number}}'",
             ]
             if operation.get("needs_bearer"):
                 parts.append(f"-H '{HttpHeader.AUTHORIZATION}: {HttpHeader.AUTHORIZATION_BEARER_PREFIX}{{token}}'")
@@ -204,6 +205,11 @@ class RouteExportEngine:
                         {
                             "key": "x-reference-urn",
                             "value": "{{reference_urn}}",
+                            "type": "text",
+                        },
+                        {
+                            "key": "X-Reference-Number",
+                            "value": "{{reference_number}}",
                             "type": "text",
                         },
                     ],

@@ -5,7 +5,7 @@ from http import HTTPStatus
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
-from constants.http_headers import x_reference_urn_headers
+from constants.http_header import HttpHeader
 from controllers.apis.v1.example.create import ExampleCreateController
 from dtos.responses.abstraction import IResponseDTO
 
@@ -34,7 +34,10 @@ async def create_example(request: Request, payload: dict) -> JSONResponse:
         return JSONResponse(
             status_code=HTTPStatus.CREATED,
             content=dto.model_dump(),
-            headers=x_reference_urn_headers(getattr(dto, "reference_urn", None)),
+            headers=HttpHeader().correlation_response_headers(
+                reference_urn=request.headers.get(HttpHeader.X_REFERENCE_URN),
+                reference_number=request.headers.get(HttpHeader.X_REFERENCE_NUMBER),
+            ),
         )
     except Exception as err:
         response_dto, http_status = controller.handle_exception(

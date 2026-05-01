@@ -119,7 +119,14 @@ class IResponseAPIDTO(IResponseDTO):
         default=None,
         description=(
             "Echo of the client correlation id when provided "
-            "(e.g. IRequestDTO.reference_urn or the x-reference-urn request header). "
-            "APIs also set the x-reference-urn response header when this value is non-empty."
+            "via the x-reference-urn request header."
+        ),
+    )
+
+    referenceNumber: str = Field(
+        default=None,
+        description=(
+            "Echo of the client reference number when provided "
+            "via the X-Reference-Number request header."
         ),
     )

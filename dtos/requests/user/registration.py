@@ -1,8 +1,6 @@
 """Registration request DTO."""
 
-from uuid import uuid4
-
-from pydantic import Field, field_validator
+from pydantic import field_validator
 
 from dtos.requests.user.abstraction import IRequestUserDTO
 
@@ -10,7 +8,6 @@ from dtos.requests.user.abstraction import IRequestUserDTO
 class UserRegistrationRequestDTO(IRequestUserDTO):
     """DTO for POST /user/register."""
 
-    reference_urn: str = Field(default_factory=lambda: str(uuid4()))
     email: str
     password: str
     name: str = ""

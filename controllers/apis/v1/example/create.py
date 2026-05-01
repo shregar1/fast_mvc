@@ -69,5 +69,5 @@ class ExampleCreateController(IExampleAPIController):
             responseMessage=result["message"],
             responseKey="success_example_created",
             data=response_data.model_dump(),
-            reference_urn=request_dto.reference_urn,
+            reference_number=getattr(request.state, "reference_number", None),
         )
