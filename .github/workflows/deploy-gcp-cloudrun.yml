@@ -1,0 +1,63 @@
+# Deploy to Google Cloud Run from source (Cloud Build + deploy).
+#
+# Trigger: workflow_dispatch only (add "push: branches: [main]" when ready).
+#
+# Prerequisites:
+#   - Enable Cloud Run API, Cloud Build API, Artifact Registry (as needed)
+#   - Workload Identity Federation: GitHub → GCP (recommended) OR export JSON key (not shown here)
+#   - Dockerfile at repo root (optional for buildpacks; source deploy uses your Dockerfile when present)
+#
+# GitHub Actions variables:
+#   GCP_WORKLOAD_IDENTITY_PROVIDER — full WIF resource name
+#   GCP_SERVICE_ACCOUNT            — service account email allowed to deploy
+#   GCP_CLOUD_RUN_SERVICE          — Cloud Run service name
+#   GCP_REGION                     — e.g. us-central1
+#   GCP_PROJECT_ID                 — GCP project id (optional if inferred from credentials)
+#
+# Docs: https://github.com/google-github-actions/auth#setting-up-workload-identity-federation
+
+name: Deploy to GCP Cloud Run
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: deploy-gcp-cloudrun-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify GCP variables
+        run: |
+          missing=0
+          for v in GCP_WORKLOAD_IDENTITY_PROVIDER GCP_SERVICE_ACCOUNT GCP_CLOUD_RUN_SERVICE GCP_REGION; do
+            eval "val=\${${v}}"
+            if [ -z "$val" ]; then echo "::error::Set Actions variable $v"; missing=1; fi
+          done
+          exit "$missing"
+        env:
+          GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          GCP_SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}
+          GCP_CLOUD_RUN_SERVICE: ${{ vars.GCP_CLOUD_RUN_SERVICE }}
+          GCP_REGION: ${{ vars.GCP_REGION }}
+
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+
+      - name: Deploy to Cloud Run
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: ${{ vars.GCP_CLOUD_RUN_SERVICE }}
+          region: ${{ vars.GCP_REGION }}
+          source: .

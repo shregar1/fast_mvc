@@ -1,0 +1,41 @@
+# Deploy to Fly.io (remote build on Fly builders).
+#
+# Trigger: workflow_dispatch only (add "push: branches: [main]" when ready).
+#
+# Prerequisites:
+#   - fly.toml at repo root (run `fly launch` locally once, commit fly.toml)
+#   - Fly app created and API token stored in GitHub
+#
+# GitHub Actions secret:
+#   FLY_API_TOKEN — from https://fly.io/user/personal_access_tokens
+#
+# Docs: https://fly.io/docs/reference/fly-launch/ — https://fly.io/docs/app-guides/continuous-deployment-with-github-actions/
+
+name: Deploy to Fly.io
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-fly-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify Fly token
+        run: |
+          if [ -z "${{ secrets.FLY_API_TOKEN }}" ]; then
+            echo "::error::Set secret FLY_API_TOKEN"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+
+      - uses: superfly/flyctl-actions/setup-flyctl@v1
+
+      - name: Deploy
+        run: flyctl deploy --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

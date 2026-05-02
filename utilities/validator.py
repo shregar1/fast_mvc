@@ -18,6 +18,8 @@ from typing import Any, Callable, Optional
 from abstractions.utility import IUtility
 from constants.default import Default
 from errors import ConfigValidationError
+from utilities.database_url import resolve_database_url
+from utilities.redis_url import resolve_redis_url
 
 __all__ = [
     "ConfigValidationError",
@@ -160,7 +162,20 @@ class ConfigValidatorUtility(IUtility):
         warnings = []
 
         for rule in self.rules:
-            value = os.getenv(rule.key, rule.default)
+            if rule.key == "DATABASE_URL":
+                value = (os.getenv(rule.key) or "").strip()
+                if not value:
+                    value = resolve_database_url()
+                if not value:
+                    value = rule.default
+            elif rule.key == "REDIS_URL":
+                value = (os.getenv(rule.key) or "").strip()
+                if not value:
+                    value = resolve_redis_url()
+                if not value:
+                    value = rule.default
+            else:
+                value = os.getenv(rule.key, rule.default)
 
             # Check required
             if rule.required and not value:

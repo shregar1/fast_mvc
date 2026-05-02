@@ -1,207 +1,58 @@
-# =============================================================================
-# {{PROJECT_NAME}} Full Stack - Docker Compose
-# =============================================================================
-#
-# One command to run the entire stack:
-#   docker-compose up -d
-#
-# Services:
-#   - postgres: PostgreSQL database
-#   - redis: Redis cache
-#   - migrations: Alembic database migrations (runs once)
-#   - app: FastAPI application
-#   - worker: Background task worker (optional)
-#   - scheduler: Task scheduler (optional)
-#
-# Usage:
-#   docker-compose up -d          # Start all services
-#   docker-compose logs -f app    # View app logs
-#   docker-compose down           # Stop all services
-#   docker-compose down -v        # Stop and remove volumes
-#
-# =============================================================================
+# App + worker + optional Caddy on external network. Local DB: add docker-compose.local.yml (see .env COMPOSE_FILE).
+# Prereq: `docker network create ${EDGE_NETWORK_NAME:-fastx-edge}` and repo-root `.env`.
+
+name: {{PROJECT_SLUG}}
+
+x-app-in-container: &app-in-container
+  HOST: "0.0.0.0"
+  PORT: "8000"
+  RUN_MIGRATIONS: "false"
+
+x-app-base: &app-base
+  image: {{PROJECT_SLUG}}-app
+  build:
+    context: .
+    dockerfile: Dockerfile
+  env_file:
+    - path: .env
+      required: true
+  restart: unless-stopped
+  networks:
+    - fastx-network
+  healthcheck:
+    test: ["CMD", "curl", "-f", "http://localhost:8000/health/live"]
+    interval: 30s
+    timeout: 10s
+    retries: 3
+    start_period: 40s
+  deploy:
+    resources:
+      limits:
+        cpus: "1"
+        memory: 512M
+      reservations:
+        cpus: "0.25"
+        memory: 128M
 
 services:
-  # ==========================================================================
-  # PostgreSQL DataI
-  # ==========================================================================
-  postgres:
-    image: postgres:16-alpine
-    container_name: {{PROJECT_SLUG}}-postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-{{PROJECT_SLUG}}}
-      PGDATA: /var/lib/postgresql/data/pgdata
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./_maint/init-scripts:/docker-entrypoint-initdb.d:ro
-    ports:
-      - "${POSTGRES_PORT:-5432}:5432"
-    networks:
-      - {{PROJECT_SLUG}}-network
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-{{PROJECT_SLUG}}}",
-        ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-    command:
-      - "postgres"
-      - "-c"
-      - "max_connections=200"
-      - "-c"
-      - "shared_buffers=256MB"
-
-  # ==========================================================================
-  # Redis Cache
-  # ==========================================================================
-  redis:
-    image: redis:7-alpine
-    container_name: {{PROJECT_SLUG}}-redis
-    restart: unless-stopped
-    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
-    volumes:
-      - redis_data:/data
-    ports:
-      - "${REDIS_PORT:-6379}:6379"
-    networks:
-      - {{PROJECT_SLUG}}-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-
-  # ==========================================================================
-  # DataI Migrations (runs once before app starts)
-  # ==========================================================================
-  migrations:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: {{PROJECT_SLUG}}-migrations
-    environment:
-      # DataI
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-{{PROJECT_SLUG}}}
-      # Redis
-      REDIS_URL: redis://redis:6379/0
-      # Security
-      SECRET_KEY: ${SECRET_KEY:-LocalDev_Secret_ChangeInProduction_32min!}
-      # Min 32 chars + complexity; override via .env in production
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-Aa1!Aa1!Aa1!Aa1!Aa1!Aa1!Aa1!Aa1!}
-      # App
-      APP_ENV: ${APP_ENV:-production}
-      LOG_LEVEL: ${LOG_LEVEL:-INFO}
-      # This repo currently does not ship alembic migration scripts under `migrations/`.
-      # Skip migrations so the app can boot (API + in-memory sample endpoints still work).
-      RUN_MIGRATIONS: "false"
-    command: >
-      sh -c "echo '⏳ Waiting for dependencies...' && sleep 2 && echo '⏭️  Skipping alembic migrations (no scripts/) && exit 0'"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - {{PROJECT_SLUG}}-network
-    profiles:
-      - "" # Run by default
-      - "migrations"
-      - "full"
-
-  # ==========================================================================
-  # FastAPI Application
-  # ==========================================================================
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: {{PROJECT_SLUG}}-app
-    restart: unless-stopped
+    <<: *app-base
     environment:
-      # DataI
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-{{PROJECT_SLUG}}}
-      # Redis
-      REDIS_URL: redis://redis:6379/0
-      # Security
-      SECRET_KEY: ${SECRET_KEY:-LocalDev_Secret_ChangeInProduction_32min!}
-      # Min 32 chars + complexity; override via .env in production
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-Aa1!Aa1!Aa1!Aa1!Aa1!Aa1!Aa1!Aa1!}
-      JWT_ALGORITHM: ${JWT_ALGORITHM:-HS256}
-      JWT_EXPIRATION_HOURS: ${JWT_EXPIRATION_HOURS:-24}
-      # App
-      APP_NAME: ${APP_NAME:-{{PROJECT_NAME}}}
-      APP_VERSION: ${APP_VERSION:-1.0.0}
-      APP_ENV: ${APP_ENV:-production}
-      DEBUG: ${DEBUG:-false}
-      LOG_LEVEL: ${LOG_LEVEL:-INFO}
-      # Server
-      HOST: 0.0.0.0
-      PORT: 8000
-      WORKERS: ${WORKERS:-4}
-      # gRPC (optional)
-      GRPC_ENABLED: ${GRPC_ENABLED:-false}
-      GRPC_HOST: ${GRPC_HOST:-0.0.0.0}
-      GRPC_PORT: ${GRPC_PORT:-50051}
-      # CORS
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:8080}
-      # Rate Limiting
-      RATE_LIMIT_REQUESTS_PER_MINUTE: ${RATE_LIMIT_REQUESTS_PER_MINUTE:-100}
-      RATE_LIMIT_REQUESTS_PER_HOUR: ${RATE_LIMIT_REQUESTS_PER_HOUR:-1000}
-      # This repo currently does not ship alembic migration scripts under `migrations/`.
-      # Skip migrations so the app can boot.
-      RUN_MIGRATIONS: "false"
+      <<: *app-in-container
+      GRPC_PORT: ${GRPC_PORT:-51051}
     ports:
       - "${APP_PORT:-8000}:8000"
-      # Expose gRPC port when enabled (container listens on GRPC_PORT).
-      - "${GRPC_PORT:-50051}:${GRPC_PORT:-50051}"
-    networks:
-      - {{PROJECT_SLUG}}-network
-    depends_on:
-      migrations:
-        condition: service_completed_successfully
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health/live"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    deploy:
-      resources:
-        limits:
-          cpus: "1"
-          memory: 512M
-        reservations:
-          cpus: "0.25"
-          memory: 128M
+      - "${GRPC_PORT:-51051}:${GRPC_PORT:-51051}"
 
-  # ==========================================================================
-  # Background Worker (Celery)
-  # ==========================================================================
   worker:
+    image: {{PROJECT_SLUG}}-app
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: {{PROJECT_SLUG}}-worker
+    env_file:
+      - path: .env
+        required: true
     restart: unless-stopped
-    environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-{{PROJECT_SLUG}}}
-      REDIS_URL: redis://redis:6379/0
-      SECRET_KEY: ${SECRET_KEY:-LocalDev_Secret_ChangeInProduction_32min!}
-      APP_ENV: ${APP_ENV:-production}
-      LOG_LEVEL: ${LOG_LEVEL:-INFO}
-      # Skip alembic migrations (no `migrations/` scripts shipped in this repo)
-      RUN_MIGRATIONS: "false"
     command:
       - celery
       - -A
@@ -210,75 +61,35 @@ services:
       - --loglevel=${LOG_LEVEL:-INFO}
       - --concurrency=2
       - --max-tasks-per-child=1000
-    depends_on:
-      - postgres
-      - redis
     networks:
-      - {{PROJECT_SLUG}}-network
+      - fastx-network
     profiles:
       - "worker"
       - "full"
 
-  # ==========================================================================
-  # Task Scheduler (Celery Beat)
-  # ==========================================================================
   scheduler:
+    image: {{PROJECT_SLUG}}-app
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: {{PROJECT_SLUG}}-scheduler
+    env_file:
+      - path: .env
+        required: true
     restart: unless-stopped
-    environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-{{PROJECT_SLUG}}}
-      REDIS_URL: redis://redis:6379/0
-      SECRET_KEY: ${SECRET_KEY:-LocalDev_Secret_ChangeInProduction_32min!}
-      APP_ENV: ${APP_ENV:-production}
-      LOG_LEVEL: ${LOG_LEVEL:-INFO}
-      # Skip alembic migrations (no `migrations/` scripts shipped in this repo)
-      RUN_MIGRATIONS: "false"
     command:
       - celery
       - -A
       - core.tasks
       - beat
       - --loglevel=${LOG_LEVEL:-INFO}
-    depends_on:
-      - postgres
-      - redis
     networks:
-      - {{PROJECT_SLUG}}-network
+      - fastx-network
     profiles:
       - "worker"
       - "full"
 
-  # ==========================================================================
-  # Nginx Reverse Proxy (Optional)
-  # ==========================================================================
-  nginx:
-    image: nginx:alpine
-    container_name: {{PROJECT_SLUG}}-nginx
-    restart: unless-stopped
-    ports:
-      - "${NGINX_HTTP_PORT:-80}:80"
-      - "${NGINX_HTTPS_PORT:-443}:443"
-    volumes:
-      - ./_maint/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./_maint/nginx/ssl:/etc/nginx/ssl:ro
-    depends_on:
-      app:
-        condition: service_healthy
-    networks:
-      - {{PROJECT_SLUG}}-network
-    profiles:
-      - "nginx"
-      - "full"
-
-  # ==========================================================================
-  # Caddy Reverse Proxy with HTTP/3 (QUIC) (Optional)
-  # ==========================================================================
   caddy:
     image: caddy:2-alpine
-    container_name: {{PROJECT_SLUG}}-caddy
     restart: unless-stopped
     ports:
       - "${CADDY_HTTP_PORT:-80}:80"
@@ -290,68 +101,12 @@ services:
       app:
         condition: service_healthy
     networks:
-      - {{PROJECT_SLUG}}-network
+      - fastx-network
     profiles:
       - "caddy"
+      - "full"
 
-  # ==========================================================================
-  # DataI Admin (PgAdmin - Optional)
-  # ==========================================================================
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: {{PROJECT_SLUG}}-pgadmin
-    restart: unless-stopped
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@example.com}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
-      PGADMIN_CONFIG_SERVER_MODE: "False"
-    ports:
-      - "${PGADMIN_PORT:-5050}:80"
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-    networks:
-      - {{PROJECT_SLUG}}-network
-    profiles:
-      - "dev"
-      - "admin"
-
-  # ==========================================================================
-  # Redis Insight (Redis GUI - Optional)
-  # ==========================================================================
-  redis-insight:
-    image: redislabs/redisinsight:latest
-    container_name: {{PROJECT_SLUG}}-redis-insight
-    restart: unless-stopped
-    ports:
-      - "${REDIS_INSIGHT_PORT:-5540}:5540"
-    volumes:
-      - redisinsight_data:/db
-    networks:
-      - {{PROJECT_SLUG}}-network
-    profiles:
-      - "dev"
-      - "admin"
-
-# =============================================================================
-# Volumes
-# =============================================================================
-volumes:
-  postgres_data:
-    driver: local
-  redis_data:
-    driver: local
-  pgadmin_data:
-    driver: local
-  redisinsight_data:
-    driver: local
-
-# =============================================================================
-# Networks
-# =============================================================================
 networks:
-  {{PROJECT_SLUG}}-network:
-    driver: bridge
-    ipam:
-      config:
-        # Avoid overlap with other local Docker networks.
-        - subnet: 172.23.0.0/16
+  fastx-network:
+    external: true
+    name: ${EDGE_NETWORK_NAME:-fastx-edge}

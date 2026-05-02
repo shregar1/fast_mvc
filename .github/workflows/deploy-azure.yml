@@ -1,0 +1,67 @@
+# Deploy to Azure Container Apps via Azure Container Registry (ACR).
+#
+# Trigger: workflow_dispatch only (add "push: branches: [main]" when ready).
+#
+# Prerequisites:
+#   - Resource group, Container App, ACR, and service principal with push/pull rights
+#   - Dockerfile at repo root (same as local Docker builds)
+#
+# GitHub Actions secret:
+#   AZURE_CREDENTIALS — JSON output of: az ad sp create-for-rbac --sdk-auth ...
+#
+# GitHub Actions variables (repo Settings → Variables):
+#   AZURE_ACR_NAME              — ACR name (no .azurecr.io)
+#   AZURE_RESOURCE_GROUP        — Resource group containing the Container App
+#   AZURE_CONTAINER_APP_NAME    — Container App name
+#   AZURE_IMAGE_NAME            — Repository name inside ACR (e.g. {{PROJECT_SLUG}}-app)
+
+name: Deploy to Azure
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-azure-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify Azure deploy variables
+        run: |
+          missing=0
+          for v in AZURE_ACR_NAME AZURE_RESOURCE_GROUP AZURE_CONTAINER_APP_NAME AZURE_IMAGE_NAME; do
+            eval "val=\${${v}}"
+            if [ -z "$val" ]; then echo "::error::Set Actions variable $v"; missing=1; fi
+          done
+          if [ -z "${{ secrets.AZURE_CREDENTIALS }}" ]; then echo "::error::Set secret AZURE_CREDENTIALS"; missing=1; fi
+          exit "$missing"
+        env:
+          AZURE_ACR_NAME: ${{ vars.AZURE_ACR_NAME }}
+          AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+          AZURE_CONTAINER_APP_NAME: ${{ vars.AZURE_CONTAINER_APP_NAME }}
+          AZURE_IMAGE_NAME: ${{ vars.AZURE_IMAGE_NAME }}
+
+      - uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Build image in ACR
+        run: |
+          az acr build --registry "${{ vars.AZURE_ACR_NAME }}" \
+            --image "${{ vars.AZURE_IMAGE_NAME }}:${{ github.sha }}" \
+            --file Dockerfile .
+
+      - name: Resolve ACR login server and update Container App
+        run: |
+          set -euo pipefail
+          LOGIN_SERVER=$(az acr show --name "${{ vars.AZURE_ACR_NAME }}" --query loginServer -o tsv)
+          IMAGE="${LOGIN_SERVER}/${{ vars.AZURE_IMAGE_NAME }}:${{ github.sha }}"
+          az containerapp update \
+            --name "${{ vars.AZURE_CONTAINER_APP_NAME }}" \
+            --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
+            --image "$IMAGE"

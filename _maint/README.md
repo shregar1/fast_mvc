@@ -2,7 +2,7 @@
 
 ## What this folder is
 
-**`_maint`** holds **operational assets** that the **hosting and developer workflow** depend on: Docker-related **nginx** configuration, PostgreSQL **bootstrap SQL**, and **scripts** (seeding, git metadata hooks). It is **not** part of the FastAPI application’s feature code (`controllers`, `services`, etc.).
+**`_maint`** holds **operational assets** that the **hosting and developer workflow** depend on: **Caddy** config (primary reverse proxy in compose), legacy **nginx** samples, PostgreSQL **bootstrap SQL**, and **scripts** (seeding, git metadata hooks). It is **not** part of the FastAPI application’s feature code (`controllers`, `services`, etc.).
 
 Think of `_maint` as the **“how we run and provision the system”** layer: change it when you change **compose**, **reverse proxy**, **DB init**, or **automation**—not when you add a new business endpoint.
 
@@ -16,7 +16,8 @@ Think of `_maint` as the **“how we run and provision the system”** layer: ch
 
 | Path | Purpose |
 |------|---------|
-| **`nginx/`** | `nginx.conf` and `ssl/` for the optional nginx service in `docker-compose.yml`. |
+| **`caddy/`** | `Caddyfile` for the optional **caddy** service (`docker-compose.yml`, profiles `caddy` / `full`). |
+| **`nginx/`** | Legacy `nginx.conf` / `ssl/` samples (not wired in the default split compose; prefer Caddy). |
 | **`init-scripts/`** | SQL executed on **first** PostgreSQL init (mounted as `docker-entrypoint-initdb.d`). |
 | **`scripts/`** | `seed.py`, `git_log_recorder.py`, and similar; referenced from **`docker-entrypoint.sh`** and **`.pre-commit-config.yaml`**. |
 

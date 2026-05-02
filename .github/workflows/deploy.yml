@@ -1,0 +1,82 @@
+# Deploy to a VM (e.g. GCP) on push to main.
+#
+# Prerequisites on the server:
+#   - Docker Engine + Docker Compose plugin
+#   - External edge network name must match EDGE_NETWORK_NAME in repo-root .env
+#     (default fastx-edge; workflow creates the network if missing)
+#   - This repo cloned to the path set in GitHub repo variable DEPLOY_PATH
+#   - .env present on the server (deploy fails if missing); never commit secrets
+#   - Git on the server can fetch from GitHub (deploy key, SSH agent, or PAT)
+#   - Deploy user in the docker group (or use root — not recommended)
+#
+# GitHub repo secrets (Settings → Secrets and variables → Actions):
+#   DEPLOY_HOST       — Server IP or DNS name
+#   DEPLOY_USER       — SSH user (e.g. ubuntu)
+#   DEPLOY_SSH_KEY    — Private key for that user (full PEM, including headers)
+#
+# GitHub repo variables:
+#   DEPLOY_PATH       — Absolute path to this repo on the server
+
+name: Deploy to VM
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify deploy configuration
+        run: |
+          missing=0
+          if [ -z "${{ secrets.DEPLOY_HOST }}" ]; then echo "::error::Set Actions secret DEPLOY_HOST (VM IP or hostname)"; missing=1; fi
+          if [ -z "${{ secrets.DEPLOY_USER }}" ]; then echo "::error::Set Actions secret DEPLOY_USER (SSH login user on the VM)"; missing=1; fi
+          if [ -z "${{ secrets.DEPLOY_SSH_KEY }}" ]; then echo "::error::Set Actions secret DEPLOY_SSH_KEY (private key PEM for that user)"; missing=1; fi
+          if [ -z "${{ vars.DEPLOY_PATH }}" ]; then echo "::error::Set Actions variable DEPLOY_PATH (absolute clone path on the server)"; missing=1; fi
+          exit "$missing"
+
+      - name: Install SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: Trust server host key
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Pull and restart stack
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
+        run: |
+          REMOTE_PATH=$(printf '%q' "$DEPLOY_PATH")
+          ssh "${DEPLOY_USER}@${DEPLOY_HOST}" "DEPLOY_PATH=${REMOTE_PATH} exec bash -s" <<'REMOTE'
+          set -euo pipefail
+          cd "$DEPLOY_PATH"
+          git fetch origin main
+          git reset --hard origin/main
+          if [ ! -f .env ]; then
+            echo "error: .env file not found in ${DEPLOY_PATH}" >&2
+            exit 1
+          fi
+          EDGE_NET="fastx-edge"
+          if [ -f .env ]; then
+            _line=$(grep -E '^[[:space:]]*EDGE_NETWORK_NAME=' .env | tail -1 || true)
+            if [ -n "$_line" ]; then
+              EDGE_NET="${_line#*=}"
+              EDGE_NET="${EDGE_NET%%#*}"
+              EDGE_NET=$(printf '%s' "$EDGE_NET" | sed -e 's/^["'\'']//' -e 's/["'\'']$//' -e 's/[[:space:]]*$//')
+            fi
+          fi
+          unset _line
+          docker network inspect "$EDGE_NET" >/dev/null 2>&1 || docker network create "$EDGE_NET"
+          docker compose up -d --build
+          REMOTE

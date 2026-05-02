@@ -1,0 +1,32 @@
+# Trigger a Render deploy via your service's Deploy Hook (no checkout required).
+#
+# Trigger: workflow_dispatch only (add "push: branches: [main]" when ready).
+#
+# Prerequisites:
+#   - Render dashboard → your service → Settings → Deploy Hook → Generate & copy URL
+#
+# GitHub Actions secret:
+#   RENDER_DEPLOY_HOOK_URL — full HTTPS URL Render gives you (treat as a secret)
+#
+# Render builds from your connected Git branch; the hook only starts a new deploy.
+
+name: Deploy to Render
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-render-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render deploy
+        run: |
+          if [ -z "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" ]; then
+            echo "::error::Set secret RENDER_DEPLOY_HOOK_URL"
+            exit 1
+          fi
+          curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"

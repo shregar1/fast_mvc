@@ -1,0 +1,46 @@
+# Deploy to Railway using the official CLI (container/service deploy).
+#
+# Trigger: workflow_dispatch only (add "push: branches: [main]" when ready).
+#
+# Prerequisites:
+#   - Railway project linked (`railway link` locally) and railway.toml / config committed, OR
+#     set service/project via Railway dashboard and CLI env vars (see Railway docs)
+#
+# GitHub Actions secret:
+#   RAILWAY_TOKEN — https://railway.app/account/tokens
+#
+# Docs: https://docs.railway.app/guides/cli — https://docs.railway.app/deploy/deployments
+
+name: Deploy to Railway
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-railway-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify Railway token
+        run: |
+          if [ -z "${{ secrets.RAILWAY_TOKEN }}" ]; then
+            echo "::error::Set secret RAILWAY_TOKEN"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy
+        run: railway up --detach
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}

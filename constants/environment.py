@@ -119,12 +119,12 @@ class EnvironmentVar:
     POSTGRES_PASSWORD: Final[str] = "POSTGRES_PASSWORD"
     POSTGRES_DB: Final[str] = "POSTGRES_DB"
     POSTGRES_PORT: Final[str] = "POSTGRES_PORT"
-    PGADMIN_EMAIL: Final[str] = "PGADMIN_EMAIL"
-    PGADMIN_PASSWORD: Final[str] = "PGADMIN_PASSWORD"
-    PGADMIN_PORT: Final[str] = "PGADMIN_PORT"
     REDIS_INSIGHT_PORT: Final[str] = "REDIS_INSIGHT_PORT"
     NGINX_HTTP_PORT: Final[str] = "NGINX_HTTP_PORT"
     NGINX_HTTPS_PORT: Final[str] = "NGINX_HTTPS_PORT"
+    COMPOSE_FILE: Final[str] = "COMPOSE_FILE"
+    EDGE_NETWORK_NAME: Final[str] = "EDGE_NETWORK_NAME"
+    APP_PORT: Final[str] = "APP_PORT"
     # -------------------------------------------------------------------------
     # QUIC / HTTP-3 (Caddy)
     # -------------------------------------------------------------------------
@@ -149,6 +149,46 @@ class EnvironmentVar:
     GEMINI_ENABLED: Final[str] = "GEMINI_ENABLED"
     GEMINI_API_KEY: Final[str] = "GEMINI_API_KEY"
     GEMINI_MODEL: Final[str] = "GEMINI_MODEL"
+
+    MOONSHOT_ENABLED: Final[str] = "MOONSHOT_ENABLED"
+    MOONSHOT_API_KEY: Final[str] = "MOONSHOT_API_KEY"
+    MOONSHOT_BASE_URL: Final[str] = "MOONSHOT_BASE_URL"
+    MOONSHOT_MODEL: Final[str] = "MOONSHOT_MODEL"
+
+    XAI_ENABLED: Final[str] = "XAI_ENABLED"
+    XAI_API_KEY: Final[str] = "XAI_API_KEY"
+    XAI_BASE_URL: Final[str] = "XAI_BASE_URL"
+    XAI_MODEL: Final[str] = "XAI_MODEL"
+
+    LITELLM_ENABLED: Final[str] = "LITELLM_ENABLED"
+    LITELLM_API_BASE: Final[str] = "LITELLM_API_BASE"
+    LITELLM_API_KEY: Final[str] = "LITELLM_API_KEY"
+    LITELLM_MODEL: Final[str] = "LITELLM_MODEL"
+
+    MISTRAL_ENABLED: Final[str] = "MISTRAL_ENABLED"
+    MISTRAL_API_KEY: Final[str] = "MISTRAL_API_KEY"
+    MISTRAL_BASE_URL: Final[str] = "MISTRAL_BASE_URL"
+    MISTRAL_MODEL: Final[str] = "MISTRAL_MODEL"
+
+    DEEPSEEK_ENABLED: Final[str] = "DEEPSEEK_ENABLED"
+    DEEPSEEK_API_KEY: Final[str] = "DEEPSEEK_API_KEY"
+    DEEPSEEK_BASE_URL: Final[str] = "DEEPSEEK_BASE_URL"
+    DEEPSEEK_MODEL: Final[str] = "DEEPSEEK_MODEL"
+
+    TOGETHER_ENABLED: Final[str] = "TOGETHER_ENABLED"
+    TOGETHER_API_KEY: Final[str] = "TOGETHER_API_KEY"
+    TOGETHER_BASE_URL: Final[str] = "TOGETHER_BASE_URL"
+    TOGETHER_MODEL: Final[str] = "TOGETHER_MODEL"
+
+    COHERE_ENABLED: Final[str] = "COHERE_ENABLED"
+    COHERE_API_KEY: Final[str] = "COHERE_API_KEY"
+    COHERE_MODEL: Final[str] = "COHERE_MODEL"
+
+    AZURE_OPENAI_ENABLED: Final[str] = "AZURE_OPENAI_ENABLED"
+    AZURE_OPENAI_API_KEY: Final[str] = "AZURE_OPENAI_API_KEY"
+    AZURE_OPENAI_ENDPOINT: Final[str] = "AZURE_OPENAI_ENDPOINT"
+    AZURE_OPENAI_API_VERSION: Final[str] = "AZURE_OPENAI_API_VERSION"
+    AZURE_OPENAI_DEPLOYMENT: Final[str] = "AZURE_OPENAI_DEPLOYMENT"
 
     # -------------------------------------------------------------------------
     # Optional: push notifications
