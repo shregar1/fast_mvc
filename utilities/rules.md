@@ -16,31 +16,27 @@ Do not assume “one `IUtility` class per file” for the whole package; use the
 
 These modules define exactly one public class that extends **`IUtility`** (`abstractions.utility`):
 
-| Module | Class |
-|--------|--------|
-| `cors.py` | `CorsConfigUtility` |
-| `datetime.py` | `DateTimeUtility` |
-| `env.py` | `EnvironmentParserUtility` |
-| `mfa.py` | `MFAUtility` |
-| `phone_otp.py` | `PhoneOtpUtility` |
-| `security_headers.py` | `SecurityHeadersUtility` |
-| `string.py` | `StringUtility` |
-| `system.py` | `SystemUtility` |
-| `validator.py` | `ConfigValidatorUtility` |
+- **`cors.py`** — `CorsConfigUtility`
+- **`datetime.py`** — `DateTimeUtility`
+- **`env.py`** — `EnvironmentParserUtility`
+- **`mfa.py`** — `MFAUtility`
+- **`phone_otp.py`** — `PhoneOtpUtility`
+- **`security_headers.py`** — `SecurityHeadersUtility`
+- **`string.py`** — `StringUtility`
+- **`system.py`** — `SystemUtility`
+- **`validator.py`** — `ConfigValidatorUtility`
 
 ## Other modules (not `IUtility` subclasses)
 
-| Module | Contents |
-|--------|----------|
-| `audit.py` | `log_audit(...)` |
-| `auth.py` | `constant_time_compare`, `parse_basic_authorization` |
-| `database_url.py` | `build_postgresql_url_from_components`, `resolve_database_url` |
-| `dictionary.py` | `DictionaryUtility` (plain class) |
-| `jwt.py` | `JWTUtility` (plain class) |
-| `redis_url.py` | `build_redis_url_from_components`, `resolve_redis_url` |
-| `request_utils.py` | `get_client_ip` |
-| `security.py` | `hash_password`, `verify_password` |
-| `webhook_dispatcher.py` | `dispatch_webhook_event` |
+- **`audit.py`** — `log_audit(...)`
+- **`auth.py`** — `constant_time_compare`, `parse_basic_authorization`
+- **`database_url.py`** — `build_postgresql_url_from_components`, `resolve_database_url`
+- **`dictionary.py`** — `DictionaryUtility` (plain class)
+- **`jwt.py`** — `JWTUtility` (plain class)
+- **`redis_url.py`** — `build_redis_url_from_components`, `resolve_redis_url`
+- **`request_utils.py`** — `get_client_ip`
+- **`security.py`** — `hash_password`, `verify_password`
+- **`webhook_dispatcher.py`** — `dispatch_webhook_event`
 
 ## Inheritance (IUtility line only)
 
@@ -73,7 +69,7 @@ Controllers inject MFA via **`dependencies/services/mfa.py`** (`MFAUtilityDepend
 
 ## Don't
 
-- Don't claim every file under `utilities/` is a single `IUtility` — use the tables above.
+- Don't claim every file under `utilities/` is a single `IUtility` — use the lists above.
 - Don't add `services/mfa.py`-style aliases — `MFAUtility` and `PhoneOtpUtility` live here.
 - Don't import controllers or services — utilities are leaves in the dependency graph.
 - Don't read environment variables at call time for hot paths without a clear pattern — prefer import-time or `config/` for stable tests.

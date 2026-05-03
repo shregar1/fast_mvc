@@ -8,12 +8,10 @@ This layer sits between **controllers** (HTTP) and **repositories** (persistence
 
 ## Responsibilities
 
-| Concern | Handled here |
-|--------|----------------|
-| Business rules | Validation, workflows, cross-entity invariants |
-| Orchestration | Multiple repositories, external calls, compensating actions |
-| Logging / metrics | Operation-level context (`urn`, `api_name`, `user_id` via `IService`) |
-| DTO mapping | Transform request DTOs into domain operations and results back to dicts |
+- **Business rules** — Validation, workflows, cross-entity invariants  
+- **Orchestration** — Multiple repositories, external calls, compensating actions  
+- **Logging / metrics** — Operation-level context (`urn`, `api_name`, `user_id` via `IService`)  
+- **DTO mapping** — Transform request DTOs into domain operations and results back to dicts  
 
 ## Layout (this repo)
 
@@ -30,7 +28,7 @@ There is **no** `services/apis/v1/` directory yet; adding one should follow the 
 
 ## How it fits in the stack
 
-```
+```text
 Controller → Service → Repository → Database
 ```
 
