@@ -154,6 +154,12 @@ Repository = "https://github.com/shregar1/fastMVC"
 Issues = "https://github.com/shregar1/fastMVC/issues"
 Changelog = "https://github.com/shregar1/fastMVC/blob/main/CHANGELOG.md"
 
+[tool.basedpyright]
+include = ["."]
+pythonVersion = "3.10"
+typeCheckingMode = "basic"
+executionEnvironments = [{ root = ".", extraPaths = [] }]
+
 [project.scripts]
 # CLI entry points are now managed by the fastx-cli package.
 

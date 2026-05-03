@@ -1,9 +1,10 @@
 {
   "extends": "../pyrightconfig.json",
+  "extraPaths": ["."],
   "executionEnvironments": [
     {
       "root": ".",
-      "extraPaths": [],
+      "extraPaths": ["."],
       "pythonVersion": "3.13"
     }
   ]
