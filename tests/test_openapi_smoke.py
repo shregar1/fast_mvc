@@ -69,6 +69,11 @@ def test_openapi_every_route_returns_without_server_error(client: TestClient) ->
                 kwargs["json"] = body
 
             resp = client.request(method.upper(), url, **kwargs)
-            assert resp.status_code < 500, (
-                f"{method.upper()} {url} -> {resp.status_code}: {resp.text[:500]}"
+            code = resp.status_code
+            # /health* may return 503 when Postgres/Redis are not running locally; that is not an
+            # uncaught application 5xx in the same sense as a 500 from a route handler.
+            if code >= 500 and code == 503 and path.startswith("/health"):
+                continue
+            assert code < 500, (
+                f"{method.upper()} {url} -> {code}: {resp.text[:500]}"
             )

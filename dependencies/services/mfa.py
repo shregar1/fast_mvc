@@ -5,8 +5,8 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import Any
 
-from utilities.mfa import MFAUtility
-from start_utils import logger
+from fastx_platform.core.utils import MFAUtility
+from loguru import logger
 
 
 class MFAUtilityDependency:

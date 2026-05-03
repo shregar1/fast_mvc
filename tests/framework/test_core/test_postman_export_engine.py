@@ -107,13 +107,14 @@ def test_postman_collection_name_falls_back_to_repo_or_fastx(
     payload = json.loads(collection_path.read_text(encoding="utf-8"))
     assert payload["info"]["name"] == "RepoName - Auto Generated"
 
-    # fastx last-resort
+    # Last resort: :meth:`RouteExportEngine._postman_project_display_name` uses ``Path.cwd().name``
+    # when git and ``APP_NAME`` are unset (not a hard-coded ``fastx``).
     monkeypatch.setattr(
         SystemUtility, "git_repository_folder_name", staticmethod(lambda: None)
     )
     collection_path2, _ = engine.export_postman_collection()
     payload2 = json.loads(collection_path2.read_text(encoding="utf-8"))
-    assert payload2["info"]["name"] == "fastx - Auto Generated"
+    assert payload2["info"]["name"] == f"{tmp_path.name} - Auto Generated"
 
 
 def test_export_request_contains_generated_tests_and_headers(

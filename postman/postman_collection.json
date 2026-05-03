@@ -1,6 +1,6 @@
 {
   "info": {
-    "name": "{{PROJECT_NAME}} - Auto Generated",
+    "name": "FastMVC - Auto Generated",
     "description": "**One-click import:** this file includes **collection variables** (`base_url`, `reference_urn`, `reference_number`, `token`, `refresh_token`). Folders mirror the **URL path** (e.g. `health/live`, `items/{id}`). Import only this collection \u2014 no environment required. Edit values under the collection \u2192 **Variables** (or use the collection menu \u2192 Edit). Run **Collection Runner** for auto-generated tests per request. To also emit a separate environment JSON under `postman/`, set env var `POSTMAN_EXPORT_ENVIRONMENT=1` before boot.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
@@ -27,6 +27,11 @@
                         "key": "x-reference-urn",
                         "value": "{{reference_urn}}",
                         "type": "text"
+                      },
+                      {
+                        "key": "X-Reference-Number",
+                        "value": "{{reference_number}}",
+                        "type": "text"
                       }
                     ],
                     "url": {
@@ -46,7 +51,7 @@
                     {
                       "listen": "prerequest",
                       "script": {
-                        "id": "2afca871-908a-45b1-bede-d9e803b1dfcf",
+                        "id": "7b4211cf-1a91-447f-9cfe-a916cc35558b",
                         "type": "text/javascript",
                         "exec": [
                           "// FastX \u2014 auto-generated prerequest (imported with collection)",
@@ -66,7 +71,7 @@
                     {
                       "listen": "test",
                       "script": {
-                        "id": "e7bcc29c-0f95-4fa3-864b-970eda637d50",
+                        "id": "be87d7b5-beeb-423b-beb2-c4a25df7abae",
                         "type": "text/javascript",
                         "exec": [
                           "// FastX \u2014 exhaustive auto-generated tests (Collection Runner)",
@@ -317,6 +322,11 @@
                             "key": "x-reference-urn",
                             "value": "{{reference_urn}}",
                             "type": "text"
+                          },
+                          {
+                            "key": "X-Reference-Number",
+                            "value": "{{reference_number}}",
+                            "type": "text"
                           }
                         ],
                         "url": {
@@ -343,7 +353,7 @@
                         {
                           "listen": "prerequest",
                           "script": {
-                            "id": "0cc50fe1-0d09-49c1-bc71-b97384ab2ead",
+                            "id": "6830461c-8fd1-49a5-ba3b-6b3d4919c24f",
                             "type": "text/javascript",
                             "exec": [
                               "// FastX \u2014 auto-generated prerequest (imported with collection)",
@@ -363,7 +373,7 @@
                         {
                           "listen": "test",
                           "script": {
-                            "id": "8b273482-eac0-485c-84da-552e0fb8d822",
+                            "id": "035f8993-342c-4153-bc20-8b548a627bfa",
                             "type": "text/javascript",
                             "exec": [
                               "// FastX \u2014 exhaustive auto-generated tests (Collection Runner)",
@@ -614,6 +624,11 @@
                     "key": "x-reference-urn",
                     "value": "{{reference_urn}}",
                     "type": "text"
+                  },
+                  {
+                    "key": "X-Reference-Number",
+                    "value": "{{reference_number}}",
+                    "type": "text"
                   }
                 ],
                 "url": {
@@ -632,7 +647,7 @@
                 {
                   "listen": "prerequest",
                   "script": {
-                    "id": "e46b85ae-6a1e-4016-b969-b4a8a0e22298",
+                    "id": "f9aacce9-42a0-407b-b43f-d1605817c15b",
                     "type": "text/javascript",
                     "exec": [
                       "// FastX \u2014 auto-generated prerequest (imported with collection)",
@@ -652,7 +667,7 @@
                 {
                   "listen": "test",
                   "script": {
-                    "id": "8c5ca5be-3633-41fe-bb8e-0dc7fccf8944",
+                    "id": "0868fc29-8aa6-43af-a06a-f98a7bfc7b00",
                     "type": "text/javascript",
                     "exec": [
                       "// FastX \u2014 exhaustive auto-generated tests (Collection Runner)",
@@ -903,6 +918,11 @@
                         "key": "x-reference-urn",
                         "value": "{{reference_urn}}",
                         "type": "text"
+                      },
+                      {
+                        "key": "X-Reference-Number",
+                        "value": "{{reference_number}}",
+                        "type": "text"
                       }
                     ],
                     "url": {
@@ -922,7 +942,7 @@
                     {
                       "listen": "prerequest",
                       "script": {
-                        "id": "438a2674-46ad-46a0-b726-f8820ca2157c",
+                        "id": "70ccdad3-110a-4920-a6b1-ecf4477df11a",
                         "type": "text/javascript",
                         "exec": [
                           "// FastX \u2014 auto-generated prerequest (imported with collection)",
@@ -942,7 +962,7 @@
                     {
                       "listen": "test",
                       "script": {
-                        "id": "f2c22725-9d4e-4d03-85d1-5d0a60571a51",
+                        "id": "ab1d0d8d-b53d-44fe-8c51-100deb5554dc",
                         "type": "text/javascript",
                         "exec": [
                           "// FastX \u2014 exhaustive auto-generated tests (Collection Runner)",
@@ -1187,6 +1207,11 @@
                     "key": "x-reference-urn",
                     "value": "{{reference_urn}}",
                     "type": "text"
+                  },
+                  {
+                    "key": "X-Reference-Number",
+                    "value": "{{reference_number}}",
+                    "type": "text"
                   }
                 ],
                 "url": {
@@ -1205,7 +1230,7 @@
                 {
                   "listen": "prerequest",
                   "script": {
-                    "id": "c4a29ab3-5b60-405c-9b86-452fedc78b1c",
+                    "id": "65992057-ef7b-4a83-9a46-28d9467240d5",
                     "type": "text/javascript",
                     "exec": [
                       "// FastX \u2014 auto-generated prerequest (imported with collection)",
@@ -1225,7 +1250,7 @@
                 {
                   "listen": "test",
                   "script": {
-                    "id": "d9720332-5001-46f4-9fd5-df77ffd5adc4",
+                    "id": "3ad0311b-4428-4be3-932b-ab0ce6f00dda",
                     "type": "text/javascript",
                     "exec": [
                       "// FastX \u2014 exhaustive auto-generated tests (Collection Runner)",
@@ -1476,6 +1501,11 @@
                         "key": "x-reference-urn",
                         "value": "{{reference_urn}}",
                         "type": "text"
+                      },
+                      {
+                        "key": "X-Reference-Number",
+                        "value": "{{reference_number}}",
+                        "type": "text"
                       }
                     ],
                     "url": {
@@ -1495,7 +1525,7 @@
                     {
                       "listen": "prerequest",
                       "script": {
-                        "id": "d84feafb-d0b4-4af4-a388-ffa07b5c1884",
+                        "id": "ce88273b-05d7-41bd-814f-90ed01bc09ae",
                         "type": "text/javascript",
                         "exec": [
                           "// FastX \u2014 auto-generated prerequest (imported with collection)",
@@ -1515,7 +1545,7 @@
                     {
                       "listen": "test",
                       "script": {
-                        "id": "8d0f2349-191f-440d-ba07-c68b6fa77bf3",
+                        "id": "71a0f477-0837-4c94-9bc1-7d5e9cfe1a54",
                         "type": "text/javascript",
                         "exec": [
                           "// FastX \u2014 exhaustive auto-generated tests (Collection Runner)",
@@ -1760,6 +1790,11 @@
                     "key": "x-reference-urn",
                     "value": "{{reference_urn}}",
                     "type": "text"
+                  },
+                  {
+                    "key": "X-Reference-Number",
+                    "value": "{{reference_number}}",
+                    "type": "text"
                   }
                 ],
                 "url": {
@@ -1778,7 +1813,7 @@
                 {
                   "listen": "prerequest",
                   "script": {
-                    "id": "f04bb9bb-da0a-437b-a805-0f2c7969aa0e",
+                    "id": "73bed9ef-0388-4a47-bdc2-16421b41014c",
                     "type": "text/javascript",
                     "exec": [
                       "// FastX \u2014 auto-generated prerequest (imported with collection)",
@@ -1798,7 +1833,7 @@
                 {
                   "listen": "test",
                   "script": {
-                    "id": "49c3bfbd-2216-4b9d-b4ee-4a0ab0b10b66",
+                    "id": "9af04349-92ab-48b3-8e9d-58e7e1799d86",
                     "type": "text/javascript",
                     "exec": [
                       "// FastX \u2014 exhaustive auto-generated tests (Collection Runner)",
@@ -2049,6 +2084,11 @@
                         "key": "x-reference-urn",
                         "value": "{{reference_urn}}",
                         "type": "text"
+                      },
+                      {
+                        "key": "X-Reference-Number",
+                        "value": "{{reference_number}}",
+                        "type": "text"
                       }
                     ],
                     "url": {
@@ -2068,7 +2108,7 @@
                     {
                       "listen": "prerequest",
                       "script": {
-                        "id": "0f336363-cf4e-4271-ba90-58bf403cb8df",
+                        "id": "e83fb0b9-4d9a-48a0-99a8-740012856732",
                         "type": "text/javascript",
                         "exec": [
                           "// FastX \u2014 auto-generated prerequest (imported with collection)",
@@ -2088,7 +2128,7 @@
                     {
                       "listen": "test",
                       "script": {
-                        "id": "8fd133be-719c-4063-8cd3-867fda64d7da",
+                        "id": "22f9d826-afdd-4f8a-bd5c-6de41f3689da",
                         "type": "text/javascript",
                         "exec": [
                           "// FastX \u2014 exhaustive auto-generated tests (Collection Runner)",
@@ -2333,6 +2373,11 @@
                     "key": "x-reference-urn",
                     "value": "{{reference_urn}}",
                     "type": "text"
+                  },
+                  {
+                    "key": "X-Reference-Number",
+                    "value": "{{reference_number}}",
+                    "type": "text"
                   }
                 ],
                 "url": {
@@ -2351,7 +2396,7 @@
                 {
                   "listen": "prerequest",
                   "script": {
-                    "id": "f961e5ed-1272-4747-9d91-6bfd99ba4c7e",
+                    "id": "763d8847-24e9-4a9b-bf1a-d3da713e211e",
                     "type": "text/javascript",
                     "exec": [
                       "// FastX \u2014 auto-generated prerequest (imported with collection)",
@@ -2371,7 +2416,7 @@
                 {
                   "listen": "test",
                   "script": {
-                    "id": "75d6f442-9d98-4935-b0b1-c1986c65294f",
+                    "id": "7450b678-4e91-466c-8aac-7b9bc6d17ea9",
                     "type": "text/javascript",
                     "exec": [
                       "// FastX \u2014 exhaustive auto-generated tests (Collection Runner)",
@@ -2622,6 +2667,11 @@
                         "key": "x-reference-urn",
                         "value": "{{reference_urn}}",
                         "type": "text"
+                      },
+                      {
+                        "key": "X-Reference-Number",
+                        "value": "{{reference_number}}",
+                        "type": "text"
                       }
                     ],
                     "url": {
@@ -2641,7 +2691,7 @@
                     {
                       "listen": "prerequest",
                       "script": {
-                        "id": "db0640a6-9d57-43a9-8ff4-bea362c212e2",
+                        "id": "9724b9ac-7338-465e-a937-0dcf8eef7e74",
                         "type": "text/javascript",
                         "exec": [
                           "// FastX \u2014 auto-generated prerequest (imported with collection)",
@@ -2661,7 +2711,7 @@
                     {
                       "listen": "test",
                       "script": {
-                        "id": "590d79eb-6d8b-44fb-ac74-186bba1d5211",
+                        "id": "b6fb8892-fee4-4e7a-86cd-162ce46cd3fe",
                         "type": "text/javascript",
                         "exec": [
                           "// FastX \u2014 exhaustive auto-generated tests (Collection Runner)",
@@ -2906,6 +2956,11 @@
                     "key": "x-reference-urn",
                     "value": "{{reference_urn}}",
                     "type": "text"
+                  },
+                  {
+                    "key": "X-Reference-Number",
+                    "value": "{{reference_number}}",
+                    "type": "text"
                   }
                 ],
                 "url": {
@@ -2924,7 +2979,7 @@
                 {
                   "listen": "prerequest",
                   "script": {
-                    "id": "316c16c7-7e3c-4dbf-8a76-d357412edd3a",
+                    "id": "8518cc0d-edef-45ce-95e1-10f5da0a6a8c",
                     "type": "text/javascript",
                     "exec": [
                       "// FastX \u2014 auto-generated prerequest (imported with collection)",
@@ -2944,7 +2999,7 @@
                 {
                   "listen": "test",
                   "script": {
-                    "id": "7725ffbd-b6f1-4eec-abeb-817c078a82c6",
+                    "id": "f077c34e-3a60-4d28-b77b-f99b4aa14e94",
                     "type": "text/javascript",
                     "exec": [
                       "// FastX \u2014 exhaustive auto-generated tests (Collection Runner)",
@@ -3195,6 +3250,11 @@
                         "key": "x-reference-urn",
                         "value": "{{reference_urn}}",
                         "type": "text"
+                      },
+                      {
+                        "key": "X-Reference-Number",
+                        "value": "{{reference_number}}",
+                        "type": "text"
                       }
                     ],
                     "url": {
@@ -3214,7 +3274,7 @@
                     {
                       "listen": "prerequest",
                       "script": {
-                        "id": "9f2e0274-a55c-427a-9083-977579f10f56",
+                        "id": "d36cfa84-87f5-43d9-b4c3-2d174731f141",
                         "type": "text/javascript",
                         "exec": [
                           "// FastX \u2014 auto-generated prerequest (imported with collection)",
@@ -3234,7 +3294,7 @@
                     {
                       "listen": "test",
                       "script": {
-                        "id": "c4627837-c7d4-4abb-9889-ac5dcaf66f91",
+                        "id": "1eb2585f-f467-431a-ba62-2f9f8cea9bc8",
                         "type": "text/javascript",
                         "exec": [
                           "// FastX \u2014 exhaustive auto-generated tests (Collection Runner)",
@@ -3479,6 +3539,11 @@
                     "key": "x-reference-urn",
                     "value": "{{reference_urn}}",
                     "type": "text"
+                  },
+                  {
+                    "key": "X-Reference-Number",
+                    "value": "{{reference_number}}",
+                    "type": "text"
                   }
                 ],
                 "url": {
@@ -3497,7 +3562,7 @@
                 {
                   "listen": "prerequest",
                   "script": {
-                    "id": "4df9ab75-3b56-4951-82a7-6412b14ab18a",
+                    "id": "994fc2d0-e66b-476f-b38b-9408eb63d6ee",
                     "type": "text/javascript",
                     "exec": [
                       "// FastX \u2014 auto-generated prerequest (imported with collection)",
@@ -3517,7 +3582,7 @@
                 {
                   "listen": "test",
                   "script": {
-                    "id": "c7309d15-d59c-47f1-9460-85ee6ac7cf64",
+                    "id": "4a3ef5fd-262b-4241-bab3-c67f976c97cf",
                     "type": "text/javascript",
                     "exec": [
                       "// FastX \u2014 exhaustive auto-generated tests (Collection Runner)",
@@ -3770,6 +3835,11 @@
                     "key": "x-reference-urn",
                     "value": "{{reference_urn}}",
                     "type": "text"
+                  },
+                  {
+                    "key": "X-Reference-Number",
+                    "value": "{{reference_number}}",
+                    "type": "text"
                   }
                 ],
                 "url": {
@@ -3788,7 +3858,7 @@
                 {
                   "listen": "prerequest",
                   "script": {
-                    "id": "05e9b70d-7a27-4e76-8595-cea68302e678",
+                    "id": "10e8a5e4-837e-4fff-9a6c-e8eae15f4d35",
                     "type": "text/javascript",
                     "exec": [
                       "// FastX \u2014 auto-generated prerequest (imported with collection)",
@@ -3808,7 +3878,7 @@
                 {
                   "listen": "test",
                   "script": {
-                    "id": "b329e661-13d4-4395-a13c-b12a0a124748",
+                    "id": "9931ecc8-e86d-4176-b0d2-64eb3f97dab7",
                     "type": "text/javascript",
                     "exec": [
                       "// FastX \u2014 exhaustive auto-generated tests (Collection Runner)",
@@ -4056,6 +4126,11 @@
                     "key": "x-reference-urn",
                     "value": "{{reference_urn}}",
                     "type": "text"
+                  },
+                  {
+                    "key": "X-Reference-Number",
+                    "value": "{{reference_number}}",
+                    "type": "text"
                   }
                 ],
                 "url": {
@@ -4074,7 +4149,7 @@
                 {
                   "listen": "prerequest",
                   "script": {
-                    "id": "0f336313-026b-483b-8083-6296ed07f941",
+                    "id": "0e0e353b-dc35-49d5-8342-64cfed06fb81",
                     "type": "text/javascript",
                     "exec": [
                       "// FastX \u2014 auto-generated prerequest (imported with collection)",
@@ -4094,7 +4169,7 @@
                 {
                   "listen": "test",
                   "script": {
-                    "id": "f032c260-9838-4c0d-90c9-cd75924a214b",
+                    "id": "6d078171-9628-4932-a5f2-1d8830c6d30b",
                     "type": "text/javascript",
                     "exec": [
                       "// FastX \u2014 exhaustive auto-generated tests (Collection Runner)",
@@ -4339,6 +4414,11 @@
                 "key": "x-reference-urn",
                 "value": "{{reference_urn}}",
                 "type": "text"
+              },
+              {
+                "key": "X-Reference-Number",
+                "value": "{{reference_number}}",
+                "type": "text"
               }
             ],
             "url": {
@@ -4356,7 +4436,7 @@
             {
               "listen": "prerequest",
               "script": {
-                "id": "d004e448-0032-4397-a0a6-808b57c6a3c7",
+                "id": "688df203-718e-4799-bee7-5625197d864e",
                 "type": "text/javascript",
                 "exec": [
                   "// FastX \u2014 auto-generated prerequest (imported with collection)",
@@ -4376,7 +4456,7 @@
             {
               "listen": "test",
               "script": {
-                "id": "06bbf81e-6ab4-4128-a0b3-b605290c55fe",
+                "id": "3f0c41e1-627e-4803-ad1a-04da9e62e866",
                 "type": "text/javascript",
                 "exec": [
                   "// FastX \u2014 exhaustive auto-generated tests (Collection Runner)",

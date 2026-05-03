@@ -25,15 +25,18 @@ from pathlib import Path
 # PATH SETUP
 # =============================================================================
 
-# Add project root to Python path
-PROJECT_ROOT = Path(__file__).parent.parent
+# Add project root to Python path (``__file__`` can be relative when pytest loads conftest).
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 # Monorepo: local ``fastx_platform`` (and optional packages) for imports like ``fastx_platform.errors``
 _REPO_ROOT = PROJECT_ROOT.parent
 for _extra in (
     _REPO_ROOT / "fastx_platform" / "src",
+    _REPO_ROOT / "fastx_middleware" / "src",
+    _REPO_ROOT / "fastx_database" / "src",
     _REPO_ROOT / "fastx_dashboards" / "src",
+    _REPO_ROOT / "fastx_channels" / "src",
 ):
     if _extra.is_dir():
         sys.path.insert(0, str(_extra))

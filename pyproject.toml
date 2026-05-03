@@ -158,7 +158,8 @@ Changelog = "https://github.com/shregar1/fastMVC/blob/main/CHANGELOG.md"
 include = ["."]
 pythonVersion = "3.10"
 typeCheckingMode = "basic"
-executionEnvironments = [{ root = ".", extraPaths = [] }]
+extraPaths = ["."]
+executionEnvironments = [{ root = ".", extraPaths = ["."] }]
 
 [project.scripts]
 # CLI entry points are now managed by the fastx-cli package.
@@ -188,7 +189,15 @@ exclude = ["tests*", "tests.*", "tests/**", "docs*", "scripts*", "dist*", "htmlc
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["."]
+# Prepend *before* conftest runs so ``fastx_middleware`` / ``fastx_platform`` resolve in a monorepo checkout.
+pythonpath = [
+    ".",
+    "../fastx_platform/src",
+    "../fastx_middleware/src",
+    "../fastx_database/src",
+    "../fastx_dashboards/src",
+    "../fastx_channels/src",
+]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
 python_classes = ["Test*"]
