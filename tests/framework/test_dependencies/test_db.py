@@ -26,29 +26,29 @@ class TestDBDependencyFallback:
     """Tests for DBDependency fallback behavior."""
 
     def test_fallback_raises_import_error(self):
-        """Test fallback raises ImportError when fast_db not installed."""
+        """Test fallback raises ImportError when fastx_db not installed."""
         # Force reimport to test fallback
         import sys
 
         # Remove cached module to force reimport
-        if "fast_db" in sys.modules:
-            del sys.modules["fast_db"]
+        if "fastx_db" in sys.modules:
+            del sys.modules["fastx_db"]
 
         # Mock the import to fail
-        with patch.dict("sys.modules", {"fast_db": None}):
+        with patch.dict("sys.modules", {"fastx_db": None}):
             # Create a fresh fallback class
             class _DBDependencyFallback:
-                """Fallback DBDependency when fast_db is not installed."""
+                """Fallback DBDependency when fastx_db is not installed."""
 
                 @staticmethod
                 def derive() -> Any:
                     """Raise informative error about missing dependency."""
                     raise ImportError(
-                        "fast_db is required for database dependencies. "
+                        "fastx_db is required for database dependencies. "
                         "Install with: pip install fastx-mvc[platform]"
                     )
 
             fallback = _DBDependencyFallback()
             with pytest.raises(ImportError) as exc_info:
                 fallback.derive()
-            assert "fast_db is required" in str(exc_info.value)
+            assert "fastx_db is required" in str(exc_info.value)

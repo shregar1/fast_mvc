@@ -178,7 +178,7 @@ logger.info("Loaded environment variables")
 db_session = None  # type: ignore
 db_session_factory = None  # type: ignore
 try:
-    from fast_db import create_and_set_session  # pyright: ignore[reportMissingImports]
+    from fastx_db import create_and_set_session  # pyright: ignore[reportMissingImports]
 
     db_session = create_and_set_session(db_configuration)
 except ImportError:

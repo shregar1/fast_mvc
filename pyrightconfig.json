@@ -1,10 +1,10 @@
 {
   "extends": "../pyrightconfig.json",
-  "extraPaths": ["."],
+  "extraPaths": [".", "../fastx_platform/src"],
   "executionEnvironments": [
     {
       "root": ".",
-      "extraPaths": ["."],
+      "extraPaths": [".", "../fastx_platform/src"],
       "pythonVersion": "3.13"
     }
   ]

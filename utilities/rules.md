@@ -19,7 +19,7 @@ These modules define exactly one public class that extends **`IUtility`** (`abst
 - **`cors.py`** — `CorsConfigUtility`
 - **`datetime.py`** — `DateTimeUtility`
 - **`env.py`** — `EnvironmentParserUtility`
-- **`mfa.py`** — `MFAUtility`
+- **`MFAUtility`** — implemented in **`fastx_platform.core.utils`** (`mfa_totp.py`); re-exported from **`utilities/__init__.py`** (no local `mfa.py`)
 - **`phone_otp.py`** — `PhoneOtpUtility`
 - **`security_headers.py`** — `SecurityHeadersUtility`
 - **`string.py`** — `StringUtility`
@@ -45,7 +45,7 @@ IUtility (abstractions/utility.py)
   ├── CorsConfigUtility (utilities/cors.py)
   ├── DateTimeUtility (utilities/datetime.py)
   ├── EnvironmentParserUtility (utilities/env.py)
-  ├── MFAUtility (utilities/mfa.py)
+  ├── MFAUtility (fastx_platform.core.utils.mfa_totp; barrel re-export)
   ├── PhoneOtpUtility (utilities/phone_otp.py)
   ├── SecurityHeadersUtility (utilities/security_headers.py)
   ├── StringUtility (utilities/string.py)
@@ -70,7 +70,7 @@ Controllers inject MFA via **`dependencies/services/mfa.py`** (`MFAUtilityDepend
 ## Don't
 
 - Don't claim every file under `utilities/` is a single `IUtility` — use the lists above.
-- Don't add `services/mfa.py`-style aliases — `MFAUtility` and `PhoneOtpUtility` live here.
+- Don't add `services/mfa.py`-style aliases — `MFAUtility` is shared from **`fastx_platform`**; `PhoneOtpUtility` stays in **`utilities/phone_otp.py`**.
 - Don't import controllers or services — utilities are leaves in the dependency graph.
 - Don't read environment variables at call time for hot paths without a clear pattern — prefer import-time or `config/` for stable tests.
 
@@ -103,7 +103,6 @@ utilities/
   dictionary.py
   env.py
   jwt.py
-  mfa.py
   phone_otp.py
   redis_url.py
   request_utils.py

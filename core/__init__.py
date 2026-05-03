@@ -77,7 +77,7 @@ __all__ = [
     "Metrics",
     "Tracer",
     "AuditLog",
-    # Jobs (fast_jobs)
+    # Jobs (fastx_jobs)
     "enqueue",
     "cancel_job",
     "get_job_status",
@@ -90,7 +90,7 @@ __all__ = [
     # Features
     "FeatureFlags",
     "feature_flag",
-    # Tenancy (fast_tenancy)
+    # Tenancy (fastx_tenancy)
     "Tenant",
     "TenantContext",
     "get_current_tenant",

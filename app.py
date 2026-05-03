@@ -134,7 +134,7 @@ except ImportError:
     configure_datadog = None  # type: ignore
     configure_otel = None  # type: ignore
 
-# Optional routers (require corresponding fast_* packages)
+# Optional routers (require corresponding fastx_* packages)
 try:
     from fastx_dashboards import DashboardRouter  # noqa: I001  # pyright: ignore[reportMissingImports, reportAttributeAccessIssue]
 except ImportError:

@@ -17,7 +17,7 @@ FastX is a **project generator for FastAPI** with a clean MVC stack and a **menu
 - **Makefile** — `make dev`, `test`, `lint`, `migrate`, `docker`, etc.
 - **Entity generation** — Controllers, services, repositories, DTOs.
 - **Alembic migrations** — `fastx db migrate/upgrade/downgrade/reset` (see below).
-- **App template** — FastAPI structure, config, middleware, and hooks expected by extension packages (`fast_*`).
+- **App template** — FastAPI structure, config, middleware, and hooks expected by extension packages (`fastx_*`).
 - **Batteries** — FastAPI, SQLAlchemy 2, Alembic, Pydantic v2, Redis, JWT, bcrypt, optional dashboards, observability, payments, and more via flags (see [Optional platform features](#optional-platform-features)).
 
 ### New features (high level)
@@ -314,7 +314,7 @@ Then open `http://localhost:8000/docs`, and when dashboards are enabled, `/dashb
 
 ## Extension packages
 
-The **`fast_*`** libraries in the monorepo are optional add-ons (DB, queues, LLM, storage, …). See the [parent README](../README.md) for the full package table and [`install_packages.sh`](../install_packages.sh) to install them in editable mode.
+The **`fastx_*`** libraries in the monorepo are optional add-ons (DB, queues, LLM, storage, …). See the [parent README](../README.md) for the full package table and [`install_packages.sh`](../install_packages.sh) to install them in editable mode.
 
 Day-to-day commands: see [`Makefile`](Makefile) (`make test`, `make lint`, `make format`, `make build`, …).
 

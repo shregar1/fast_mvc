@@ -2,33 +2,22 @@
 
 from __future__ import annotations
 
-from typing import Any, Optional
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-# Check what actually exists in cache.py
-try:
-    from dependencies.cache import get_cache, CacheDependency
-    HAS_CACHE_DEPS = True
-except ImportError:
-    HAS_CACHE_DEPS = False
+from dependencies.cache import CacheDependency
 
 
-@pytest.mark.skipif(not HAS_CACHE_DEPS, reason="Cache dependencies not available")
 class TestCacheDependency:
     """Tests for CacheDependency class."""
 
-    def test_init_default(self):
-        """Test initialization with default values."""
-        cache = CacheDependency()
-        assert cache is not None
+    def test_derive_returns_redis_session(self):
+        """derive() proxies to application redis_session."""
+        fake_redis = MagicMock(name="redis_session")
+        with patch("dependencies.cache.redis_session", fake_redis):
+            assert CacheDependency.derive() is fake_redis
 
-
-@pytest.mark.skipif(not HAS_CACHE_DEPS, reason="Cache dependencies not available")
-class TestGetCache:
-    """Tests for get_cache function."""
-
-    def test_get_cache_exists(self):
-        """Test get_cache function exists."""
-        assert callable(get_cache)
+    def test_derive_callable(self):
+        """derive is a usable FastAPI dependency."""
+        assert callable(CacheDependency.derive)

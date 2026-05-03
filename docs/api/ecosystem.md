@@ -23,11 +23,11 @@ Automated reference for all packages in the FastX ecosystem.
 ::: taxonomy
 
 ## 🔗 Fast-DataI
-#### 📦 fast_dataI
-::: fast_dataI
+#### 📦 fastx_dataI
+::: fastx_dataI
 
-#### 📦 fast_dataI
-::: fast_dataI
+#### 📦 fastx_dataI
+::: fastx_dataI
 
 ## 🔗 Fast-Middleware
 #### 📦 mw_core

@@ -158,8 +158,10 @@ Changelog = "https://github.com/shregar1/fastMVC/blob/main/CHANGELOG.md"
 include = ["."]
 pythonVersion = "3.10"
 typeCheckingMode = "basic"
-extraPaths = ["."]
-executionEnvironments = [{ root = ".", extraPaths = ["."] }]
+# Sibling ``fastx_platform`` repo so ``import fastx_platform…`` resolves when developing the monorepo
+# without relying only on site-packages (same layout as root ``pyrightconfig.json``).
+extraPaths = [".", "../fastx_platform/src"]
+executionEnvironments = [{ root = ".", extraPaths = [".", "../fastx_platform/src"] }]
 
 [project.scripts]
 # CLI entry points are now managed by the fastx-cli package.

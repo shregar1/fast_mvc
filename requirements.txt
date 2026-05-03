@@ -19,7 +19,7 @@ build>=0.10.0
 pre-commit>=3.0.0
 
 # --- Optional FastX ecosystem packages (install only what you need) ---
-fast_dashboards>=0.1.0
+fastx_dashboards>=0.1.0
 fast-platform>=0.13.0
 
 # --- Documentation (MkDocs) ---

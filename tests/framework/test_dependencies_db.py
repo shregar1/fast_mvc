@@ -58,19 +58,19 @@ class TestDBDependencyInstance:
             instance = DBDependency()
             assert instance is not None
         except (TypeError, ImportError):
-            pytest.skip("fast_db not available")
+            pytest.skip("fastx_db not available")
 
 
 class TestDBDependencyDeriveBehavior:
     """Test DBDependency.derive behavior."""
 
-    def test_derive_without_fast_db_raises(self):
-        """Test derive raises without fast_db."""
+    def test_derive_without_fastx_db_raises(self):
+        """Test derive raises without fastx_db."""
         from dependencies.db import DBDependency
         try:
             result = DBDependency.derive()
-            # If it works, fast_db is installed
+            # If it works, fastx_db is installed
             assert result is not None
         except ImportError:
-            # Expected if fast_db is not installed
+            # Expected if fastx_db is not installed
             pass

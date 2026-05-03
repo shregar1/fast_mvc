@@ -1,6 +1,6 @@
 """DataI table name constants.
 
-Re-exports Table from fast_db for backward compatibility.
+Re-exports Table from fastx_db for backward compatibility.
 
 Usage:
     >>> from constants.db.table import Table
@@ -8,6 +8,6 @@ Usage:
     ...     __tablename__ = Table.USER
 """
 
-from fast_db import Table
+from fastx_db import Table
 
 __all__ = ["Table"]

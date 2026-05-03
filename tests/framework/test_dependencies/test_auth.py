@@ -2,58 +2,32 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, Optional
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
+from fastapi import Request
 
-# Check what actually exists in auth.py
-try:
-    from dependencies.auth import (
-        get_current_user,
-        get_optional_user,
-        require_permissions,
-        AuthDependency,
-    )
-    HAS_AUTH_DEPS = True
-except ImportError:
-    HAS_AUTH_DEPS = False
+from dependencies.auth import AuthDependency
 
 
-@pytest.mark.skipif(not HAS_AUTH_DEPS, reason="Auth dependencies not available")
 class TestAuthDependency:
     """Tests for AuthDependency class."""
 
-    def test_init_default(self):
-        """Test initialization with default values."""
-        auth = AuthDependency()
-        assert auth is not None
+    def test_class_exists(self):
+        """AuthDependency is importable."""
+        assert AuthDependency is not None
 
+    def test_get_current_user_raises_when_anonymous(self):
+        """Unauthenticated request raises UnauthorizedError."""
+        from fastx_platform.errors import UnauthorizedError
 
-@pytest.mark.skipif(not HAS_AUTH_DEPS, reason="Auth dependencies not available")
-class TestGetCurrentUser:
-    """Tests for get_current_user function."""
+        req = MagicMock(spec=Request)
+        req.state = MagicMock(user=None)
+        with pytest.raises(UnauthorizedError):
+            AuthDependency.get_current_user(req)
 
-    @pytest.mark.asyncio
-    async def test_get_current_user_exists(self):
-        """Test get_current_user function exists."""
-        assert callable(get_current_user)
-
-
-@pytest.mark.skipif(not HAS_AUTH_DEPS, reason="Auth dependencies not available")
-class TestGetOptionalUser:
-    """Tests for get_optional_user function."""
-
-    @pytest.mark.asyncio
-    async def test_get_optional_user_exists(self):
-        """Test get_optional_user function exists."""
-        assert callable(get_optional_user)
-
-
-@pytest.mark.skipif(not HAS_AUTH_DEPS, reason="Auth dependencies not available")
-class TestRequirePermissions:
-    """Tests for require_permissions function."""
-
-    def test_require_permissions_exists(self):
-        """Test require_permissions function exists."""
-        assert callable(require_permissions)
+    def test_get_current_user_returns_state_user(self):
+        """Authenticated request returns user from state."""
+        req = MagicMock(spec=Request)
+        req.state = MagicMock(user={"id": "u1"})
+        assert AuthDependency.get_current_user(req) == {"id": "u1"}

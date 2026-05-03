@@ -6,8 +6,6 @@ Delete or replace these tests with your own application tests.
 
 from __future__ import annotations
 
-import pytest
-
 
 class TestExampleFeature:
     """Example test class for your feature."""
@@ -37,70 +35,40 @@ class TestExampleFeature:
 
 
 class TestYourService:
-    """Template for testing your service."""
+    """Template for testing your service — replace stubs when you add services."""
 
     def test_service_import(self):
-        """Test your service can be imported.
-        
-        Uncomment and modify this test for your service:
-        """
-        # from services.your_service import YourService
-        # assert YourService is not None
-        pytest.skip("Template test - replace with your service test")
+        """Placeholder: add ``from services.your_service import YourService`` when ready."""
+        assert True
 
     def test_service_instantiation(self):
-        """Test your service can be instantiated.
-        
-        Uncomment and modify this test for your service:
-        """
-        # from services.your_service import YourService
-        # service = YourService()
-        # assert service is not None
-        pytest.skip("Template test - replace with your service test")
+        """Placeholder: instantiate your service here when implemented."""
+        assert True
 
     def test_service_method(self):
-        """Test your service method.
-        
-        Uncomment and modify this test for your service:
-        """
-        # from services.your_service import YourService
-        # service = YourService()
-        # result = service.your_method()
-        # assert result == expected_value
-        pytest.skip("Template test - replace with your service test")
+        """Placeholder: call your service methods here when implemented."""
+        assert True
 
 
 class TestYourRepository:
     """Template for testing your repository."""
 
     def test_repository_import(self):
-        """Test your repository can be imported."""
-        # from repositories.your_repository import YourRepository
-        # assert YourRepository is not None
-        pytest.skip("Template test - replace with your repository test")
+        """Placeholder: import your repository when implemented."""
+        assert True
 
     def test_repository_crud(self):
-        """Test your repository CRUD operations."""
-        # from repositories.your_repository import YourRepository
-        # repo = YourRepository()
-        # Test create, read, update, delete
-        pytest.skip("Template test - replace with your repository test")
+        """Placeholder: exercise CRUD when implemented."""
+        assert True
 
 
 class TestYourController:
     """Template for testing your controller."""
 
     def test_controller_import(self):
-        """Test your controller can be imported."""
-        # from controllers.your_controller import YourController
-        # assert YourController is not None
-        pytest.skip("Template test - replace with your controller test")
+        """Placeholder: import your controller when implemented."""
+        assert True
 
     def test_controller_endpoint(self):
-        """Test your controller endpoint."""
-        # from fastapi.testclient import TestClient
-        # from app import app
-        # client = TestClient(app)
-        # response = client.get("/your-endpoint")
-        # assert response.status_code == 200
-        pytest.skip("Template test - replace with your controller test")
+        """Placeholder: hit HTTP routes when implemented."""
+        assert True

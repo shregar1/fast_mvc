@@ -209,52 +209,39 @@ class TestErrorClasses:
     """Tests for error classes."""
 
     def test_error_module_importable(self):
-        """Test errors module is importable."""
-        try:
-            from errors import base
-            assert base is not None
-        except ImportError:
-            pytest.skip("errors.base not available")
+        """Test errors package exposes ConfigValidationError."""
+        from errors import ConfigValidationError
 
-    def test_error_abstractions_importable(self):
-        """Test errors.abstractions is importable."""
-        try:
-            from errors.abstractions import base_error
-            assert base_error is not None
-        except ImportError:
-            pytest.skip("errors.abstractions.base_error not available")
+        assert ConfigValidationError is not None
+
+    def test_config_validation_error_constructible(self):
+        """ConfigValidationError can be raised."""
+        from errors.config_validation import ConfigValidationError
+
+        with pytest.raises(ConfigValidationError):
+            raise ConfigValidationError(["bad"])
 
 
 class TestMiddlewareAbstractions:
-    """Tests for middleware abstractions."""
+    """Tests for middleware package surface."""
 
-    def test_middleware_abstractions_importable(self):
-        """Test middlewares.abstractions is importable."""
-        try:
-            from middlewares.abstractions import base
-            assert base is not None
-        except ImportError:
-            pytest.skip("middlewares.abstractions.base not available")
+    def test_docs_auth_exported(self):
+        """Docs auth middleware is importable."""
+        from middlewares import DocsAuthConfig, DocsBasicAuthMiddleware
+
+        assert DocsAuthConfig is not None
+        assert DocsBasicAuthMiddleware is not None
 
 
 class TestConfig:
-    """Tests for config."""
+    """Tests for DTO config helpers."""
 
-    def test_config_module_importable(self):
-        """Test config module is importable."""
-        try:
-            import config
-            assert config is not None
-        except ImportError:
-            pytest.skip("config module not available")
+    def test_dto_config_builder_importable(self):
+        """dtos.config provides DtoConfigBuilder."""
+        from dtos.config import DtoConfigBuilder
 
-    def test_config_application_importable(self):
-        """Test config.application is importable."""
-        try:
-            from config import application
-            assert application is not None
-        except ImportError:
-            pytest.skip("config.application not available")
+        cfg = DtoConfigBuilder.build_config(frozen=True)
+        assert cfg is not None
 
 
 class TestUtilitiesLogging:

@@ -87,14 +87,14 @@ class TestRequestIdContext:
     """Tests for RequestIdContext if it exists."""
 
     def test_request_id_context_if_exists(self):
-        """Test RequestIdContext if it exists."""
+        """Test RequestIdContext set/get/reset."""
+        from core.utils.request_id_context import RequestIdContext
+
+        token = RequestIdContext.set("test-request-id")
         try:
-            from core.utils.context import RequestIdContext
-            RequestIdContext.set_request_id("test-request-id")
-            assert RequestIdContext.get_request_id() == "test-request-id"
-            RequestIdContext.set_request_id(None)
-        except ImportError:
-            pytest.skip("RequestIdContext not available")
+            assert RequestIdContext.get() == "test-request-id"
+        finally:
+            RequestIdContext.reset(token)
 
 
 class TestCoreModuleImports:

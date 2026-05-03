@@ -70,7 +70,7 @@ There are **no** `IMFAService`, `IPhoneService`, or `IAccountService` types in t
 
 ## Imports (no thin re-exports)
 
-Do not add modules under `services/` that only re-export types from `utilities/` under a `*Service` alias (removed shims: `services/mfa.py`, `services/user/phone_otp.py`). Use **`MFAUtility`** from `utilities.mfa`, **`PhoneOtpUtility`** from `utilities.phone_otp`, and **`MFAUtilityDependency`** from `dependencies/services/mfa.py` in controllers.
+Do not add modules under `services/` that only re-export types from `utilities/` under a `*Service` alias (removed shims: `services/mfa.py`, `services/user/phone_otp.py`). Use **`MFAUtility`** from `fastx_platform.core.utils` (the `utilities` package re-exports it for convenience), **`PhoneOtpUtility`** from `utilities.phone_otp`, and **`MFAUtilityDependency`** from `dependencies/services/mfa.py` in controllers.
 
 ## Structure
 

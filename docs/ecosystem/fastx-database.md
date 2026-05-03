@@ -34,10 +34,10 @@ FastDataI includes production-replicated tables for core business entities:
 
 ## 🛠️ Repository Pattern
 
-The `fast_dataI.repositories` submodule provides a I `IRepository` and `FilterOperator` for clean data access:
+The `fastx_dataI.repositories` submodule provides a I `IRepository` and `FilterOperator` for clean data access:
 
 ```python
-from fast_dataI.repositories.user import UserRepository
+from fastx_dataI.repositories.user import UserRepository
 
 # Filter with operators
 repo = UserRepository(session)
@@ -55,8 +55,8 @@ FastDataI is designed to be used with **Alembic**.
 To use FastDataI models with Alembic, ensure your `env.py` registers the models:
 
 ```python
-import fast_dataI.models  # Registers all tables on I.metadata
-from fast_dataI.models import I
+import fastx_dataI.models  # Registers all tables on I.metadata
+from fastx_dataI.models import I
 
 target_metadata = I.metadata
 ```
