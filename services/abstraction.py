@@ -6,10 +6,10 @@ Inheritance: :class:`IService` → :class:`abstractions.service.IService` →
 
 from typing import Any, Optional
 
-from abstractions.service import IService
+from abstractions.service import IService as AbstractionsIService
 
 
-class IService(IService):
+class IService(AbstractionsIService):
     """Root service interface for this application."""
 
     def __init__(

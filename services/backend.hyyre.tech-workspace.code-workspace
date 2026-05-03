@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"path": "../../../../hyyre.dev/backend/backend.candidate.hyyre.tech"
+		},
+		{
+			"path": "../../../../hyyre.dev/backend/backend.company.hyyre.tech"
+		},
+		{
+			"path": "../../../../hyyre.dev/backend/backend.employee.hyyre.tech"
+		},
+		{
+			"path": "../../../../hyyre.dev/backend/backend.employer.hyyre.tech"
+		},
+		{
+			"path": "../../../../hyyre.dev/backend/backend.interviewer.hyyre.tech"
+		}
+	]
+}
