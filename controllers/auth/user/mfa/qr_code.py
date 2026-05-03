@@ -12,7 +12,7 @@ from constants.api_lk import APILK
 from controllers.apis.v1.abstraction import IV1APIController
 from dependencies.db import DBDependency
 from dependencies.repositiories.user import UserRepositoryDependency
-from dependencies.services.mfa import MFAUtilityDependency as MFAServiceDependency
+from dependencies.services.mfa import MFAUtilityDependency
 from dependencies.services.user.mfa.qr_code import MFAQrCodeServiceDependency
 from dependencies.utilities.dictionary import DictionaryUtilityDependency
 
@@ -26,7 +26,7 @@ class MFASetupQrCodeController(IV1APIController):
         request: Request,
         session: Session = Depends(DBDependency.derive),
         service_factory: Callable = Depends(MFAQrCodeServiceDependency.derive),
-        mfa_service_factory: Callable = Depends(MFAServiceDependency.derive),
+        mfa_service_factory: Callable = Depends(MFAUtilityDependency.derive),
         user_repository_factory: Callable = Depends(UserRepositoryDependency.derive),
         dictionary_utility: Callable = Depends(DictionaryUtilityDependency.derive),
     ) -> Response:

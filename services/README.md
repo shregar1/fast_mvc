@@ -15,14 +15,18 @@ This layer sits between **controllers** (HTTP) and **repositories** (persistence
 | Logging / metrics | Operation-level context (`urn`, `api_name`, `user_id` via `IService`) |
 | DTO mapping | Transform request DTOs into domain operations and results back to dicts |
 
-## Layout (conceptual)
+## Layout (this repo)
 
-```
+Exact paths and inheritance are documented in **`services/rules.md`**. At a glance:
+
+```text
 services/
-├── abstraction.py          # App-level service base (extends IService)
-├── example/                # Example use case (abstraction.py, example_service.py)
-└── user/                   # Feature-specific services (e.g. user/fetch)
+├── abstraction.py
+├── example/                 # IExampleService + CRUD-style services
+└── user/                    # IUserService + auth/MFA/phone/account flows
 ```
+
+There is **no** `services/apis/v1/` directory yet; adding one should follow the same change + docs update as **`services/example/`**.
 
 ## How it fits in the stack
 
@@ -43,4 +47,5 @@ Services receive **dependencies** injected via **`dependencies/services/`** (fac
 1. **Idempotent** behavior where possible for the same logical operation.  
 2. **Raise** domain-appropriate errors (mapped to HTTP by controllers or platform).  
 3. **Avoid** importing FastAPI `Request` inside services; pass context via kwargs or DTOs.  
-4. **Unit test** services with mocked repositories.
+4. **Unit test** services with mocked repositories.  
+5. **Do not** add pass-through modules that only alias types from `utilities/` (for example `MFAUtility` → `MFAService`); import utilities and dependency wrappers from their canonical modules. See `services/rules.md`.

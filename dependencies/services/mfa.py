@@ -33,7 +33,4 @@ class MFAUtilityDependency:
         return factory
 
 
-# Backwards compatibility alias
-MFAServiceDependency = MFAUtilityDependency
-
-__all__ = ["MFAUtilityDependency", "MFAServiceDependency"]
+__all__ = ["MFAUtilityDependency"]

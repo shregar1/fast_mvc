@@ -1,68 +1,86 @@
 # Utility Rules
 
-Utilities are stateless-ish helpers: JWT, dictionary conversion, hashing, JSON-Web-Key loading, HTTP client wrappers, email, audit, client-IP extraction, etc. They're the glue between services and external tech.
+Utilities are helpers for JWT, dictionaries, startup/config, HTTP, MFA/TOTP, phone OTP, etc. This document describes **`fastx_mvc/utilities/` as it exists in git**. Update it when you add or rename modules.
 
-## Structure
+## Reality: mixed patterns
 
-1. **Every utility file must contain exactly one class** that inherits from `IUtility` (from `abstractions.utility`). No standalone functions at module level.
-2. **Class utilities take context in `__init__`** — `urn`, `user_urn`, `api_name`, `user_id`. Forward `*args, **kwargs` to `super().__init__(...)`.
-3. **Stateless helpers use `@staticmethod`** — if a method doesn't need per-request context, make it a static method on the class rather than a standalone function.
+Not every file here is an **`IUtility`** subclass. The tree includes:
 
-```python
-from abstractions.utility import IUtility
+- **Classes that subclass `IUtility`** — see list below.
+- **Classes that do not subclass `IUtility`** — e.g. `DictionaryUtility`, `JWTUtility` (plain classes with similar constructor context).
+- **Module-level functions only** — e.g. `audit.py`, `auth.py`, `security.py`, `webhook_dispatcher.py`, `database_url.py`, `redis_url.py`, `request_utils.py`.
 
-class AuditUtility(IUtility):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+Do not assume “one `IUtility` class per file” for the whole package; use the inventory below.
 
-    @staticmethod
-    def log_audit(session, action, resource_type, *, actor_id=None, ...):
-        ...
-```
+## `IUtility` subclasses (authoritative)
 
-## Inheritance
+These modules define exactly one public class that extends **`IUtility`** (`abstractions.utility`):
 
-```
+| Module | Class |
+|--------|--------|
+| `cors.py` | `CorsConfigUtility` |
+| `datetime.py` | `DateTimeUtility` |
+| `env.py` | `EnvironmentParserUtility` |
+| `mfa.py` | `MFAUtility` |
+| `phone_otp.py` | `PhoneOtpUtility` |
+| `security_headers.py` | `SecurityHeadersUtility` |
+| `string.py` | `StringUtility` |
+| `system.py` | `SystemUtility` |
+| `validator.py` | `ConfigValidatorUtility` |
+
+## Other modules (not `IUtility` subclasses)
+
+| Module | Contents |
+|--------|----------|
+| `audit.py` | `log_audit(...)` |
+| `auth.py` | `constant_time_compare`, `parse_basic_authorization` |
+| `database_url.py` | `build_postgresql_url_from_components`, `resolve_database_url` |
+| `dictionary.py` | `DictionaryUtility` (plain class) |
+| `jwt.py` | `JWTUtility` (plain class) |
+| `redis_url.py` | `build_redis_url_from_components`, `resolve_redis_url` |
+| `request_utils.py` | `get_client_ip` |
+| `security.py` | `hash_password`, `verify_password` |
+| `webhook_dispatcher.py` | `dispatch_webhook_event` |
+
+## Inheritance (IUtility line only)
+
+```text
 IUtility (abstractions/utility.py)
-  ├── AuditUtility (utilities/audit.py)
+  ├── CorsConfigUtility (utilities/cors.py)
   ├── DateTimeUtility (utilities/datetime.py)
-  ├── DictionaryUtility (utilities/dictionary.py)
   ├── EnvironmentParserUtility (utilities/env.py)
-  ├── JWTUtility (utilities/jwt.py)
   ├── MFAUtility (utilities/mfa.py)
   ├── PhoneOtpUtility (utilities/phone_otp.py)
-  ├── RequestUtility (utilities/request_utils.py)
-  ├── SecurityUtility (utilities/security.py)
   ├── SecurityHeadersUtility (utilities/security_headers.py)
   ├── StringUtility (utilities/string.py)
   ├── SystemUtility (utilities/system.py)
-  ├── ConfigValidatorUtility (utilities/validator.py)
-  └── WebhookDispatcherUtility (utilities/webhook_dispatcher.py)
+  └── ConfigValidatorUtility (utilities/validator.py)
 ```
 
-Every utility class **must** extend `IUtility`. No exceptions.
+## Consumers
+
+Import from **`utilities/<module>.py`** or from **`utilities/__init__.py`** (barrel). Do not add **`services/`** shims that re-export the same type under another name.
+
+Controllers inject MFA via **`dependencies/services/mfa.py`** (`MFAUtilityDependency`), not a duplicate export.
 
 ## Do
 
-- Make every utility injectable via a dependency factory in `dependencies/utilities/<x>.py` — that's how controllers get per-request instances.
-- Raise typed errors from `fastx_platform.errors` (`UnexpectedResponseError`, `ServiceUnavailableError`) on external failures — never leak raw `requests`/`httpx`/`smtplib` exceptions.
-- Treat external I/O as failable: timeouts, retries, and a `try/except` that surfaces a typed error.
+- For **new** injectable request-scoped helpers, prefer subclassing **`IUtility`** and adding **`dependencies/utilities/<x>.py`** with `derive()` returning a factory — matches existing MFA/phone OTP wiring.
+- Raise typed errors from `fastx_platform.errors` on external failures — never leak raw client-library exceptions.
+- Treat external I/O as failable: timeouts, retries, and typed errors on exhaustion.
 - Log at `debug` for normal operation, `warning` when a retryable call fails, `error` when the helper gives up.
-- Keep return shapes simple — dict, DTO, or primitive. No SQLAlchemy objects, no FastAPI types.
-- Use `@staticmethod` for methods that don't need instance state — callers can invoke them directly on the class without instantiation.
+- Keep return shapes simple — dict, DTO, or primitive. No SQLAlchemy objects, no FastAPI types on utility boundaries.
 
 ## Don't
 
-- Don't put standalone functions at module level — wrap them as `@staticmethod` on the utility class.
-- Don't touch the DB session. If you need persistence, you belong in a repository.
+- Don't claim every file under `utilities/` is a single `IUtility` — use the tables above.
+- Don't add `services/mfa.py`-style aliases — `MFAUtility` and `PhoneOtpUtility` live here.
 - Don't import controllers or services — utilities are leaves in the dependency graph.
-- Don't cache on a module-level mutable (`_cache = {}`) without a TTL or explicit invalidation path.
-- Don't read environment variables at call time — read them once at module import (or use the `config/` layer) so tests can patch cleanly.
-- Don't swallow exceptions — convert them, don't hide them.
+- Don't read environment variables at call time for hot paths without a clear pattern — prefer import-time or `config/` for stable tests.
 
-## Dependency Factory Contract
+## Dependency factory contract
 
-Every injectable utility must have a matching `dependencies/utilities/<x>.py`:
+Injectable `IUtility` types use **`dependencies/utilities/<x>.py`**:
 
 ```python
 class XxxUtilityDependency:
@@ -74,27 +92,29 @@ class XxxUtilityDependency:
         return factory
 ```
 
-Controllers then `Depends(XxxUtilityDependency.derive)` and pass the factory into `bind_request_context(...)`.
+Controllers `Depends(XxxUtilityDependency.derive)` and pass the factory into `bind_request_context(...)` where applicable.
 
-## File Layout
+## File layout (authoritative)
 
-```
+```text
 utilities/
-  __init__.py               # re-exports all utility classes
-  audit.py                  # AuditUtility
-  datetime.py               # DateTimeUtility
-  dictionary.py             # DictionaryUtility
-  env.py                    # EnvironmentParserUtility
-  jwt.py                    # JWTUtility
-  mfa.py                    # MFAUtility
-  phone_otp.py              # PhoneOtpUtility
-  request_utils.py          # RequestUtility
-  security.py               # SecurityUtility
-  security_headers.py       # SecurityHeadersUtility
-  string.py                 # StringUtility
-  system.py                 # SystemUtility
-  validator.py              # ConfigValidatorUtility
-  webhook_dispatcher.py     # WebhookDispatcherUtility
+  __init__.py
+  audit.py
+  auth.py
+  cors.py
+  database_url.py
+  datetime.py
+  dictionary.py
+  env.py
+  jwt.py
+  mfa.py
+  phone_otp.py
+  redis_url.py
+  request_utils.py
+  security.py
+  security_headers.py
+  string.py
+  system.py
+  validator.py
+  webhook_dispatcher.py
 ```
-
-One class per file. File name matches the utility's purpose. Class name follows `XxxUtility` convention.

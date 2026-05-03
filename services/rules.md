@@ -2,89 +2,87 @@
 
 Services hold business logic. They orchestrate repositories, utilities, and external calls — they are the only layer allowed to encode policy.
 
-## Directory Structure
+This document describes **`fastx_mvc/services/` as it exists in git**. If you add or remove packages, update this file in the same change.
 
-API domain services live under `services/apis/v1/`. Auth services live under `services/auth/user/`.
+## Directory layout (authoritative)
+
+There is **no** `services/apis/v1/` directory in this repository today. Layout is:
 
 ```text
 services/
   __init__.py
-  abstraction.py             # IService (root service interface)
-  apis/
+  abstraction.py
+  example/
     __init__.py
-    v1/
+    abstraction.py      # IExampleService(IService)
+    create.py
+    delete.py
+    fetch.py
+    fetch_all.py
+    update.py
+  user/
+    __init__.py
+    abstraction.py      # IUserService(IService)
+    fetch.py
+    forgot_password.py
+    login.py
+    logout.py
+    phone_verify_service.py
+    refresh_token.py
+    register.py
+    reset_password.py
+    subscription.py
+    token_issuance.py
+    mfa/
       __init__.py
-      <domain>/
-        __init__.py          # re-exports all service classes
-        abstraction.py       # IDomainService(IService)
-        _helpers.py          # domain-specific error factories (optional)
-        <action>.py          # one service class per file
-        ...
-  auth/
-    __init__.py
-    user/                    # mirrors controllers/auth/user/
-      __init__.py            # re-exports all top-level user service classes
-      abstraction.py         # IUserService(IService)
-      login.py               # one service class per file
-      register.py
-      logout.py
-      fetch.py
-      refresh_token.py
-      forgot_password.py
-      reset_password.py
-      subscription.py
-      token_issuance.py
-      mfa/
-        __init__.py          # re-exports all MFA service classes
-        abstraction.py       # IMFAService(IUserService)
-        setup.py
-        verify.py
-        disable.py
-        status.py
-        qr_code.py
-      phone/
-        __init__.py          # re-exports all phone service classes
-        abstraction.py       # IPhoneService(IUserService)
-        send_otp.py
-        verify_otp.py
-      account/
-        __init__.py          # re-exports all account service classes
-        abstraction.py       # IAccountService(IUserService)
-        send_verification_email.py
-        verify_email.py
-        verify_mfa.py
+      disable.py
+      qr_code.py
+      setup.py
+      status.py
+      verify.py
+    phone/
+      __init__.py
+      send_otp.py
+      verify_otp.py
+    account/
+      __init__.py
+      send_verification_email.py
+      verify_email.py
+      verify_mfa.py
 ```
 
-This mirrors the controller hierarchy (`controllers/apis/v1/<domain>/` and `controllers/auth/user/`).
+Controllers live under `controllers/auth/user/` and `controllers/apis/v1/`; only the parts above exist under `services/`.
 
-## Inheritance Hierarchy
+## Inheritance (matches code today)
 
 ```text
-FrameworkService (abstractions/service.py)
-  └── IService (services/abstraction.py)
-        ├── IDomainService (services/apis/v1/<domain>/abstraction.py)
-        └── IUserService (services/auth/user/abstraction.py)
-              ├── IMFAService (services/auth/user/mfa/abstraction.py)
-              ├── IPhoneService (services/auth/user/phone/abstraction.py)
-              └── IAccountService (services/auth/user/account/abstraction.py)
+abstractions.service.IService
+  └── services.abstraction.IService
+        ├── services.user.abstraction.IUserService
+        │     └── most service classes under services/user/
+        └── services.example.abstraction.IExampleService
+              └── *Service classes under services/example/
 ```
 
-Every service class **must** extend its domain abstraction, not `IService` directly. User sub-domain services extend their sub-domain abstraction (e.g. MFA services extend `IMFAService`, not `IUserService`).
+There are **no** `IMFAService`, `IPhoneService`, or `IAccountService` types in this tree. Subfolders `user/mfa/`, `user/phone/`, and `user/account/` do **not** define `abstraction.py`; their services subclass **`IUserService`** when they participate in the standard service base (see exceptions).
+
+**Plain classes (do not subclass `IUserService`):** `ForgotPasswordService`, `ResetPasswordService`, `PhoneSendOtpService`, `PhoneVerifyOtpService`, `SendVerificationEmailService`, `VerifyEmailService`. New work should prefer extending `IUserService` unless there is a strong reason not to.
+
+## Imports (no thin re-exports)
+
+Do not add modules under `services/` that only re-export types from `utilities/` under a `*Service` alias (removed shims: `services/mfa.py`, `services/user/phone_otp.py`). Use **`MFAUtility`** from `utilities.mfa`, **`PhoneOtpUtility`** from `utilities.phone_otp`, and **`MFAUtilityDependency`** from `dependencies/services/mfa.py` in controllers.
 
 ## Structure
 
-1. **Extend the domain abstraction** — domain services extend their domain abstraction, user services extend `IUserService`, etc. Never extend `IService` directly from a service file.
-2. **One service class per file** — `UserLoginService.run()`, not `UserService.login()/logout()/register()`. One class, one verb, one file.
-3. **Constructor takes dependencies, not primitives** — repositories, utilities, and context fields (`urn`, `user_urn`, `api_name`, `user_id`). Forward `*args, **kwargs` to `super().__init__(...)`.
-4. **Entry point is `async def run(self, request_dto)`** — returns a `BaseResponseDTO`.
-5. **Domain-specific helpers in `_helpers.py`** — error factories and internal base classes live in `_helpers.py`. Only create `_helpers.py` when the domain needs its own helpers; shared behaviour belongs on the abstraction at the appropriate layer.
+1. **Extend the right abstraction** — example-domain services extend `IExampleService`; user-domain services extend `IUserService` unless they are one of the legacy plain classes listed above.
+2. **One service class per file** — one class, one verb, one file.
+3. **Constructor takes dependencies, not primitives** — repositories, utilities, and context fields (`urn`, `user_urn`, `api_name`, `user_id`). Forward `*args, **kwargs` to `super().__init__(...)` when using `IUserService` / `IExampleService`.
+4. **Entry point is `async def run(self, request_dto)`** — returns a `BaseResponseDTO` (or project equivalent).
+5. **Domain-specific helpers** — use `_helpers.py` only when a domain under `services/` needs shared helpers; this repo’s `example/` domain does not use `_helpers.py` yet.
 
-When adding a new API domain:
+## Adding `services/apis/v1/` (not present yet)
 
-1. Create `services/apis/v1/<domain>/` with `__init__.py`, `abstraction.py`, and one service file per use case.
-2. The domain abstraction extends `IService` and injects the domain repository.
-3. Re-export all service classes in the domain `__init__.py`.
-4. Create matching dependency factories in `dependencies/services/<domain>/`.
+When you introduce API-domain services, add `services/apis/v1/<domain>/` with `abstraction.py` defining `IDomainService(IService)`, one file per use case, package `__init__.py` exports, and matching `dependencies/services/...` factories — mirror the existing **`services/example/`** pattern.
 
 ## Do
 
@@ -93,7 +91,7 @@ When adding a new API domain:
 - Keep repository access through the injected repository instance — never open a new session.
 - Log at `info` for happy-path milestones, `warning` for handled failures, `error` only for unrecoverable bugs.
 - Make services stateless across calls — everything lives on the injected context and inputs.
-- Put shared behaviour on the abstraction at the appropriate layer — `IService` for all services, domain abstraction for domain-wide behaviour.
+- Put shared behaviour on the abstraction at the appropriate layer — `IService` for all services, `IUserService` / `IExampleService` / future domain bases for shared user/example/domain behaviour.
 
 ## Don't
 
@@ -102,14 +100,13 @@ When adding a new API domain:
 - Don't catch exceptions to return a "FAILED" DTO — raise typed errors; the controller's `handle_exception` is the single error translator.
 - Don't commit/rollback the session — the repository or the unit-of-work owns the transaction boundary.
 - Don't instantiate another service inside a service — compose via the dependency factory or split the use case.
-- Don't cache context on the class (`UserLoginService.current_user`) — pass it through explicitly.
+- Don't cache context on the class — pass it through explicitly.
 - Don't take `*_factory` callables — services receive already-constructed dependencies.
-- Don't put API domain services at the top level — they belong in `services/apis/v1/<domain>/`.
-- Don't put auth services inside `apis/v1/` — they stay at `services/auth/user/`.
+- Don't add pass-through `services/*.py` files that only alias `utilities.*` types as `*Service`.
 - Don't put multiple service classes in one file — one class per file, always.
-- Don't extend `IService` directly from a service file — extend the domain abstraction.
+- Don't document subdomains as having `abstraction.py` until those files exist.
 
-## Dependency Factory Contract
+## Dependency factory contract
 
 Every service must have a matching `dependencies/services/.../<service>.py` that exposes a `XxxServiceDependency` with a `derive()` classmethod returning a callable:
 
