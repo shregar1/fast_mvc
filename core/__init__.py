@@ -8,7 +8,7 @@ Usage:
     # Core only (no optional dependencies)
     from core import app
 
-    # With optional services (requires fast-platform)
+    # With optional services (requires fastx-platform)
     from core import CircuitBreaker, Metrics
 """
 

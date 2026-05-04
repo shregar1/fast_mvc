@@ -113,9 +113,9 @@ docs = [
 interactive = [
     "questionary>=2.0.0",
 ]
-# Core platform services - fast-platform is mandatory.
-# fast-database is optional at runtime (see `abstractions/repository.py` fallback).
-# Individual service categories (require fast-platform extras)
+# Core platform services - fastx-platform is mandatory.
+# fastx-database is optional at runtime (see `abstractions/repository.py` fallback).
+# Individual service categories (require fastx-platform extras)
 notifications = ["fastx-platform[notifications]>=0.13.0"]
 storage = ["fastx-platform[storage]>=0.13.0"]
 messaging = ["fastx-platform[messaging]>=0.13.0"]

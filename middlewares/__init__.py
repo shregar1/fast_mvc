@@ -1,6 +1,6 @@
 """Middleware package.
 
-JWT and HTTP middleware implementations live in the ``fast-middleware`` distribution
+JWT and HTTP middleware implementations live in the ``fastx-middleware`` distribution
 (import ``fastmiddleware``). This package provides OpenAPI/docs helpers only.
 
 Use::

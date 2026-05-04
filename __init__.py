@@ -20,7 +20,7 @@ Modules:
     - dependencies: DI container and utilities
     - models, services, repositories: domain layers
 
-Optional Integrations (via fast-platform):
+Optional Integrations (via fastx-platform):
     - notifications: Email, SMS, Chat, Push notifications
     - storage: S3, GCS, Azure Blob
     - messaging: SQS, Pub/Sub, Service Bus

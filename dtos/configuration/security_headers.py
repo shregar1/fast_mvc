@@ -121,7 +121,7 @@ class SecurityHeadersSettingsDTO(IConfigurationDTO):
     )
 
     def to_middleware_config(self) -> SecurityHeadersConfig:
-        """Build the fast-middleware :class:`~fastmiddleware.SecurityHeadersConfig` instance."""
+        """Build the fastx-middleware :class:`~fastmiddleware.SecurityHeadersConfig` instance."""
         csp = self.content_security_policy
         return SecurityHeadersConfig(
             x_content_type_options=self.x_content_type_options,

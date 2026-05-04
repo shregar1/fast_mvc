@@ -59,7 +59,7 @@ from constants.logging_setup import configure_loguru
 
 configure_loguru()
 
-# Import middlewares from fast-middleware package
+# Import middlewares from fastx-middleware package
 from fastx_middleware import (  # pyright: ignore[reportMissingImports]
     AuthConfig,
     AuthenticationMiddleware,
@@ -124,7 +124,7 @@ try:
 except ImportError:
     WebSocketRouter = None  # type: ignore
 
-# Optional observability (requires fast-platform)
+# Optional observability (requires fastx-platform)
 try:
     from fastx_platform.observability import (  # pyright: ignore[reportMissingImports]
         configure_datadog,
@@ -271,7 +271,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
     logger.info("Application startup event triggered")
     logger.info(f"FastX API starting on {HOST}:{PORT}")
-    logger.info("Using fast-middleware for request processing")
+    logger.info("Using fastx-middleware for request processing")
     curl_examples = route_export_engine.build_curl_examples()
     app.state.route_curl_examples = curl_examples
     collection_path, env_path = route_export_engine.export_postman_collection()
@@ -322,7 +322,7 @@ except ImportError:
     app.docs_url = "/docs"
     app.redoc_url = "/redoc"
 
-# Optional Datadog / OpenTelemetry integration (requires fast-platform)
+# Optional Datadog / OpenTelemetry integration (requires fastx-platform)
 if configure_datadog and EnvironmentParserUtility.get_bool_with_logging(
     EnvironmentVar.DATADOG_ENABLED,
     False,
@@ -338,7 +338,7 @@ if configure_otel and EnvironmentParserUtility.get_bool_with_logging(
 # ---------------------------------------------------------------------------
 # Map request.state.request_id → request.state.urn so controllers can use
 # ``request.state.urn`` uniformly.  RequestContextMiddleware (from
-# fast-middleware) sets ``request_id``; our controllers expect ``urn``.
+# fastx-middleware) sets ``request_id``; our controllers expect ``urn``.
 # ---------------------------------------------------------------------------
 @app.middleware("http")
 async def _set_urn_on_state(request: Request, call_next):
@@ -721,12 +721,12 @@ async def readiness_probe(request: Request):
 
 
 # =============================================================================
-# MIDDLEWARE CONFIGURATION (using fast-middleware package)
+# MIDDLEWARE CONFIGURATION (using fastx-middleware package)
 # =============================================================================
 
 logger.info("Initializing middleware stack with fastmiddleware")
 
-# Request Context Middleware - request ID/URN and tracking (from fast-middleware; must be first)
+# Request Context Middleware - request ID/URN and tracking (from fastx-middleware; must be first)
 app.add_middleware(RequestContextMiddleware)
 
 # Trusted Host Middleware - Prevents host header attacks

@@ -67,7 +67,7 @@ FastDashboards is available for all FastX projects:
 ```bash
 pip install -e ./fastx_dashboards
 ```
-To use MetaI signed embeds, install with extras:
+To use Metabase signed embeds, install with extras:
 ```bash
-pip install 'fastx_dashboards[metaI]'
+pip install 'fastx-dashboards[metabase]'
 ```

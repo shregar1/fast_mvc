@@ -17,7 +17,7 @@ Config is loaded from this directory so you can **override package defaults** wi
 ## How it works
 
 1. **`FASTMVC_CONFIG_I`** is set at startup (in `start_utils`) to this directory (`config/`).
-2. Each package (e.g. `fastx_platform`, `fastx_kafka`, `fastx_webrtc` from `fast-platform`, `fastx_channels`) resolves config paths in this order:
+2. Each package (e.g. `fastx_platform`, `fastx_kafka`, `fastx_webrtc` from `fastx-platform`, `fastx_channels`) resolves config paths in this order:
    - **`FASTMVC_<NAME>_CONFIG_PATH`** – explicit path (e.g. `FASTMVC_DB_CONFIG_PATH=/etc/myapp/db.json`)
    - **`{FASTMVC_CONFIG_I}/{name}/config.json`** – this repo’s override (e.g. `config/db/config.json`)
    - **`config/{name}/config.json`** – cwd-relative default
@@ -38,7 +38,7 @@ config/
 ├── kafka/
 │   └── config.json     ← Kafka (fastx_kafka)
 ├── webrtc/
-│   └── config.json     ← WebRTC (`fastx_webrtc` module in `fast-platform`)
+│   └── config.json     ← WebRTC (`fastx_webrtc` module in `fastx-platform`)
 ├── channels/
 │   └── config.json     ← Channels (fastx_channels)
 └── ...                 ← other configs (configurations/* in main)
